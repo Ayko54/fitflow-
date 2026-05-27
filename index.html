@@ -891,18 +891,16 @@ async function doRegister() {
 
 async function afterLogin() {
   try {
-    const {data, error} = await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+    const {data, error} = await sb.from('profiles').select('*').eq('id',currentUser.id).limit(1);
     if(error) console.error('Profile fetch error:', error);
-    userProfile = data;
+    userProfile = (data && data.length > 0) ? data[0] : null;
   } catch(e) {
     console.error('afterLogin error:', e);
     userProfile = null;
   }
   document.getElementById('loader').style.display='none';
   if(!userProfile || !userProfile.onboarding_completed) {
-    // Reset onboarding data
     obData = {};
-    // Show first onboarding step
     document.querySelectorAll('.onboard-step').forEach(s=>s.style.display='none');
     document.getElementById('ob-1').style.display='flex';
     document.getElementById('ob-1').style.flexDirection='column';
@@ -971,7 +969,7 @@ async function completeOnboarding() {
   obData.daily_calorie_goal=calcBMR(obData)-300;
   
   // Try update first, if fails try upsert
-  const {data:existing} = await sb.from('profiles').select('id').eq('id',currentUser.id).maybeSingle();
+  const {data:existingArr} = await sb.from('profiles').select('id').eq('id',currentUser.id).limit(1); const existing = existingArr && existingArr.length > 0 ? existingArr[0] : null;
   let error;
   if(existing) {
     const res = await sb.from('profiles').update(obData).eq('id',currentUser.id);
@@ -989,7 +987,7 @@ async function completeOnboarding() {
   
   // Log starting weight
   await sb.from('weight_logs').insert({user_id:currentUser.id,weight:obData.current_weight,notes:'Başlangıç kilosu'});
-  const {data} = await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+  const {data:profileArr} = await sb.from('profiles').select('*').eq('id',currentUser.id).limit(1); const data = profileArr && profileArr.length > 0 ? profileArr[0] : null;
   userProfile = data;
   showToast('Profil kaydedildi! 🌸');
   goTo('dashboard');
@@ -1135,7 +1133,7 @@ async function loadExerciseScreen() {
   document.getElementById('ex-date').textContent = formatDate(today());
 
   // Check if plan exists for today
-  const {data:planData} = await sb.from('exercise_plans').select('*').eq('user_id',currentUser.id).eq('plan_date',today()).single();
+  const {data:planData} = await sb.from('exercise_plans').select('*').eq('user_id',currentUser.id).eq('plan_date',today()).limit(1).then(r => ({data: r.data && r.data[0] ? r.data[0] : null}));
   const {data:exLogs} = await sb.from('exercise_logs').select('*').eq('user_id',currentUser.id).eq('log_date',today());
   const completedNames = (exLogs||[]).map(e=>e.exercise_name);
 
