@@ -614,6 +614,14 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
       <div class="progress-wrap"><div class="progress-fill" id="food-progress-bar" style="width:0%"></div></div>
     </div>
 
+    <div id="food-ai-plan-card" class="card card-purple" style="margin-bottom:14px;display:none;">
+      <div style="font-size:13px;font-weight:700;color:var(--purple-800);margin-bottom:8px;">✨ AI Günlük Yemek Planı</div>
+      <div id="food-ai-plan-content" style="font-size:13px;color:var(--gray-600);line-height:1.6;"></div>
+      <button class="btn btn-primary" onclick="applyFoodPlan()" style="margin-top:10px;">Planı Uygula</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('food-ai-plan-card').style.display='none'" style="margin-top:4px;">Kapat</button>
+    </div>
+    <button class="btn btn-outline" onclick="generateFoodPlan()" id="food-plan-btn" style="margin-bottom:14px;">✨ AI Yemek Planı Öner</button>
+
     <div class="meal-section" id="meal-section-breakfast">
       <div class="meal-header">
         <span class="meal-title">🌅 Kahvaltı</span>
@@ -1056,6 +1064,68 @@ async function loadDashboard() {
 }
 
 // ============ FOOD SCREEN ============
+let aiMealPlan = null;
+
+async function generateFoodPlan() {
+  const btn = document.getElementById('food-plan-btn');
+  btn.textContent = 'Plan hazırlanıyor...';
+  btn.disabled = true;
+  try {
+    const goal = userProfile?.daily_calorie_goal || 1800;
+    const diet = userProfile?.diet_type || 'normal';
+    const allergies = userProfile?.allergies || 'yok';
+    const meals = userProfile?.meals_per_day || 3;
+    const resp = await fetch('/api/chat', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-haiku-4-5',
+        max_tokens:800,
+        system:'Sen bir diyetisyensin. Sadece JSON döndür, başka hiçbir şey yazma. Format: {"breakfast":{"name":"yemek adı","desc":"kısa açıklama","kcal":300,"protein":15,"carbs":40,"fat":8},"lunch":{...},"dinner":{...},"snack":{...}}',
+        messages:[{role:'user',content:`Günlük ${goal} kcal hedefi olan, ${diet} beslenen, alerjileri: ${allergies} olan kişi için ${meals} öğünlük Türk mutfağından sağlıklı bir günlük yemek planı yap.`}]
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content[0].text.replace(/\`\`\`json|\`\`\`/g,'').trim();
+    aiMealPlan = JSON.parse(raw);
+    let html = '';
+    const mealNames = {breakfast:'🌅 Kahvaltı', lunch:'☀️ Öğle', dinner:'🌙 Akşam', snack:'🍎 Ara Öğün'};
+    for(const [key, meal] of Object.entries(aiMealPlan)) {
+      html += `<div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--purple-100);">
+        <strong>${mealNames[key]||key}:</strong> ${meal.name}<br/>
+        <span style="color:var(--gray-400);font-size:12px;">${meal.desc} • ${meal.kcal} kcal</span>
+      </div>`;
+    }
+    document.getElementById('food-ai-plan-content').innerHTML = html;
+    document.getElementById('food-ai-plan-card').style.display = 'block';
+  } catch(e) {
+    showToast('Plan oluşturulamadı, tekrar dene');
+  }
+  btn.textContent = '✨ AI Yemek Planı Öner';
+  btn.disabled = false;
+}
+
+async function applyFoodPlan() {
+  if(!aiMealPlan) return;
+  const mealMap = {breakfast:'breakfast', lunch:'lunch', dinner:'dinner', snack:'snack'};
+  for(const [key, meal] of Object.entries(aiMealPlan)) {
+    await sb.from('food_logs').insert({
+      user_id:currentUser.id,
+      log_date:today(),
+      meal_type:mealMap[key]||key,
+      food_name:meal.name,
+      portion_desc:meal.desc,
+      calories:meal.kcal,
+      protein_g:meal.protein||0,
+      carbs_g:meal.carbs||0,
+      fat_g:meal.fat||0
+    });
+  }
+  document.getElementById('food-ai-plan-card').style.display='none';
+  showToast('Yemek planı uygulandı! 🌸');
+  loadFoodScreen();
+}
+
 async function loadFoodScreen() {
   document.getElementById('food-date').textContent = formatDate(today());
   const meals = ['breakfast','lunch','dinner','snack'];
