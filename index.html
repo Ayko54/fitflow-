@@ -763,7 +763,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 // ============ CONFIG ============
 const SUPABASE_URL = 'https://cmsvgmvymlrfdhhvpuwt.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtc3ZnbXZ5bWxyZmRoaHZwdXd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MDI2NzIsImV4cCI6MjA5NTQ3ODY3Mn0.yAhOYz2-z0VL3bSfc5YL7nS3Dh1_eOVlxzD-HYjN9sw';
-const CLAUDE_API_KEY = 'sk-ant-api03-a-k589886SPczFm5V1UxR-L2o9QHDzAx5059zuFv4H35IDZoxkERGSnFsIs72Jlo4moFYYi6lYYn5e3CHNQW1w-mqurFQAA';
+const CLAUDE_API_KEY = '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';
 const DAILY_MSG_LIMIT = 10;
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -891,7 +891,7 @@ async function doRegister() {
 
 async function afterLogin() {
   try {
-    const {data, error} = await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+    const {data, error} = await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
     if(error) console.error('Profile fetch error:', error);
     userProfile = data;
   } catch(e) {
@@ -971,7 +971,7 @@ async function completeOnboarding() {
   obData.daily_calorie_goal=calcBMR(obData)-300;
   
   // Try update first, if fails try upsert
-  const {data:existing} = await sb.from('profiles').select('id').eq('id',currentUser.id).single();
+  const {data:existing} = await sb.from('profiles').select('id').eq('id',currentUser.id).maybeSingle();
   let error;
   if(existing) {
     const res = await sb.from('profiles').update(obData).eq('id',currentUser.id);
@@ -989,7 +989,7 @@ async function completeOnboarding() {
   
   // Log starting weight
   await sb.from('weight_logs').insert({user_id:currentUser.id,weight:obData.current_weight,notes:'Başlangıç kilosu'});
-  const {data} = await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+  const {data} = await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
   userProfile = data;
   showToast('Profil kaydedildi! 🌸');
   goTo('dashboard');
