@@ -1208,9 +1208,9 @@ async function loadExerciseScreen() {
   const completedNames = (exLogs||[]).map(e=>e.exercise_name);
 
   if(planData&&planData.exercises) {
-    renderExercisePlan(planData.exercises, completedNames);
+    renderExercisePlan(planData.exercises, completedNames, exLogs);
   } else {
-    await generateExercisePlan(completedNames);
+    await generateExercisePlan(completedNames, exLogs);
   }
 
   // Steps
@@ -1218,7 +1218,7 @@ async function loadExerciseScreen() {
   if(stepsData&&stepsData[0]) document.getElementById('steps-display').textContent = stepsData[0].steps;
 }
 
-async function generateExercisePlan(completedNames) {
+async function generateExercisePlan(completedNames, exLogs) {
   const container = document.getElementById('exercise-plan-container');
   container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--gray-400);"><div style="font-size:28px;margin-bottom:8px;">✨</div><div>AI planın hazırlanıyor...</div></div>';
   try {
@@ -1237,7 +1237,7 @@ async function generateExercisePlan(completedNames) {
     const raw = data.content[0].text.replace(/```json|```/g,'').trim();
     const exercises = JSON.parse(raw);
     await sb.from('exercise_plans').insert({user_id:currentUser.id,plan_date:today(),exercises});
-    renderExercisePlan(exercises, completedNames);
+    renderExercisePlan(exercises, completedNames, exLogs);
   } catch(e) {
     container.innerHTML = '<div class="card"><p style="color:var(--gray-400);font-size:14px;">Plan yüklenemedi. Sayfayı yenileyin.</p></div>';
   }
@@ -1313,10 +1313,15 @@ async function saveExtraExercise() {
 async function saveSteps() {
   const steps = parseInt(document.getElementById('steps-input').value);
   if(!steps||steps<0){showToast('Geçerli adım sayısı girin');return;}
-  await sb.from('steps_logs').upsert({user_id:currentUser.id,log_date:today(),steps},{onConflict:'user_id,log_date'});
+  // Delete existing entry for today, then insert new one
+  await sb.from('steps_logs').delete().eq('user_id',currentUser.id).eq('log_date',today());
+  await sb.from('steps_logs').insert({user_id:currentUser.id,log_date:today(),steps});
   document.getElementById('steps-display').textContent = steps;
   document.getElementById('steps-input').value='';
   showToast('Adım kaydedildi ✓');
+  // Update dashboard
+  const dashSteps = document.getElementById('dash-steps');
+  if(dashSteps) dashSteps.textContent = steps >= 1000 ? (steps/1000).toFixed(1)+'k' : steps;
 }
 
 // ============ PROGRESS SCREEN ============
