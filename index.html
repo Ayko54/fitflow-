@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="FitFlow"/>
+<meta name="theme-color" content="#993556"/>
+<title>FitFlow</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.js"></script>
+<style>
+:root {
+  --pink-50:#FBEAF0;--pink-100:#F4C0D1;--pink-200:#ED93B1;
+  --pink-400:#D4537E;--pink-600:#993556;--pink-800:#72243E;
+  --purple-50:#EEEDFE;--purple-100:#CECBF6;--purple-400:#7F77DD;
+  --purple-600:#534AB7;--purple-800:#3C3489;
+  --green-50:#EAF3DE;--green-400:#639922;--green-800:#27500A;
+  --gray-50:#F8F7F5;--gray-100:#EEECE8;--gray-200:#D3D1C7;
+  --gray-400:#888780;--gray-600:#5F5E5A;--gray-800:#2C2C2A;
+  --white:#FFFFFF;--radius-sm:8px;--radius-md:12px;--radius-lg:16px;
+  --shadow:0 2px 16px rgba(153,53,86,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--gray-50);}
+body{font-family:'Nunito',sans-serif;color:var(--gray-800);font-size:15px;}
+
+/* APP SHELL */
+#app{height:100vh;display:flex;flex-direction:column;max-width:430px;margin:0 auto;background:var(--white);position:relative;overflow:hidden;}
+.screen{display:none;flex-direction:column;height:100%;overflow:hidden;}
+.screen.active{display:flex;}
+
+/* SCROLLABLE CONTENT */
+.page-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 80px;}
+
+/* TOP BAR */
+.topbar{background:var(--white);padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gray-100);flex-shrink:0;}
+.topbar-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:var(--pink-800);}
+.topbar-action{background:none;border:none;padding:6px;border-radius:50%;cursor:pointer;color:var(--gray-600);font-size:20px;}
+
+/* BOTTOM NAV */
+.bottomnav{background:var(--white);border-top:1px solid var(--gray-100);display:flex;padding:6px 0 env(safe-area-inset-bottom,8px);flex-shrink:0;position:relative;z-index:10;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:6px 0;border:none;background:none;}
+.nav-item svg{width:22px;height:22px;stroke:var(--gray-400);fill:none;stroke-width:1.8;transition:stroke .2s;}
+.nav-item span{font-size:10px;color:var(--gray-400);font-weight:500;transition:color .2s;}
+.nav-item.active svg{stroke:var(--pink-600);}
+.nav-item.active span{color:var(--pink-600);}
+
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--gray-100);border-radius:var(--radius-md);padding:14px;margin-bottom:12px;}
+.card-pink{background:var(--pink-50);border-color:var(--pink-100);}
+.card-purple{background:var(--purple-50);border-color:var(--purple-100);}
+.card-green{background:var(--green-50);border-color:#C0DD97;}
+
+/* BUTTONS */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;border:none;width:100%;font-family:'Nunito',sans-serif;transition:opacity .15s,transform .1s;}
+.btn:active{transform:scale(0.98);}
+.btn-primary{background:var(--pink-600);color:#fff;}
+.btn-secondary{background:var(--pink-50);color:var(--pink-600);border:1px solid var(--pink-200);}
+.btn-outline{background:transparent;color:var(--pink-600);border:1.5px solid var(--pink-400);}
+.btn-ghost{background:transparent;color:var(--gray-600);border:none;font-weight:500;}
+.btn-sm{padding:8px 14px;font-size:13px;width:auto;}
+.btn-green{background:var(--green-50);color:var(--green-800);border:1px solid #C0DD97;}
+.btn-purple{background:var(--purple-50);color:var(--purple-800);border:1px solid var(--purple-100);}
+
+/* FORM */
+.form-group{margin-bottom:14px;}
+.form-label{font-size:13px;font-weight:600;color:var(--gray-600);display:block;margin-bottom:5px;}
+.form-input{width:100%;padding:11px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:15px;font-family:'Nunito',sans-serif;color:var(--gray-800);background:var(--white);outline:none;transition:border .15s;}
+.form-input:focus{border-color:var(--pink-400);}
+select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888780' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+
+/* OPTION PILLS */
+.option-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.option-pill{padding:11px 8px;border-radius:var(--radius-sm);border:1.5px solid var(--gray-200);background:var(--gray-50);font-size:13px;font-weight:500;text-align:center;cursor:pointer;color:var(--gray-600);transition:all .15s;user-select:none;}
+.option-pill.selected{background:var(--pink-50);border-color:var(--pink-400);color:var(--pink-800);}
+.option-pill-wide{padding:12px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--gray-200);background:var(--gray-50);font-size:13px;font-weight:500;cursor:pointer;color:var(--gray-600);transition:all .15s;display:flex;align-items:center;gap:10px;margin-bottom:8px;user-select:none;}
+.option-pill-wide.selected{background:var(--pink-50);border-color:var(--pink-400);color:var(--pink-800);}
+.option-pill-wide strong{display:block;font-size:14px;}
+.option-pill-wide small{font-size:12px;color:var(--gray-400);font-weight:400;}
+.option-pill-wide.selected small{color:var(--pink-600);}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;}
+.badge-pink{background:var(--pink-50);color:var(--pink-800);}
+.badge-purple{background:var(--purple-50);color:var(--purple-800);}
+.badge-green{background:var(--green-50);color:var(--green-800);}
+.badge-gray{background:var(--gray-100);color:var(--gray-600);}
+
+/* PROGRESS */
+.progress-wrap{height:6px;background:var(--gray-100);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--pink-400),var(--pink-600));transition:width .5s ease;}
+
+/* STEP DOTS */
+.step-dots{display:flex;gap:6px;justify-content:center;padding:10px 0 4px;}
+.step-dot{width:7px;height:7px;border-radius:50%;background:var(--gray-200);transition:all .2s;}
+.step-dot.active{background:var(--pink-600);width:20px;border-radius:4px;}
+.step-dot.done{background:var(--pink-300,#f08bac);}
+
+/* SECTION TITLE */
+.sec-title{font-size:11px;font-weight:700;color:var(--gray-400);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--gray-100);margin:12px 0;}
+
+/* TOAST */
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--gray-800);color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:500;z-index:1000;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;}
+#loader .logo{font-family:'Playfair Display',serif;font-size:36px;color:var(--pink-600);margin-bottom:8px;}
+#loader .sub{font-size:14px;color:var(--gray-400);}
+.spinner{width:32px;height:32px;border:3px solid var(--pink-100);border-top-color:var(--pink-600);border-radius:50%;animation:spin .7s linear infinite;margin-top:20px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* LOGIN SCREEN */
+.login-hero{background:linear-gradient(160deg,var(--pink-50) 0%,var(--purple-50) 100%);padding:52px 24px 32px;text-align:center;}
+.login-hero .app-icon{font-size:52px;margin-bottom:10px;}
+.login-hero h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;color:var(--pink-800);}
+.login-hero p{font-size:14px;color:var(--pink-600);margin-top:6px;}
+
+/* DASHBOARD */
+.greeting{margin-bottom:16px;}
+.greeting .hi{font-size:13px;color:var(--gray-400);}
+.greeting h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;color:var(--gray-800);}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--pink-100);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:var(--pink-800);}
+
+/* CALORIE RING */
+.calorie-ring-wrap{display:flex;align-items:center;gap:16px;}
+.calorie-info .kcal-num{font-size:30px;font-weight:700;color:var(--pink-800);}
+.calorie-info .kcal-total{font-size:13px;color:var(--gray-400);}
+.macro-row{display:flex;gap:8px;margin-top:10px;}
+.macro-item{flex:1;text-align:center;background:var(--white);border-radius:var(--radius-sm);padding:6px 4px;}
+.macro-item .macro-val{font-size:14px;font-weight:700;color:var(--pink-600);}
+.macro-item .macro-label{font-size:10px;color:var(--gray-400);}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.stat-card{background:var(--gray-50);border-radius:var(--radius-sm);padding:10px;text-align:center;}
+.stat-card .stat-val{font-size:22px;font-weight:700;color:var(--gray-800);}
+.stat-card .stat-label{font-size:10px;color:var(--gray-400);margin-top:1px;}
+
+/* FOOD SCREEN */
+.meal-section{margin-bottom:14px;}
+.meal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.meal-title{font-size:15px;font-weight:700;color:var(--gray-800);}
+.meal-kcal{font-size:13px;color:var(--gray-400);}
+.food-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--gray-100);}
+.food-row:last-child{border-bottom:none;}
+.food-name{font-size:14px;color:var(--gray-800);}
+.food-kcal-badge{font-size:12px;font-weight:600;color:var(--pink-600);background:var(--pink-50);padding:2px 8px;border-radius:99px;}
+
+/* EXERCISE */
+.ex-card{border-radius:var(--radius-md);padding:14px;margin-bottom:10px;border:1.5px solid var(--purple-100);background:var(--purple-50);}
+.ex-card.done{border-color:#C0DD97;background:var(--green-50);}
+.ex-title{font-size:15px;font-weight:700;color:var(--gray-800);margin:6px 0 2px;}
+.ex-sub{font-size:13px;color:var(--gray-600);}
+.ex-actions{display:flex;gap:8px;margin-top:10px;}
+
+/* PROGRESS SCREEN */
+.weight-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--gray-100);}
+.weight-row:last-child{border-bottom:none;}
+
+/* CHAT */
+.chat-messages{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
+.bubble{padding:11px 14px;border-radius:var(--radius-md);font-size:14px;line-height:1.55;max-width:86%;}
+.bubble-ai{background:var(--pink-50);color:var(--gray-800);border-bottom-left-radius:4px;align-self:flex-start;}
+.bubble-user{background:var(--purple-600);color:#fff;border-bottom-right-radius:4px;align-self:flex-end;}
+.bubble-ai.loading::after{content:'●●●';animation:dots 1s infinite;font-size:16px;letter-spacing:3px;}
+@keyframes dots{0%,100%{opacity:.3}50%{opacity:1}}
+.chat-input-row{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--gray-100);background:var(--white);padding-bottom:env(safe-area-inset-bottom,10px);}
+.chat-input-row input{flex:1;padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:99px;font-size:14px;font-family:'Nunito',sans-serif;outline:none;}
+.chat-input-row input:focus{border-color:var(--pink-400);}
+.chat-send-btn{width:40px;height:40px;border-radius:50%;background:var(--pink-600);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.limit-notice{text-align:center;font-size:12px;color:var(--gray-400);padding:6px;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:flex-end;}
+.modal-overlay.show{display:flex;}
+.modal-sheet{background:var(--white);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:20px 16px 32px;width:100%;max-height:85vh;overflow-y:auto;animation:slideUp .25s ease;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--gray-200);border-radius:99px;margin:0 auto 16px;}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:14px;color:var(--gray-800);}
+
+/* ONBOARDING */
+.onboard-hero{padding:40px 24px 20px;text-align:center;}
+.onboard-hero h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--gray-800);margin-bottom:6px;}
+.onboard-hero p{font-size:14px;color:var(--gray-400);}
+.onboard-nav{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--gray-100);}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="logo">🌸 FitFlow</div>
+  <div class="sub">Yükleniyor...</div>
+  <div class="spinner"></div>
+</div>
+
+<div id="toast"></div>
+
+<!-- FOOD ADD MODAL -->
+<div class="modal-overlay" id="food-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="food-modal-title">Yemek Ekle</div>
+    <div class="form-group">
+      <label class="form-label">Ne yedin?</label>
+      <input class="form-input" id="food-modal-input" placeholder="ör: 1 kase mercimek çorbası, 2 köfte..."/>
+    </div>
+    <div id="food-ai-result" style="display:none;" class="card card-pink" style="margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:700;color:var(--pink-800);margin-bottom:4px;">✨ AI Tahmini</div>
+      <div id="food-ai-kcal" style="font-size:22px;font-weight:700;color:var(--pink-600);"></div>
+      <div id="food-ai-macros" style="font-size:12px;color:var(--gray-400);margin-top:2px;"></div>
+    </div>
+    <button class="btn btn-secondary" id="food-calc-btn" onclick="calcFoodAI()" style="margin-bottom:8px;">✨ AI ile Hesapla</button>
+    <button class="btn btn-primary" id="food-save-btn" onclick="saveFoodEntry()" style="display:none;">Listeye Ekle</button>
+    <button class="btn btn-ghost" onclick="closeModal('food-modal')">İptal</button>
+  </div>
+</div>
+
+<!-- WEIGHT ADD MODAL -->
+<div class="modal-overlay" id="weight-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Kilo Gir</div>
+    <div class="form-group">
+      <label class="form-label">Bugünkü kilonuz (kg)</label>
+      <input class="form-input" id="weight-input" type="number" step="0.1" placeholder="ör: 70.5"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Not (isteğe bağlı)</label>
+      <input class="form-input" id="weight-note" placeholder="ör: Sabah aç karnına"/>
+    </div>
+    <button class="btn btn-primary" onclick="saveWeight()">Kaydet</button>
+    <button class="btn btn-ghost" onclick="closeModal('weight-modal')" style="margin-top:8px;">İptal</button>
+  </div>
+</div>
+
+<!-- EXERCISE DONE MODAL -->
+<div class="modal-overlay" id="ex-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Egzersiz Tamamlandı 🎉</div>
+    <div class="form-group">
+      <label class="form-label">Kaç dakika sürdü?</label>
+      <input class="form-input" id="ex-duration" type="number" placeholder="ör: 30"/>
+    </div>
+    <button class="btn btn-green" onclick="saveExercise()">Kaydet</button>
+    <button class="btn btn-ghost" onclick="closeModal('ex-modal')" style="margin-top:8px;">İptal</button>
+  </div>
+</div>
+
+<!-- EXTRA EXERCISE MODAL -->
+<div class="modal-overlay" id="extra-ex-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Ekstra Spor Ekle</div>
+    <div class="form-group">
+      <label class="form-label">Aktivite</label>
+      <input class="form-input" id="extra-ex-name" placeholder="ör: 45 dk bisiklet, dans..."/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Süre (dakika)</label>
+      <input class="form-input" id="extra-ex-duration" type="number" placeholder="ör: 45"/>
+    </div>
+    <button class="btn btn-purple" onclick="saveExtraExercise()">Ekle</button>
+    <button class="btn btn-ghost" onclick="closeModal('extra-ex-modal')" style="margin-top:8px;">İptal</button>
+  </div>
+</div>
+
+<div id="app">
+
+<!-- ============ AUTH SCREEN ============ -->
+<div class="screen active" id="screen-auth">
+  <div style="flex:1;overflow-y:auto;">
+    <div class="login-hero">
+      <div class="app-icon">🌸</div>
+      <h1>FitFlow</h1>
+      <p>Sağlıklı yaşamın akışında kal</p>
+    </div>
+    <div style="padding:24px 16px;">
+      <div id="auth-login-form">
+        <div class="form-group">
+          <label class="form-label">E-posta</label>
+          <input class="form-input" id="login-email" type="email" placeholder="adın@email.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Şifre</label>
+          <input class="form-input" id="login-password" type="password" placeholder="••••••••"/>
+        </div>
+        <button class="btn btn-primary" onclick="doLogin()" style="margin-bottom:10px;">Giriş Yap</button>
+        <button class="btn btn-ghost" onclick="showRegister()">Hesabın yok mu? Kayıt ol →</button>
+      </div>
+      <div id="auth-register-form" style="display:none;">
+        <div class="form-group">
+          <label class="form-label">Adın</label>
+          <input class="form-input" id="reg-name" placeholder="Adın"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-posta</label>
+          <input class="form-input" id="reg-email" type="email" placeholder="adın@email.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Şifre (en az 6 karakter)</label>
+          <input class="form-input" id="reg-password" type="password" placeholder="••••••••"/>
+        </div>
+        <button class="btn btn-primary" onclick="doRegister()" style="margin-bottom:10px;">Hesap Oluştur</button>
+        <button class="btn btn-ghost" onclick="showLogin()">← Giriş sayfasına dön</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ONBOARDING ============ -->
+<div class="screen" id="screen-onboard">
+  <!-- Step 1: Vücut -->
+  <div id="ob-1" class="onboard-step">
+    <div style="padding:12px 16px 0;background:var(--white);">
+      <div class="step-dots">
+        <div class="step-dot active" id="dot-1"></div>
+        <div class="step-dot" id="dot-2"></div>
+        <div class="step-dot" id="dot-3"></div>
+        <div class="step-dot" id="dot-4"></div>
+        <div class="step-dot" id="dot-5"></div>
+        <div class="step-dot" id="dot-6"></div>
+      </div>
+      <div class="progress-wrap" style="margin:6px 0;"><div class="progress-fill" id="ob-progress" style="width:16%"></div></div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0 16px 16px;">
+      <div class="onboard-hero">
+        <h2>Merhaba! Seni tanıyalım 📏</h2>
+        <p>Bu bilgileri sadece bir kez soruyoruz</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group"><label class="form-label">Boy (cm)</label><input class="form-input" id="ob-height" type="number" placeholder="165"/></div>
+        <div class="form-group"><label class="form-label">Kilo (kg)</label><input class="form-input" id="ob-weight" type="number" placeholder="72"/></div>
+        <div class="form-group"><label class="form-label">Yaş</label><input class="form-input" id="ob-age" type="number" placeholder="28"/></div>
+        <div class="form-group">
+          <label class="form-label">Cinsiyet</label>
+          <select class="form-input" id="ob-gender">
+            <option value="female">Kadın</option>
+            <option value="male">Erkek</option>
+            <option value="other">Belirtmek istemiyorum</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="onboard-nav">
+      <div></div>
+      <button class="btn btn-primary btn-sm" onclick="obNext(1)">Devam Et →</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Hedef -->
+  <div id="ob-2" class="onboard-step" style="display:none;flex-direction:column;height:100%;">
+    <div style="padding:12px 16px 0;background:var(--white);">
+      <div class="step-dots">
+        <div class="step-dot done"></div><div class="step-dot active"></div>
+        <div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div>
+      </div>
+      <div class="progress-wrap" style="margin:6px 0;"><div class="progress-fill" style="width:33%"></div></div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0 16px 16px;">
+      <div class="onboard-hero">
+        <h2>Hedefin ne? 🎯</h2>
+        <p>Programın buna göre kişiselleştirilir</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Asıl amacın</label>
+        <div id="goal-type-opts">
+          <div class="option-pill-wide selected" onclick="selectOne('goal-type-opts',this)" data-val="lose_weight"><span style="font-size:20px;">🏃‍♀️</span><div><strong>Kilo vermek</strong><small>Sağlıklı tempoda hedefe ulaş</small></div></div>
+          <div class="option-pill-wide" onclick="selectOne('goal-type-opts',this)" data-val="healthy_eat"><span style="font-size:20px;">🥗</span><div><strong>Sağlıklı beslenmek</strong><small>Dengeli beslenme alışkanlığı</small></div></div>
+          <div class="option-pill-wide" onclick="selectOne('goal-type-opts',this)" data-val="both"><span style="font-size:20px;">💪</span><div><strong>İkisi de</strong><small>Hem kilo ver hem sağlıklı yaşa</small></div></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group"><label class="form-label">Hedef kilo (kg)</label><input class="form-input" id="ob-goal-weight" type="number" placeholder="62"/></div>
+        <div class="form-group"><label class="form-label">Süre (hafta)</label><input class="form-input" id="ob-goal-weeks" type="number" placeholder="12"/></div>
+      </div>
+    </div>
+    <div class="onboard-nav">
+      <button class="btn btn-ghost btn-sm" onclick="obBack(2)">← Geri</button>
+      <button class="btn btn-primary btn-sm" onclick="obNext(2)">Devam Et →</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Aktivite -->
+  <div id="ob-3" class="onboard-step" style="display:none;flex-direction:column;height:100%;">
+    <div style="padding:12px 16px 0;">
+      <div class="step-dots">
+        <div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot active"></div>
+        <div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div>
+      </div>
+      <div class="progress-wrap" style="margin:6px 0;"><div class="progress-fill" style="width:50%"></div></div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0 16px 16px;">
+      <div class="onboard-hero">
+        <h2>Günlük hayatın nasıl? 🚶‍♀️</h2>
+        <p>Kalori hesabı için önemli</p>
+      </div>
+      <div id="activity-opts">
+        <div class="option-pill-wide" onclick="selectOne('activity-opts',this)" data-val="sedentary"><span style="font-size:20px;">🛋️</span><div><strong>Masa başı</strong><small>Çok az hareket</small></div></div>
+        <div class="option-pill-wide selected" onclick="selectOne('activity-opts',this)" data-val="light"><span style="font-size:20px;">🚶‍♀️</span><div><strong>Hafif aktif</strong><small>Haftada 1-2 spor</small></div></div>
+        <div class="option-pill-wide" onclick="selectOne('activity-opts',this)" data-val="moderate"><span style="font-size:20px;">🏃‍♀️</span><div><strong>Orta aktif</strong><small>Haftada 3-4 spor</small></div></div>
+        <div class="option-pill-wide" onclick="selectOne('activity-opts',this)" data-val="active"><span style="font-size:20px;">💪</span><div><strong>Çok aktif</strong><small>Her gün spor</small></div></div>
+      </div>
+    </div>
+    <div class="onboard-nav">
+      <button class="btn btn-ghost btn-sm" onclick="obBack(3)">← Geri</button>
+      <button class="btn btn-primary btn-sm" onclick="obNext(3)">Devam Et →</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Beslenme -->
+  <div id="ob-4" class="onboard-step" style="display:none;flex-direction:column;height:100%;">
+    <div style="padding:12px 16px 0;">
+      <div class="step-dots">
+        <div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div>
+        <div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div>
+      </div>
+      <div class="progress-wrap" style="margin:6px 0;"><div class="progress-fill" style="width:66%"></div></div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0 16px 16px;">
+      <div class="onboard-hero">
+        <h2>Beslenme alışkanlıkların 🥗</h2>
+        <p>AI önerilerini buna göre hazırlar</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Beslenme tipi</label>
+        <div class="option-grid" id="diet-opts">
+          <div class="option-pill selected" onclick="selectOne('diet-opts',this)" data-val="normal">🍗 Normal</div>
+          <div class="option-pill" onclick="selectOne('diet-opts',this)" data-val="vegetarian">🥦 Vejetaryen</div>
+          <div class="option-pill" onclick="selectOne('diet-opts',this)" data-val="vegan">🌱 Vegan</div>
+          <div class="option-pill" onclick="selectOne('diet-opts',this)" data-val="pescatarian">🐟 Pesketaryen</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Günlük öğün sayısı</label>
+        <div class="option-grid" id="meals-opts">
+          <div class="option-pill" onclick="selectOne('meals-opts',this)" data-val="2">2 öğün</div>
+          <div class="option-pill selected" onclick="selectOne('meals-opts',this)" data-val="3">3 öğün</div>
+          <div class="option-pill" onclick="selectOne('meals-opts',this)" data-val="5">4-5 küçük</div>
+          <div class="option-pill" onclick="selectOne('meals-opts',this)" data-val="0">Esnek</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Alerjiler / sevmediğin yiyecekler</label>
+        <input class="form-input" id="ob-allergies" placeholder="ör: fındık, deniz ürünleri (yoksa boş)"/>
+      </div>
+    </div>
+    <div class="onboard-nav">
+      <button class="btn btn-ghost btn-sm" onclick="obBack(4)">← Geri</button>
+      <button class="btn btn-primary btn-sm" onclick="obNext(4)">Devam Et →</button>
+    </div>
+  </div>
+
+  <!-- Step 5: Spor -->
+  <div id="ob-5" class="onboard-step" style="display:none;flex-direction:column;height:100%;">
+    <div style="padding:12px 16px 0;">
+      <div class="step-dots">
+        <div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div>
+        <div class="step-dot done"></div><div class="step-dot active"></div><div class="step-dot"></div>
+      </div>
+      <div class="progress-wrap" style="margin:6px 0;"><div class="progress-fill" style="width:83%"></div></div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0 16px 16px;">
+      <div class="onboard-hero">
+        <h2>Nasıl spor yapmak istersin? 🏋️‍♀️</h2>
+        <p>Birden fazla seçebilirsin</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Spor tercihleri</label>
+        <div id="sport-opts">
+          <div class="option-pill-wide selected" onclick="toggleOpt(this)" data-val="home"><span style="font-size:20px;">🏠</span><div><strong>Evde spor</strong><small>TV karşısında, YouTube ile</small></div></div>
+          <div class="option-pill-wide selected" onclick="toggleOpt(this)" data-val="walk"><span style="font-size:20px;">🚶‍♀️</span><div><strong>Yürüyüş</strong><small>Dışarıda veya koşu bandı</small></div></div>
+          <div class="option-pill-wide" onclick="toggleOpt(this)" data-val="yoga"><span style="font-size:20px;">🧘‍♀️</span><div><strong>Yoga</strong><small>Esneklik ve rahatlama</small></div></div>
+          <div class="option-pill-wide" onclick="toggleOpt(this)" data-val="pilates"><span style="font-size:20px;">🩰</span><div><strong>Pilates</strong><small>Core ve postür</small></div></div>
+          <div class="option-pill-wide" onclick="toggleOpt(this)" data-val="gym"><span style="font-size:20px;">🏋️‍♀️</span><div><strong>Gym</strong><small>Spor salonu antrenmanı</small></div></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Spor geçmişin</label>
+        <div class="option-grid" id="fitness-opts">
+          <div class="option-pill selected" onclick="selectOne('fitness-opts',this)" data-val="beginner">🐣 Yeni başlıyorum</div>
+          <div class="option-pill" onclick="selectOne('fitness-opts',this)" data-val="occasional">🚶 Ara sıra</div>
+          <div class="option-pill" onclick="selectOne('fitness-opts',this)" data-val="regular">🏃 Düzenli</div>
+          <div class="option-pill" onclick="selectOne('fitness-opts',this)" data-val="experienced">💪 Deneyimli</div>
+        </div>
+      </div>
+    </div>
+    <div class="onboard-nav">
+      <button class="btn btn-ghost btn-sm" onclick="obBack(5)">← Geri</button>
+      <button class="btn btn-primary btn-sm" onclick="obNext(5)">Devam Et →</button>
+    </div>
+  </div>
+
+  <!-- Step 6: Tamamlandı -->
+  <div id="ob-6" class="onboard-step" style="display:none;flex-direction:column;height:100%;">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;">
+      <div style="font-size:64px;margin-bottom:16px;">🎉</div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:24px;color:var(--gray-800);margin-bottom:8px;">Profilin hazır!</h2>
+      <p style="font-size:14px;color:var(--gray-400);line-height:1.6;margin-bottom:24px;">AI asistanın kişisel programını hazırlıyor...</p>
+      <div class="card card-pink" style="width:100%;text-align:left;margin-bottom:20px;">
+        <div class="sec-title">Profil Özeti</div>
+        <div id="ob-summary" style="font-size:13px;color:var(--gray-600);line-height:1.8;"></div>
+      </div>
+      <button class="btn btn-primary" onclick="completeOnboarding()" style="width:100%;">Programımı Göster ✨</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div class="screen" id="screen-dashboard">
+  <div class="topbar">
+    <div>
+      <div class="greeting">
+        <div class="hi" id="dash-greeting">Günaydın,</div>
+        <h2 id="dash-name">Kullanıcı 👋</h2>
+      </div>
+    </div>
+    <div class="avatar" id="dash-avatar">?</div>
+  </div>
+  <div class="page-content">
+    <!-- Kalori kartı -->
+    <div class="card card-pink" id="calorie-card">
+      <div class="calorie-ring-wrap">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="#F4C0D1" stroke-width="8"/>
+          <circle cx="40" cy="40" r="32" fill="none" stroke="#D4537E" stroke-width="8"
+            id="calorie-ring-arc" stroke-dasharray="0 201" stroke-dashoffset="50" stroke-linecap="round" transform="rotate(-90 40 40)"/>
+          <text x="40" y="44" text-anchor="middle" font-size="13" font-weight="700" fill="#72243E" id="calorie-ring-pct">0%</text>
+        </svg>
+        <div class="calorie-info">
+          <div class="kcal-num"><span id="dash-kcal-eaten">0</span> kcal</div>
+          <div class="kcal-total">/ <span id="dash-kcal-goal">1800</span> kcal hedef</div>
+          <div style="font-size:12px;color:var(--gray-400);margin-top:3px;"><span id="dash-kcal-left">1800</span> kcal kaldı</div>
+        </div>
+      </div>
+      <div class="macro-row">
+        <div class="macro-item"><div class="macro-val" id="dash-protein">0g</div><div class="macro-label">Protein</div></div>
+        <div class="macro-item"><div class="macro-val" id="dash-carbs">0g</div><div class="macro-label">Karb</div></div>
+        <div class="macro-item"><div class="macro-val" id="dash-fat">0g</div><div class="macro-label">Yağ</div></div>
+      </div>
+    </div>
+
+    <!-- Stat grid -->
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-val" id="dash-meals">0/3</div><div class="stat-label">Öğün</div></div>
+      <div class="stat-card"><div class="stat-val" id="dash-exercises">0/2</div><div class="stat-label">Egzersiz</div></div>
+      <div class="stat-card"><div class="stat-val" id="dash-steps">0</div><div class="stat-label">Adım</div></div>
+      <div class="stat-card"><div class="stat-val" id="dash-streak">0🔥</div><div class="stat-label">Günlük seri</div></div>
+    </div>
+
+    <!-- Hedef ilerleme -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-weight:700;font-size:14px;">Hedefe ilerleme</span>
+        <span class="badge badge-pink" id="dash-goal-badge">-</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray-400);margin-bottom:6px;">
+        <span>Başlangıç: <span id="dash-start-w">-</span> kg</span>
+        <span>Şu an: <span id="dash-current-w">-</span> kg</span>
+        <span>Hedef: <span id="dash-goal-w">-</span> kg</span>
+      </div>
+      <div class="progress-wrap"><div class="progress-fill" id="dash-goal-progress" style="width:0%"></div></div>
+      <div style="font-size:12px;color:var(--gray-400);margin-top:6px;" id="dash-goal-sub">Veri bekleniyor...</div>
+    </div>
+
+    <button class="btn btn-secondary" onclick="goTo('chat')">AI Asistanıma Sor ✨</button>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-item active" onclick="goTo('dashboard')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Ana sayfa</span>
+    </button>
+    <button class="nav-item" onclick="goTo('food')">
+      <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      <span>Yemek</span>
+    </button>
+    <button class="nav-item" onclick="goTo('exercise')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Spor</span>
+    </button>
+    <button class="nav-item" onclick="goTo('progress')">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>İlerleme</span>
+    </button>
+    <button class="nav-item" onclick="goTo('chat')">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span>Asistan</span>
+    </button>
+  </div>
+</div>
+
+<!-- ============ FOOD SCREEN ============ -->
+<div class="screen" id="screen-food">
+  <div class="topbar">
+    <span class="topbar-title">Yemek Takibi</span>
+    <span style="font-size:13px;color:var(--gray-400);" id="food-date"></span>
+  </div>
+  <div class="page-content">
+    <div class="card card-pink" style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <div><div style="font-size:26px;font-weight:700;color:var(--pink-800);" id="food-kcal-eaten">0</div><div style="font-size:12px;color:var(--pink-600);">kcal yendi</div></div>
+        <div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:var(--purple-800);" id="food-kcal-goal">1800</div><div style="font-size:12px;color:var(--purple-600);">kcal hedef</div></div>
+      </div>
+      <div class="progress-wrap"><div class="progress-fill" id="food-progress-bar" style="width:0%"></div></div>
+    </div>
+
+    <div class="meal-section" id="meal-section-breakfast">
+      <div class="meal-header">
+        <span class="meal-title">🌅 Kahvaltı</span>
+        <span class="meal-kcal" id="meal-kcal-breakfast">0 kcal</span>
+      </div>
+      <div id="meal-items-breakfast"></div>
+      <button class="btn btn-secondary btn-sm" onclick="openFoodModal('breakfast')" style="margin-top:6px;">+ Yemek Ekle</button>
+    </div>
+    <div class="divider"></div>
+    <div class="meal-section" id="meal-section-lunch">
+      <div class="meal-header">
+        <span class="meal-title">☀️ Öğle Yemeği</span>
+        <span class="meal-kcal" id="meal-kcal-lunch">0 kcal</span>
+      </div>
+      <div id="meal-items-lunch"></div>
+      <button class="btn btn-secondary btn-sm" onclick="openFoodModal('lunch')" style="margin-top:6px;">+ Yemek Ekle</button>
+    </div>
+    <div class="divider"></div>
+    <div class="meal-section" id="meal-section-dinner">
+      <div class="meal-header">
+        <span class="meal-title">🌙 Akşam Yemeği</span>
+        <span class="meal-kcal" id="meal-kcal-dinner">0 kcal</span>
+      </div>
+      <div id="meal-items-dinner"></div>
+      <button class="btn btn-secondary btn-sm" onclick="openFoodModal('dinner')" style="margin-top:6px;">+ Yemek Ekle</button>
+    </div>
+    <div class="divider"></div>
+    <div class="meal-section">
+      <div class="meal-header">
+        <span class="meal-title">🍎 Ara Öğün</span>
+        <span class="meal-kcal" id="meal-kcal-snack">0 kcal</span>
+      </div>
+      <div id="meal-items-snack"></div>
+      <button class="btn btn-secondary btn-sm" onclick="openFoodModal('snack')" style="margin-top:6px;">+ Ara Öğün Ekle</button>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-item" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Ana sayfa</span></button>
+    <button class="nav-item active" onclick="goTo('food')"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Yemek</span></button>
+    <button class="nav-item" onclick="goTo('exercise')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Spor</span></button>
+    <button class="nav-item" onclick="goTo('progress')"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>İlerleme</span></button>
+    <button class="nav-item" onclick="goTo('chat')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Asistan</span></button>
+  </div>
+</div>
+
+<!-- ============ EXERCISE SCREEN ============ -->
+<div class="screen" id="screen-exercise">
+  <div class="topbar">
+    <span class="topbar-title">Spor Takibi</span>
+    <span style="font-size:13px;color:var(--gray-400);" id="ex-date"></span>
+  </div>
+  <div class="page-content">
+    <div id="exercise-plan-container">
+      <div style="text-align:center;padding:32px;color:var(--gray-400);">
+        <div style="font-size:32px;margin-bottom:8px;">🏃‍♀️</div>
+        <div>AI planın yükleniyor...</div>
+      </div>
+    </div>
+    <button class="btn btn-outline" onclick="openModal('extra-ex-modal')" style="margin-top:4px;">+ Ekstra Spor Ekle</button>
+
+    <div style="margin-top:16px;">
+      <div class="sec-title">Adım Takibi</div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="flex:1;">
+            <div style="font-size:22px;font-weight:700;color:var(--gray-800);" id="steps-display">0</div>
+            <div style="font-size:12px;color:var(--gray-400);">adım bugün</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <input class="form-input" id="steps-input" type="number" placeholder="Adım sayısı" style="width:120px;"/>
+            <button class="btn btn-sm btn-secondary" onclick="saveSteps()">Kaydet</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-item" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Ana sayfa</span></button>
+    <button class="nav-item" onclick="goTo('food')"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Yemek</span></button>
+    <button class="nav-item active" onclick="goTo('exercise')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Spor</span></button>
+    <button class="nav-item" onclick="goTo('progress')"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>İlerleme</span></button>
+    <button class="nav-item" onclick="goTo('chat')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Asistan</span></button>
+  </div>
+</div>
+
+<!-- ============ PROGRESS SCREEN ============ -->
+<div class="screen" id="screen-progress">
+  <div class="topbar">
+    <span class="topbar-title">İlerleme</span>
+    <button class="btn btn-sm btn-secondary" onclick="openModal('weight-modal')" style="width:auto;padding:6px 12px;">+ Kilo Gir</button>
+  </div>
+  <div class="page-content">
+    <div class="card card-pink">
+      <div style="display:flex;justify-content:space-around;text-align:center;">
+        <div><div style="font-size:24px;font-weight:700;color:var(--pink-800);" id="prog-lost">-</div><div style="font-size:11px;color:var(--pink-600);">kg verildi</div></div>
+        <div><div style="font-size:24px;font-weight:700;color:var(--pink-800);" id="prog-left">-</div><div style="font-size:11px;color:var(--pink-600);">kg kaldı</div></div>
+        <div><div style="font-size:24px;font-weight:700;color:var(--pink-800);" id="prog-streak">0🔥</div><div style="font-size:11px;color:var(--pink-600);">günlük seri</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:12px;font-size:15px;">Kilo Grafiği</div>
+      <canvas id="weight-chart" height="160"></canvas>
+    </div>
+
+    <div class="card">
+      <div class="sec-title">Geçmiş Ölçümler</div>
+      <div id="weight-history"></div>
+    </div>
+
+    <button class="btn btn-outline" onclick="goTo('chat')" style="margin-top:4px;">Programımı Revize Et ✨</button>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-item" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Ana sayfa</span></button>
+    <button class="nav-item" onclick="goTo('food')"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Yemek</span></button>
+    <button class="nav-item" onclick="goTo('exercise')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Spor</span></button>
+    <button class="nav-item active" onclick="goTo('progress')"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>İlerleme</span></button>
+    <button class="nav-item" onclick="goTo('chat')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Asistan</span></button>
+  </div>
+</div>
+
+<!-- ============ CHAT SCREEN ============ -->
+<div class="screen" id="screen-chat" style="flex-direction:column;">
+  <div class="topbar">
+    <span class="topbar-title">AI Asistan ✨</span>
+    <span class="badge badge-pink" id="chat-limit-badge">10/10</span>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input-row">
+    <input id="chat-input" placeholder="Bir şey sor..." maxlength="500" onkeydown="if(event.key==='Enter')sendChat()"/>
+    <button class="chat-send-btn" onclick="sendChat()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-item" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Ana sayfa</span></button>
+    <button class="nav-item" onclick="goTo('food')"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Yemek</span></button>
+    <button class="nav-item" onclick="goTo('exercise')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Spor</span></button>
+    <button class="nav-item" onclick="goTo('progress')"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>İlerleme</span></button>
+    <button class="nav-item active" onclick="goTo('chat')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Asistan</span></button>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<script>
+// ============ CONFIG ============
+const SUPABASE_URL = 'https://cmsvgmvymlrfdhhvpuwt.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_rBN6bQ-AEd7sOJAn4mIOfQ_tfboHmai';
+const CLAUDE_API_KEY = 'sk-ant-api03-a-k589886SPczFm5V1UxR-L2o9QHDzAx5059zuFv4H35IDZoxkERGSnFsIs72Jlo4moFYYi6lYYn5e3CHNQW1w-mqurFQAA';
+const DAILY_MSG_LIMIT = 10;
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let userProfile = null;
+let weightChart = null;
+let currentFoodMeal = null;
+let currentExerciseId = null;
+let pendingFoodData = null;
+let chatHistory = [];
+
+// ============ UTILS ============
+function showToast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), dur);
+}
+
+function goTo(screen) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+screen).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+screen+"'")) n.classList.add('active');
+  });
+  if(screen==='dashboard') loadDashboard();
+  if(screen==='food') loadFoodScreen();
+  if(screen==='exercise') loadExerciseScreen();
+  if(screen==='progress') loadProgressScreen();
+  if(screen==='chat') loadChatScreen();
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+  if(id==='food-modal') {
+    document.getElementById('food-modal-input').value='';
+    document.getElementById('food-ai-result').style.display='none';
+    document.getElementById('food-save-btn').style.display='none';
+    document.getElementById('food-calc-btn').style.display='flex';
+    pendingFoodData=null;
+  }
+}
+
+function today() { return new Date().toISOString().split('T')[0]; }
+
+function formatDate(d) {
+  const date = new Date(d);
+  return date.toLocaleDateString('tr-TR',{day:'numeric',month:'long'});
+}
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if(h<12) return 'Günaydın,';
+  if(h<18) return 'İyi günler,';
+  return 'İyi akşamlar,';
+}
+
+function calcBMR(profile) {
+  const w = profile.current_weight || 70;
+  const h = profile.height_cm || 165;
+  const a = profile.age || 28;
+  const isFemale = profile.gender !== 'male';
+  let bmr = isFemale
+    ? 447.593 + (9.247*w) + (3.098*h) - (4.330*a)
+    : 88.362 + (13.397*w) + (4.799*h) - (5.677*a);
+  const m = {sedentary:1.2, light:1.375, moderate:1.55, active:1.725};
+  return Math.round(bmr * (m[profile.activity_level]||1.375));
+}
+
+function selectOne(groupId, el) {
+  document.getElementById(groupId).querySelectorAll('.option-pill,.option-pill-wide').forEach(x=>x.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function toggleOpt(el) { el.classList.toggle('selected'); }
+
+function getSelected(groupId) {
+  const el = document.querySelector('#'+groupId+' .selected');
+  return el ? el.dataset.val : null;
+}
+
+function getMultiSelected(groupId) {
+  return Array.from(document.querySelectorAll('#'+groupId+' .selected')).map(e=>e.dataset.val);
+}
+
+// ============ AUTH ============
+function showRegister() {
+  document.getElementById('auth-login-form').style.display='none';
+  document.getElementById('auth-register-form').style.display='block';
+}
+
+function showLogin() {
+  document.getElementById('auth-login-form').style.display='block';
+  document.getElementById('auth-register-form').style.display='none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  if(!email||!pass){showToast('Email ve şifre girin');return;}
+  const {data,error} = await sb.auth.signInWithPassword({email,password:pass});
+  if(error){showToast('Giriş hatası: '+error.message);return;}
+  currentUser = data.user;
+  await afterLogin();
+}
+
+async function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-password').value;
+  if(!name||!email||!pass){showToast('Tüm alanları doldurun');return;}
+  if(pass.length<6){showToast('Şifre en az 6 karakter olmalı');return;}
+  const {data,error} = await sb.auth.signUp({email,password:pass,options:{data:{name}}});
+  if(error){
+    if(error.message.includes('Maksimum')) showToast('Uygulama şu an dolu (5/5)');
+    else showToast('Kayıt hatası: '+error.message);
+    return;
+  }
+  currentUser = data.user;
+  await afterLogin();
+}
+
+async function afterLogin() {
+  const {data} = await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+  userProfile = data;
+  if(!userProfile||!userProfile.onboarding_completed) {
+    goTo('onboard');
+    document.getElementById('loader').style.display='none';
+  } else {
+    goTo('dashboard');
+    document.getElementById('loader').style.display='none';
+  }
+}
+
+// ============ ONBOARDING ============
+let obData = {};
+
+function obNext(step) {
+  if(step===1) {
+    const h=document.getElementById('ob-height').value;
+    const w=document.getElementById('ob-weight').value;
+    const a=document.getElementById('ob-age').value;
+    if(!h||!w||!a){showToast('Lütfen tüm alanları doldurun');return;}
+    obData.height_cm=parseFloat(h);obData.current_weight=parseFloat(w);obData.age=parseInt(a);
+    obData.gender=document.getElementById('ob-gender').value;
+  }
+  if(step===2) {
+    const gw=document.getElementById('ob-goal-weight').value;
+    const gW=document.getElementById('ob-goal-weeks').value;
+    if(!gw||!gW){showToast('Hedef kilo ve süre girin');return;}
+    obData.goal_weight=parseFloat(gw);obData.goal_weeks=parseInt(gW);
+    obData.goal_type=getSelected('goal-type-opts')||'both';
+  }
+  if(step===3) { obData.activity_level=getSelected('activity-opts')||'light'; }
+  if(step===4) {
+    obData.diet_type=getSelected('diet-opts')||'normal';
+    obData.meals_per_day=parseInt(getSelected('meals-opts')||'3');
+    obData.allergies=document.getElementById('ob-allergies').value;
+  }
+  if(step===5) {
+    obData.sport_preferences=getMultiSelected('sport-opts');
+    obData.fitness_level=getSelected('fitness-opts')||'beginner';
+    buildObSummary();
+  }
+  document.getElementById('ob-'+step).style.display='none';
+  document.getElementById('ob-'+(step+1)).style.display='flex';
+}
+
+function obBack(step) {
+  document.getElementById('ob-'+step).style.display='none';
+  document.getElementById('ob-'+(step-1)).style.display='flex';
+}
+
+function buildObSummary() {
+  const sportMap={home:'Evde spor',walk:'Yürüyüş',yoga:'Yoga',pilates:'Pilates',gym:'Gym'};
+  const sports=(obData.sport_preferences||[]).map(s=>sportMap[s]||s).join(', ');
+  const actMap={sedentary:'Masa başı',light:'Hafif aktif',moderate:'Orta aktif',active:'Çok aktif'};
+  const dietMap={normal:'Normal',vegetarian:'Vejetaryen',vegan:'Vegan',pescatarian:'Pesketaryen'};
+  document.getElementById('ob-summary').innerHTML=`
+    📏 Boy: ${obData.height_cm} cm | Kilo: ${obData.current_weight} kg | Yaş: ${obData.age}<br/>
+    🎯 Hedef: ${obData.goal_weight} kg — ${obData.goal_weeks} haftada<br/>
+    🚶 Aktivite: ${actMap[obData.activity_level]||obData.activity_level}<br/>
+    🥗 Beslenme: ${dietMap[obData.diet_type]||obData.diet_type} | ${obData.meals_per_day} öğün/gün<br/>
+    🏃 Spor: ${sports||'Seçilmedi'}
+  `;
+}
+
+async function completeOnboarding() {
+  obData.onboarding_completed=true;
+  obData.daily_calorie_goal=calcBMR(obData)-300;
+  const {error} = await sb.from('profiles').update(obData).eq('id',currentUser.id);
+  if(error){showToast('Hata: '+error.message);return;}
+  // Log starting weight
+  await sb.from('weight_logs').insert({user_id:currentUser.id,weight:obData.current_weight,notes:'Başlangıç kilosu'});
+  const {data} = await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+  userProfile = data;
+  goTo('dashboard');
+}
+
+// ============ DASHBOARD ============
+async function loadDashboard() {
+  if(!userProfile) return;
+  document.getElementById('dash-greeting').textContent = getGreeting();
+  document.getElementById('dash-name').textContent = (userProfile.name||'Kullanıcı') + ' 👋';
+  const initials = (userProfile.name||'U').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('dash-avatar').textContent = initials;
+  document.getElementById('dash-kcal-goal').textContent = userProfile.daily_calorie_goal||1800;
+  document.getElementById('food-kcal-goal').textContent = userProfile.daily_calorie_goal||1800;
+
+  const todayDate = today();
+  // Food totals
+  const {data:foodData} = await sb.from('food_logs').select('calories,protein_g,carbs_g,fat_g').eq('user_id',currentUser.id).eq('log_date',todayDate);
+  const totCalories = (foodData||[]).reduce((s,r)=>s+(r.calories||0),0);
+  const totProtein = (foodData||[]).reduce((s,r)=>s+(r.protein_g||0),0);
+  const totCarbs = (foodData||[]).reduce((s,r)=>s+(r.carbs_g||0),0);
+  const totFat = (foodData||[]).reduce((s,r)=>s+(r.fat_g||0),0);
+  const goal = userProfile.daily_calorie_goal||1800;
+  const pct = Math.min(100,Math.round((totCalories/goal)*100));
+  const circ = Math.round(2*Math.PI*32);
+  document.getElementById('calorie-ring-arc').setAttribute('stroke-dasharray',`${Math.round(circ*pct/100)} ${circ}`);
+  document.getElementById('calorie-ring-pct').textContent = pct+'%';
+  document.getElementById('dash-kcal-eaten').textContent = totCalories;
+  document.getElementById('dash-kcal-left').textContent = Math.max(0,goal-totCalories);
+  document.getElementById('dash-protein').textContent = Math.round(totProtein)+'g';
+  document.getElementById('dash-carbs').textContent = Math.round(totCarbs)+'g';
+  document.getElementById('dash-fat').textContent = Math.round(totFat)+'g';
+
+  // Meals count
+  const mealTypes = [...new Set((foodData||[]).map(()=>'x'))];
+  document.getElementById('dash-meals').textContent = (foodData||[]).length > 0 ? '✓' : '0';
+
+  // Exercise
+  const {data:exData} = await sb.from('exercise_logs').select('id').eq('user_id',currentUser.id).eq('log_date',todayDate).eq('completed',true);
+  document.getElementById('dash-exercises').textContent = (exData||[]).length+'/2';
+
+  // Steps
+  const {data:stepsData} = await sb.from('steps_logs').select('steps').eq('user_id',currentUser.id).eq('log_date',todayDate).order('created_at',{ascending:false}).limit(1);
+  const steps = stepsData&&stepsData[0] ? stepsData[0].steps : 0;
+  document.getElementById('dash-steps').textContent = steps >= 1000 ? (steps/1000).toFixed(1)+'k' : steps;
+
+  // Weight progress
+  const {data:wData} = await sb.from('weight_logs').select('weight,log_date').eq('user_id',currentUser.id).order('log_date',{ascending:true});
+  if(wData&&wData.length>0) {
+    const startW = wData[0].weight;
+    const currW = wData[wData.length-1].weight;
+    const goalW = userProfile.goal_weight||startW;
+    const lost = Math.max(0,+(startW-currW).toFixed(1));
+    const left = Math.max(0,+(currW-goalW).toFixed(1));
+    const totalToLose = Math.max(0.1,startW-goalW);
+    const prog = Math.min(100,Math.round((lost/totalToLose)*100));
+    document.getElementById('dash-start-w').textContent = startW;
+    document.getElementById('dash-current-w').textContent = currW;
+    document.getElementById('dash-goal-w').textContent = goalW;
+    document.getElementById('dash-goal-progress').style.width = prog+'%';
+    document.getElementById('dash-goal-badge').textContent = `${userProfile.goal_weeks||12} haftada -${Math.round(totalToLose)} kg`;
+    document.getElementById('dash-goal-sub').textContent = `${lost} kg verildi • ${left} kg kaldı`;
+    document.getElementById('dash-streak').textContent = wData.length+'🔥';
+    document.getElementById('prog-streak').textContent = wData.length+'🔥';
+  }
+}
+
+// ============ FOOD SCREEN ============
+async function loadFoodScreen() {
+  document.getElementById('food-date').textContent = formatDate(today());
+  const meals = ['breakfast','lunch','dinner','snack'];
+  let totalKcal=0;
+  for(const meal of meals) {
+    const {data} = await sb.from('food_logs').select('*').eq('user_id',currentUser.id).eq('log_date',today()).eq('meal_type',meal);
+    const container = document.getElementById('meal-items-'+meal);
+    container.innerHTML='';
+    let mealKcal=0;
+    (data||[]).forEach(item=>{
+      mealKcal+=(item.calories||0);
+      container.innerHTML+=`<div class="food-row"><span class="food-name">${item.food_name}${item.portion_desc?' <small style="color:var(--gray-400);">('+item.portion_desc+')</small>':''}</span><span class="food-kcal-badge">${item.calories||0} kcal</span></div>`;
+    });
+    document.getElementById('meal-kcal-'+meal).textContent = mealKcal+' kcal';
+    totalKcal+=mealKcal;
+  }
+  const goal = userProfile?.daily_calorie_goal||1800;
+  document.getElementById('food-kcal-eaten').textContent = totalKcal;
+  document.getElementById('food-progress-bar').style.width = Math.min(100,Math.round(totalKcal/goal*100))+'%';
+}
+
+function openFoodModal(meal) {
+  currentFoodMeal = meal;
+  const mealNames={breakfast:'Kahvaltı',lunch:'Öğle',dinner:'Akşam',snack:'Ara Öğün'};
+  document.getElementById('food-modal-title').textContent = (mealNames[meal]||meal)+' — Yemek Ekle';
+  openModal('food-modal');
+}
+
+async function calcFoodAI() {
+  const text = document.getElementById('food-modal-input').value.trim();
+  if(!text){showToast('Ne yediğini yaz');return;}
+  const btn = document.getElementById('food-calc-btn');
+  btn.textContent='Hesaplanıyor...';btn.disabled=true;
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':CLAUDE_API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-haiku-4-5',
+        max_tokens:300,
+        system:'Sen bir diyetisyen asistansın. Kullanıcı yediği yemeği yazıyor, sen sadece JSON formatında kalori ve makro bilgisi döndür. Başka hiçbir şey yazma. Format: {"kcal":250,"protein":20,"carbs":30,"fat":8,"portion":"1 porsiyon"}',
+        messages:[{role:'user',content:'Yedim: '+text}]
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content[0].text.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(raw);
+    pendingFoodData={food_name:text,calories:parsed.kcal,protein_g:parsed.protein,carbs_g:parsed.carbs,fat_g:parsed.fat,portion_desc:parsed.portion};
+    document.getElementById('food-ai-kcal').textContent = parsed.kcal+' kcal';
+    document.getElementById('food-ai-macros').textContent = `Protein: ${parsed.protein}g • Karb: ${parsed.carbs}g • Yağ: ${parsed.fat}g`;
+    document.getElementById('food-ai-result').style.display='block';
+    document.getElementById('food-save-btn').style.display='flex';
+  } catch(e) {
+    showToast('AI hesaplama hatası, tekrar dene');
+  }
+  btn.textContent='✨ AI ile Hesapla';btn.disabled=false;
+}
+
+async function saveFoodEntry() {
+  if(!pendingFoodData) return;
+  const {error} = await sb.from('food_logs').insert({
+    user_id:currentUser.id,
+    log_date:today(),
+    meal_type:currentFoodMeal,
+    ...pendingFoodData
+  });
+  if(error){showToast('Kaydetme hatası');return;}
+  closeModal('food-modal');
+  showToast('Yemek eklendi ✓');
+  loadFoodScreen();
+}
+
+// ============ EXERCISE SCREEN ============
+async function loadExerciseScreen() {
+  document.getElementById('ex-date').textContent = formatDate(today());
+
+  // Check if plan exists for today
+  const {data:planData} = await sb.from('exercise_plans').select('*').eq('user_id',currentUser.id).eq('plan_date',today()).single();
+  const {data:exLogs} = await sb.from('exercise_logs').select('*').eq('user_id',currentUser.id).eq('log_date',today());
+  const completedNames = (exLogs||[]).map(e=>e.exercise_name);
+
+  if(planData&&planData.exercises) {
+    renderExercisePlan(planData.exercises, completedNames);
+  } else {
+    await generateExercisePlan(completedNames);
+  }
+
+  // Steps
+  const {data:stepsData} = await sb.from('steps_logs').select('steps').eq('user_id',currentUser.id).eq('log_date',today()).order('created_at',{ascending:false}).limit(1);
+  if(stepsData&&stepsData[0]) document.getElementById('steps-display').textContent = stepsData[0].steps;
+}
+
+async function generateExercisePlan(completedNames) {
+  const container = document.getElementById('exercise-plan-container');
+  container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--gray-400);"><div style="font-size:28px;margin-bottom:8px;">✨</div><div>AI planın hazırlanıyor...</div></div>';
+  try {
+    const prefs = (userProfile.sport_preferences||['home','walk']).join(', ');
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':CLAUDE_API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-haiku-4-5',
+        max_tokens:600,
+        system:'Sen bir fitness koçusun. Sadece JSON array döndür, başka hiçbir şey yazma. Her eleman: {"name":"egzersiz adı","type":"home/walk/yoga/pilates","duration":30,"calories":150,"description":"kısa açıklama","youtube_tip":"TV karşısında yapılabilecek egzersiz için ipucu veya YouTube arama terimi"}',
+        messages:[{role:'user',content:`Kullanıcı profili: Spor tercihi: ${prefs}, Seviye: ${userProfile.fitness_level||'beginner'}, Hedef: ${userProfile.goal_type||'both'}. Bugün için 2-3 egzersiz öner.`}]
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content[0].text.replace(/```json|```/g,'').trim();
+    const exercises = JSON.parse(raw);
+    await sb.from('exercise_plans').insert({user_id:currentUser.id,plan_date:today(),exercises});
+    renderExercisePlan(exercises, completedNames);
+  } catch(e) {
+    container.innerHTML = '<div class="card"><p style="color:var(--gray-400);font-size:14px;">Plan yüklenemedi. Sayfayı yenileyin.</p></div>';
+  }
+}
+
+function renderExercisePlan(exercises, completedNames) {
+  const container = document.getElementById('exercise-plan-container');
+  container.innerHTML = '<div class="sec-title">Bugünün Planı</div>';
+  exercises.forEach(ex=>{
+    const isDone = completedNames.includes(ex.name);
+    const card = document.createElement('div');
+    card.className = 'ex-card'+(isDone?' done':'');
+    card.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <span class="badge ${isDone?'badge-green':'badge-purple'}" style="margin-bottom:6px;">${isDone?'✓ Tamamlandı':ex.type||'Spor'}</span>
+          <div class="ex-title">${ex.name}</div>
+          <div class="ex-sub">${ex.duration} dk • ~${ex.calories} kcal</div>
+          ${ex.description?`<div style="font-size:12px;color:var(--gray-400);margin-top:4px;">${ex.description}</div>`:''}
+          ${ex.youtube_tip&&!isDone?`<div style="font-size:12px;color:var(--purple-600);margin-top:6px;background:var(--white);padding:6px 8px;border-radius:6px;">📺 ${ex.youtube_tip}</div>`:''}
+        </div>
+        ${isDone?'<span style="font-size:24px;">✅</span>':''}
+      </div>
+      ${!isDone?`<div class="ex-actions">
+        <button class="btn btn-sm btn-purple" onclick="startExercise('${ex.name.replace(/'/g,"\\'")}')">▶ Başla</button>
+        <button class="btn btn-sm btn-green" onclick="openExModal('${ex.name.replace(/'/g,"\\'")}',${ex.duration})">✓ Tamamladım</button>
+      </div>`:''}
+    `;
+    container.appendChild(card);
+  });
+}
+
+function startExercise(name) { showToast('Egzersiz başladı: '+name+' 💪'); }
+
+function openExModal(name, duration) {
+  currentExerciseId = {name, duration};
+  document.getElementById('ex-duration').value = duration;
+  openModal('ex-modal');
+}
+
+async function saveExercise() {
+  if(!currentExerciseId) return;
+  const dur = parseInt(document.getElementById('ex-duration').value)||currentExerciseId.duration;
+  const {error} = await sb.from('exercise_logs').insert({
+    user_id:currentUser.id,
+    log_date:today(),
+    exercise_name:currentExerciseId.name,
+    duration_minutes:dur,
+    completed:true
+  });
+  if(error){showToast('Hata: '+error.message);return;}
+  closeModal('ex-modal');
+  showToast('Harika iş! Egzersiz kaydedildi 🎉');
+  loadExerciseScreen();
+}
+
+async function saveExtraExercise() {
+  const name = document.getElementById('extra-ex-name').value.trim();
+  const dur = parseInt(document.getElementById('extra-ex-duration').value)||30;
+  if(!name){showToast('Aktivite adı girin');return;}
+  const {error} = await sb.from('exercise_logs').insert({
+    user_id:currentUser.id,log_date:today(),exercise_name:name,
+    exercise_type:'extra',duration_minutes:dur,completed:true
+  });
+  if(error){showToast('Hata');return;}
+  document.getElementById('extra-ex-name').value='';
+  document.getElementById('extra-ex-duration').value='';
+  closeModal('extra-ex-modal');
+  showToast('Ekstra spor eklendi ✓');
+  loadExerciseScreen();
+}
+
+async function saveSteps() {
+  const steps = parseInt(document.getElementById('steps-input').value);
+  if(!steps||steps<0){showToast('Geçerli adım sayısı girin');return;}
+  await sb.from('steps_logs').upsert({user_id:currentUser.id,log_date:today(),steps},{onConflict:'user_id,log_date'});
+  document.getElementById('steps-display').textContent = steps;
+  document.getElementById('steps-input').value='';
+  showToast('Adım kaydedildi ✓');
+}
+
+// ============ PROGRESS SCREEN ============
+async function loadProgressScreen() {
+  const {data:wData} = await sb.from('weight_logs').select('*').eq('user_id',currentUser.id).order('log_date',{ascending:true});
+  if(!wData||wData.length===0){
+    document.getElementById('weight-history').innerHTML='<p style="color:var(--gray-400);font-size:14px;text-align:center;padding:16px;">Henüz kilo kaydı yok</p>';
+    return;
+  }
+  const startW = wData[0].weight;
+  const currW = wData[wData.length-1].weight;
+  const goalW = userProfile?.goal_weight||currW;
+  const lost = +(startW-currW).toFixed(1);
+  const left = +Math.max(0,currW-goalW).toFixed(1);
+  document.getElementById('prog-lost').textContent = lost>=0?'-'+lost:'+'+Math.abs(lost);
+  document.getElementById('prog-left').textContent = left;
+  document.getElementById('prog-streak').textContent = wData.length+'🔥';
+
+  // Chart
+  const labels = wData.map(w=>formatDate(w.log_date).replace(' ',''));
+  const weights = wData.map(w=>w.weight);
+  if(weightChart) weightChart.destroy();
+  weightChart = new Chart(document.getElementById('weight-chart'),{
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        data:weights,
+        borderColor:'#D4537E',
+        backgroundColor:'rgba(212,83,126,0.08)',
+        borderWidth:2.5,
+        tension:0.4,
+        fill:true,
+        pointBackgroundColor:'#D4537E',
+        pointRadius:4
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+' kg'}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10},maxRotation:45}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>v+' kg'}}
+      }
+    }
+  });
+
+  // History
+  const hist = document.getElementById('weight-history');
+  hist.innerHTML='';
+  [...wData].reverse().forEach((w,i)=>{
+    const prev = wData[wData.length-2-i];
+    const diff = prev ? +(w.weight-prev.weight).toFixed(1) : 0;
+    const badge = i===wData.length-1 ? '<span class="badge badge-gray">Başlangıç</span>' :
+      diff>0 ? `<span class="badge badge-pink">+${diff}</span>` :
+      diff<0 ? `<span class="badge badge-green">${diff}</span>` :
+      `<span class="badge badge-gray">±0</span>`;
+    hist.innerHTML+=`<div class="weight-row"><span style="font-size:14px;">${formatDate(w.log_date)}</span><span style="font-weight:700;color:var(--pink-600);">${w.weight} kg</span>${badge}</div>`;
+  });
+}
+
+async function saveWeight() {
+  const w = parseFloat(document.getElementById('weight-input').value);
+  const note = document.getElementById('weight-note').value;
+  if(!w||w<20||w>300){showToast('Geçerli bir kilo girin');return;}
+  const {error} = await sb.from('weight_logs').insert({user_id:currentUser.id,log_date:today(),weight:w,notes:note});
+  if(error){showToast('Hata: '+error.message);return;}
+  document.getElementById('weight-input').value='';
+  document.getElementById('weight-note').value='';
+  closeModal('weight-modal');
+  showToast('Kilo kaydedildi 🌸');
+  loadProgressScreen();
+  // Update current weight in profile
+  await sb.from('profiles').update({current_weight:w}).eq('id',currentUser.id);
+  userProfile.current_weight=w;
+}
+
+// ============ CHAT SCREEN ============
+async function loadChatScreen() {
+  const msgCount = await getTodayMsgCount();
+  const remaining = Math.max(0,DAILY_MSG_LIMIT-msgCount);
+  document.getElementById('chat-limit-badge').textContent = remaining+'/'+DAILY_MSG_LIMIT;
+
+  const chatDiv = document.getElementById('chat-messages');
+  if(chatDiv.children.length===0) {
+    const {data:logs} = await sb.from('chat_logs').select('*').eq('user_id',currentUser.id).eq('log_date',today()).order('created_at',{ascending:true});
+    chatHistory=[];
+    if(!logs||logs.length===0) {
+      addBubble('ai',`Merhaba ${userProfile?.name||''}! 🌸 Bugün nasıl gidiyorsun? Beslenmen, egzersizin veya programın hakkında soru sorabilirsin.`);
+    } else {
+      logs.forEach(l=>{
+        chatHistory.push({role:l.role,content:l.content});
+        addBubble(l.role,l.content,false);
+      });
+    }
+  }
+}
+
+async function getTodayMsgCount() {
+  const {count} = await sb.from('chat_logs').select('*',{count:'exact',head:true}).eq('user_id',currentUser.id).eq('log_date',today()).eq('role','user');
+  return count||0;
+}
+
+function addBubble(role,text,scroll=true) {
+  const div=document.createElement('div');
+  div.className='bubble '+(role==='user'?'bubble-user':'bubble-ai');
+  div.textContent=text;
+  document.getElementById('chat-messages').appendChild(div);
+  if(scroll) div.scrollIntoView({behavior:'smooth'});
+  return div;
+}
+
+async function sendChat() {
+  const input=document.getElementById('chat-input');
+  const text=input.value.trim();
+  if(!text) return;
+
+  const msgCount=await getTodayMsgCount();
+  if(msgCount>=DAILY_MSG_LIMIT){
+    showToast('Günlük 10 mesaj hakkın doldu. Yarın devam et!');
+    return;
+  }
+
+  input.value='';
+  addBubble('user',text);
+  await sb.from('chat_logs').insert({user_id:currentUser.id,role:'user',content:text,log_date:today()});
+  chatHistory.push({role:'user',content:text});
+
+  const remaining=DAILY_MSG_LIMIT-msgCount-1;
+  document.getElementById('chat-limit-badge').textContent=remaining+'/'+DAILY_MSG_LIMIT;
+
+  const loadingBubble=addBubble('ai','');
+  loadingBubble.classList.add('loading');
+
+  try {
+    const systemPrompt=`Sen FitFlow uygulamasının kişisel diyetisyen ve fitness koçusun. Kullanıcı hakkında bilgiler: Ad: ${userProfile?.name}, Yaş: ${userProfile?.age}, Boy: ${userProfile?.height_cm}cm, Kilo: ${userProfile?.current_weight}kg, Hedef kilo: ${userProfile?.goal_weight}kg, Hedef süre: ${userProfile?.goal_weeks} hafta, Aktivite: ${userProfile?.activity_level}, Beslenme: ${userProfile?.diet_type}, Alerjiler: ${userProfile?.allergies||'yok'}, Spor tercihi: ${(userProfile?.sport_preferences||[]).join(', ')}. Türkçe, sıcak ve motive edici bir dille yanıt ver. Kısa ve öz ol. Gerektiğinde kalori hedefi veya program revizyonu öner.`;
+
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':CLAUDE_API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-haiku-4-5',
+        max_tokens:500,
+        system:systemPrompt,
+        messages:chatHistory.slice(-10)
+      })
+    });
+    const data=await resp.json();
+    const reply=data.content[0].text;
+    loadingBubble.classList.remove('loading');
+    loadingBubble.textContent=reply;
+    loadingBubble.scrollIntoView({behavior:'smooth'});
+    chatHistory.push({role:'assistant',content:reply});
+    await sb.from('chat_logs').insert({user_id:currentUser.id,role:'assistant',content:reply,log_date:today()});
+  } catch(e) {
+    loadingBubble.classList.remove('loading');
+    loadingBubble.textContent='Bir hata oluştu, tekrar dene.';
+  }
+}
+
+// ============ INIT ============
+async function init() {
+  const {data:{session}} = await sb.auth.getSession();
+  if(session) {
+    currentUser=session.user;
+    await afterLogin();
+  } else {
+    document.getElementById('loader').style.display='none';
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById('screen-auth').classList.add('active');
+  }
+}
+
+init();
+
+// Register service worker for PWA
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
