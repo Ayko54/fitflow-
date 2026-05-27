@@ -762,7 +762,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 <script>
 // ============ CONFIG ============
 const SUPABASE_URL = 'https://cmsvgmvymlrfdhhvpuwt.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_rBN6bQ-AEd7sOJAn4mIOfQ_tfboHmai';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtc3ZnbXZ5bWxyZmRoaHZwdXd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MDI2NzIsImV4cCI6MjA5NTQ3ODY3Mn0.yAhOYz2-z0VL3bSfc5YL7nS3Dh1_eOVlxzD-HYjN9sw';
 const CLAUDE_API_KEY = 'sk-ant-api03-a-k589886SPczFm5V1UxR-L2o9QHDzAx5059zuFv4H35IDZoxkERGSnFsIs72Jlo4moFYYi6lYYn5e3CHNQW1w-mqurFQAA';
 const DAILY_MSG_LIMIT = 10;
 
@@ -890,14 +890,26 @@ async function doRegister() {
 }
 
 async function afterLogin() {
-  const {data} = await sb.from('profiles').select('*').eq('id',currentUser.id).single();
-  userProfile = data;
-  if(!userProfile||!userProfile.onboarding_completed) {
+  try {
+    const {data, error} = await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+    if(error) console.error('Profile fetch error:', error);
+    userProfile = data;
+  } catch(e) {
+    console.error('afterLogin error:', e);
+    userProfile = null;
+  }
+  document.getElementById('loader').style.display='none';
+  if(!userProfile || !userProfile.onboarding_completed) {
+    // Reset onboarding data
+    obData = {};
+    // Show first onboarding step
+    document.querySelectorAll('.onboard-step').forEach(s=>s.style.display='none');
+    document.getElementById('ob-1').style.display='flex';
+    document.getElementById('ob-1').style.flexDirection='column';
+    document.getElementById('ob-1').style.height='100%';
     goTo('onboard');
-    document.getElementById('loader').style.display='none';
   } else {
     goTo('dashboard');
-    document.getElementById('loader').style.display='none';
   }
 }
 
@@ -957,12 +969,29 @@ function buildObSummary() {
 async function completeOnboarding() {
   obData.onboarding_completed=true;
   obData.daily_calorie_goal=calcBMR(obData)-300;
-  const {error} = await sb.from('profiles').update(obData).eq('id',currentUser.id);
-  if(error){showToast('Hata: '+error.message);return;}
+  
+  // Try update first, if fails try upsert
+  const {data:existing} = await sb.from('profiles').select('id').eq('id',currentUser.id).single();
+  let error;
+  if(existing) {
+    const res = await sb.from('profiles').update(obData).eq('id',currentUser.id);
+    error = res.error;
+  } else {
+    const res = await sb.from('profiles').insert({id:currentUser.id,...obData});
+    error = res.error;
+  }
+  
+  if(error){
+    console.error('Profile save error:', error);
+    showToast('Profil kaydedilemedi: '+error.message, 4000);
+    return;
+  }
+  
   // Log starting weight
   await sb.from('weight_logs').insert({user_id:currentUser.id,weight:obData.current_weight,notes:'Başlangıç kilosu'});
   const {data} = await sb.from('profiles').select('*').eq('id',currentUser.id).single();
   userProfile = data;
+  showToast('Profil kaydedildi! 🌸');
   goTo('dashboard');
 }
 
