@@ -1824,7 +1824,7 @@ async function confirmChallengeToggle(){
   const{data:part}=await sb.from('challenge_participants').select('is_active').eq('user_id',CU.id).eq('challenge_date',today()).limit(1);
   const isActive=part&&part[0]&&part[0].is_active;
   if(isActive){
-    if(!confirm('Challenge'den ayrılmak istediğine emin misin? Sıralama geçmişin kaybolmaz.'))return;
+    if(!confirm('Challengeden ayrılmak istediğine emin misin? Sıralama geçmişin kaybolmaz.'))return;
   }
   await toggleChallenge();
 }
