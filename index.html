@@ -1080,7 +1080,7 @@ async function completeOnboarding(){
     const{error}=await sb.from('profiles').update(obD).eq('id',CU.id);
     if(error){err('Profil kaydedilemedi. Tekrar dene.');return;}
     // Başlangıç kilosu kaydet
-    await sb.from('weight_logs').insert({user_id:CU.id,weight:obD.current_weight,notes:'Başlangıç kilosu',log_date:today()}).then(()=>{}).catch(()=>{});
+    try{await sb.from('weight_logs').insert({user_id:CU.id,weight:obD.current_weight,notes:'Başlangıç kilosu',log_date:today()});}catch(_){}
     const{data}=await sb.from('profiles').select('*').eq('id',CU.id).limit(1);
     UP=data&&data[0]?data[0]:obD;UP.id=CU.id;
     confetti();ok('Programın hazır! 🎉');
@@ -1976,7 +1976,7 @@ async function sendChat(){
   setBtn('chat-send-btn',true,'');
   addBubble('user',text);
   chatHist.push({role:'user',content:text});
-  await sb.from('chat_logs').insert({user_id:CU.id,role:'user',content:text,log_date:today()}).catch(()=>{});
+  try{await sb.from('chat_logs').insert({user_id:CU.id,role:'user',content:text,log_date:today()});}catch(_){}
   document.getElementById('chat-limit').textContent=(total-cnt-1)+'/'+total;
   const loadEl=addBubble('ai','');loadEl.classList.add('typing-dots');
   try{
@@ -2144,7 +2144,7 @@ async function addWin(pts,reason){
     const nw=(UP?.win_points||0)+pts;
     await sb.from('profiles').update({win_points:nw}).eq('id',CU.id);
     if(UP)UP.win_points=nw;
-    await sb.from('win_history').insert({user_id:CU.id,points:pts,reason}).catch(()=>{});
+    try{await sb.from('win_history').insert({user_id:CU.id,points:pts,reason});}catch(_){}
   }catch(e){}
 }
 
