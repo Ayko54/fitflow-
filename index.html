@@ -10,8 +10,20 @@
 <title>FitFlow</title>
 <link rel="manifest" href="manifest.json"/>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.js"></script>
+<script>
+// Inline emergency fallback - if scripts fail, show auth
+window.addEventListener('error', function(e){
+  if(e.filename && (e.filename.includes('supabase') || e.filename.includes('chart'))){
+    document.getElementById('loader').style.display='none';
+    var a=document.getElementById('screen-auth');
+    if(a){a.classList.add('active');}
+    console.error('Script load failed:', e.filename);
+  }
+}, true);
+</script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js" 
+  onerror="document.getElementById('loader').style.display='none';document.getElementById('screen-auth').classList.add('active');"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;background:#0a0612;}
@@ -792,12 +804,19 @@ select.form-input option{background:#1a0a2e;color:#fff;}
 const SB_URL='https://cmsvgmvymlrfdhhvpuwt.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtc3ZnbXZ5bWxyZmRoaHZwdXd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MDI2NzIsImV4cCI6MjA5NTQ3ODY3Mn0.yAhOYz2-z0VL3bSfc5YL7nS3Dh1_eOVlxzD-HYjN9sw';
 const DAILY_LIMIT=10;
-let sb;
-try{sb=supabase.createClient(SB_URL,SB_KEY);}
-catch(e){
+let sb=null;
+try{
+  if(typeof supabase!=='undefined'){
+    sb=supabase.createClient(SB_URL,SB_KEY);
+  }else{
+    throw new Error('Supabase not loaded');
+  }
+}catch(e){
   console.error('Supabase init failed',e);
-  document.getElementById('loader').style.display='none';
-  document.getElementById('screen-auth').classList.add('active');
+  setTimeout(()=>{
+    document.getElementById('loader').style.display='none';
+    document.getElementById('screen-auth').classList.add('active');
+  },100);
 }
 
 // ============ STATE ============
@@ -2089,38 +2108,47 @@ async function addWin(pts,reason){
 
 // ============ INIT ============
 async function init(){
-  // Hard timeout - if nothing happens in 5s, show auth screen
   const loaderEl=document.getElementById('loader');
+  
+  // If supabase not loaded, show auth immediately
+  if(typeof supabase==='undefined'||!sb){
+    loaderEl.style.display='none';
+    document.getElementById('screen-auth').classList.add('active');
+    return;
+  }
+
+  // Show auth after 3 seconds no matter what
   const hardTimeout=setTimeout(()=>{
     loaderEl.style.display='none';
     document.getElementById('screen-auth').classList.add('active');
-    document.querySelectorAll('.screen:not(#screen-auth)').forEach(s=>s.classList.remove('active'));
-  },5000);
+  },3000);
 
-  try{
-    // Race between getSession and a 4s timeout
-    const sessionPromise=sb.auth.getSession();
-    const timeoutPromise=new Promise(r=>setTimeout(()=>r({data:{session:null},timedOut:true}),4000));
-    const result=await Promise.race([sessionPromise,timeoutPromise]);
-    clearTimeout(hardTimeout);
-    const session=result.data?.session;
-    if(session){CU=session.user;await afterLogin();}
-    else{loaderEl.style.display='none';}
-  }catch(e){
-    clearTimeout(hardTimeout);
-    loaderEl.style.display='none';
-    err('Bağlantı hatası. Sayfayı yenile.');
-  }
-
+  // Listen for auth changes first
   sb.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_OUT'){
       CU=null;UP=null;
       document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
       document.getElementById('screen-auth').classList.add('active');
-    }else if(event==='SIGNED_IN'&&session&&!CU){
-      CU=session.user;await afterLogin();
+    }else if(event==='SIGNED_IN'&&session){
+      clearTimeout(hardTimeout);
+      if(!CU){CU=session.user;await afterLogin();}
     }
   });
+
+  try{
+    const{data:{session},error}=await sb.auth.getSession();
+    clearTimeout(hardTimeout);
+    if(error||!session){
+      loaderEl.style.display='none';
+    }else{
+      CU=session.user;
+      await afterLogin();
+    }
+  }catch(e){
+    clearTimeout(hardTimeout);
+    loaderEl.style.display='none';
+    err('Bağlantı hatası. Sayfayı yenile.');
+  }
 }
 
 // Photo meal analysis
