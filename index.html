@@ -251,7 +251,7 @@ select.form-input option{background:#1a0a2e;color:#fff;}
       <div class="quick-item" onclick="closeModal('quick-modal');quickAddWater()"><div style="font-size:26px;margin-bottom:5px;">💧</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Su</div></div>
       <div class="quick-item" onclick="closeModal('quick-modal');openModal('weight-modal')"><div style="font-size:26px;margin-bottom:5px;">⚖️</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Kilo</div></div>
       <div class="quick-item" onclick="closeModal('quick-modal');goTo('chat')"><div style="font-size:26px;margin-bottom:5px;">✨</div><div style="font-size:12px;font-weight:500;color:var(--text2);">AI Sor</div></div>
-      <div class="quick-item" onclick="closeModal('quick-modal');openModal('mood-modal')"><div style="font-size:26px;margin-bottom:5px;">😊</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Ruh Hali</div></div>
+      <div class="quick-item" onclick="closeModal('quick-modal');openMealPhoto()"><div style="font-size:26px;margin-bottom:5px;">📷</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Fotoğrafla</div></div>
     </div>
     <button class="btn btn-ghost" onclick="closeModal('quick-modal')">Kapat</button>
   </div>
@@ -300,10 +300,14 @@ select.form-input option{background:#1a0a2e;color:#fff;}
     <div class="modal-title">📏 Profil Düzenle</div>
     <div class="form-group"><label class="form-label">Ad</label><input class="form-input" id="edit-name" placeholder="Adın"/></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div class="form-group"><label class="form-label">Kilo (kg)</label><input class="form-input" id="edit-weight" type="number" step="0.1"/></div>
-      <div class="form-group"><label class="form-label">Hedef Kilo</label><input class="form-input" id="edit-goal-weight" type="number" step="0.1"/></div>
-      <div class="form-group"><label class="form-label">Boy (cm)</label><input class="form-input" id="edit-height" type="number"/></div>
-      <div class="form-group"><label class="form-label">Yaş</label><input class="form-input" id="edit-age" type="number"/></div>
+      <div class="form-group"><label class="form-label">Kilo (kg)</label>
+        <select class="form-input" id="edit-weight" style="height:46px;"></select></div>
+      <div class="form-group"><label class="form-label">Hedef Kilo (kg)</label>
+        <select class="form-input" id="edit-goal-weight" style="height:46px;"></select></div>
+      <div class="form-group"><label class="form-label">Boy (cm)</label>
+        <select class="form-input" id="edit-height" style="height:46px;"></select></div>
+      <div class="form-group"><label class="form-label">Yaş</label>
+        <select class="form-input" id="edit-age" style="height:46px;"></select></div>
     </div>
     <button class="btn btn-primary" id="edit-profile-btn" onclick="saveProfileEdit()">Kaydet</button>
     <button class="btn btn-ghost" onclick="closeModal('edit-profile-modal')" style="margin-top:8px;">İptal</button>
@@ -517,9 +521,8 @@ select.form-input option{background:#1a0a2e;color:#fff;}
       <div class="macro-bar-wrap" style="margin-top:8px;" id="f-macro-bar"></div>
     </div>
     <div id="f-meals"></div>
-    <div style="margin-top:8px;">
-      <button class="btn btn-outline" id="weekly-plan-btn" onclick="generateWeeklyPlan()">✨ 7 Günlük AI Yemek Planı</button>
-      <div id="weekly-plan-result" style="display:none;margin-top:10px;"></div>
+    <div style="margin-top:8px;" id="weekly-plan-section">
+      <div id="weekly-plan-result" style="margin-top:0;"></div>
     </div>
   </div>
   <div class="bottomnav">
@@ -669,12 +672,12 @@ select.form-input option{background:#1a0a2e;color:#fff;}
   </div>
   <div class="page-content">
     <div class="card-accent">
-      <div style="font-size:10px;color:var(--accent);font-weight:600;margin-bottom:4px;">BUGÜNKÜ CHALLENGE</div>
+      <div style="font-size:10px;color:var(--accent);font-weight:600;margin-bottom:4px;">🏆 BUGÜNKÜ CHALLENGE</div>
       <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Günlük Hedef Yarışı</div>
-      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Kilo bilgileri gizli — sadece % tamamlanma görünür</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px;">Her gün gece yarısı sıfırlanır. Kalori hedefini, egzersizini ve su içimini tamamla — <strong style="color:var(--accent);">% ilerlemeye göre</strong> sıralanırsın. Kilo bilgisi kimseye gösterilmez.</div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span class="badge badge-amber" id="ch-timer">--s --dk kaldı</span>
-        <button class="btn btn-primary btn-sm" id="ch-join-btn" onclick="toggleChallenge()" style="width:auto;padding:7px 16px;font-size:12px;">Katıl</button>
+        <button class="btn btn-primary btn-sm" id="ch-join-btn" onclick="confirmChallengeToggle()" style="width:auto;padding:7px 16px;font-size:12px;">Katıl</button>
       </div>
     </div>
     <div style="display:flex;gap:6px;margin-bottom:12px;">
@@ -764,7 +767,7 @@ select.form-input option{background:#1a0a2e;color:#fff;}
     <!-- Menu -->
     <div class="sec-title" style="margin-top:12px;">Hesap</div>
     <div class="card">
-      <div class="menu-item" onclick="openModal('edit-profile-modal')"><div class="menu-icon" style="background:var(--card-accent);">📏</div><div style="flex:1;"><div style="font-size:14px;font-weight:500;">Profil Düzenle</div><div style="font-size:11px;color:var(--text3);">Kilo, hedef, yaş...</div></div><span style="color:var(--text3);">›</span></div>
+      <div class="menu-item" onclick="openEditProfileModal()"><div class="menu-icon" style="background:var(--card-accent);">📏</div><div style="flex:1;"><div style="font-size:14px;font-weight:500;">Profil Düzenle</div><div style="font-size:11px;color:var(--text3);">Kilo, hedef, yaş...</div></div><span style="color:var(--text3);">›</span></div>
       <div class="menu-item" onclick="openModal('password-modal')"><div class="menu-icon" style="background:rgba(96,165,250,0.1);">🔑</div><div style="flex:1;"><div style="font-size:14px;font-weight:500;">Şifre Değiştir</div></div><span style="color:var(--text3);">›</span></div>
       <div class="menu-item" onclick="openModal('coupon-modal')"><div class="menu-icon" style="background:rgba(251,191,36,0.1);">🎁</div><div style="flex:1;"><div style="font-size:14px;font-weight:500;">Kupon Kodu</div><div style="font-size:11px;color:var(--text3);">Ekstra AI mesaj hakkı kazan</div></div><span style="color:var(--text3);">›</span></div>
       <div class="menu-item" onclick="goTo('progress')"><div class="menu-icon" style="background:rgba(74,222,128,0.1);">📊</div><div style="flex:1;"><div style="font-size:14px;font-weight:500;">İlerleme & Raporlar</div></div><span style="color:var(--text3);">›</span></div>
@@ -1150,6 +1153,8 @@ async function loadFood(){
     <div class="macro-seg" style="width:${Math.round(totP/tot*100)}%;background:var(--accent);border-radius:99px 0 0 99px;"></div>
     <div class="macro-seg" style="width:${Math.round(totC/tot*100)}%;background:var(--accent3);"></div>
     <div class="macro-seg" style="width:${Math.round(totF/tot*100)}%;background:rgba(255,255,255,0.15);border-radius:0 99px 99px 0;"></div>`;
+  // Auto-generate weekly plan
+  generateWeeklyPlan();
 }
 
 function openFoodModal(meal){
@@ -1252,12 +1257,17 @@ async function saveFoodEntry(){
   finally{setBtn('food-save-btn',false,'✓ Listeye Ekle');unlockBtn('food-save-btn');}
 }
 
-async function generateWeeklyPlan(){
-  if(!lockBtn('weekly-plan-btn'))return;
-  const btn=document.getElementById('weekly-plan-btn');
+let weeklyPlanDays=[];let activePlanDay=0;
+async function generateWeeklyPlan(force=false){
   const res=document.getElementById('weekly-plan-result');
-  btn.disabled=true;btn.textContent='Plan oluşturuluyor...';
-  res.style.display='block';res.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);">✨ AI haftalık plan hazırlıyor...</div>';
+  if(!res)return;
+  // Check localStorage cache (today's plan)
+  const cacheKey='weeklyPlan_'+today();
+  const cached=sessionStorage.getItem(cacheKey);
+  if(cached&&!force){
+    try{weeklyPlanDays=JSON.parse(cached);renderWeeklyPlanTabs();return;}catch(e){}
+  }
+  res.innerHTML='<div style="text-align:center;padding:16px;color:var(--text3);font-size:13px;">✨ AI haftalık plan hazırlıyor...</div>';
   try{
     const resp=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       model:'claude-haiku-4-5-20251001',max_tokens:1200,
@@ -1268,13 +1278,52 @@ async function generateWeeklyPlan(){
     const d=await resp.json();
     const raw=d.content[0].text.replace(/```json|```/g,'').trim();
     let plan;try{plan=JSON.parse(raw);}catch(e){res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;">Plan oluşturulamadı. Tekrar dene.</div>';return;}
-    let html='<div class="sec-title" style="margin-top:0;">7 Günlük Yemek Planın 📋</div>';
-    (plan.days||[]).forEach(day=>{
-      html+=`<div class="card" style="margin-bottom:8px;"><div style="font-weight:600;margin-bottom:8px;color:var(--accent);">${day.day}</div><div style="font-size:12px;line-height:1.9;color:var(--text2);">🌅 ${day.breakfast}<br/>☀️ ${day.lunch}<br/>🌙 ${day.dinner}<br/>🍎 ${day.snack}</div></div>`;
-    });
-    res.innerHTML=html;
-  }catch(e){res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;">Bağlantı hatası. Tekrar dene.</div>';}
-  finally{btn.disabled=false;btn.textContent='✨ 7 Günlük AI Yemek Planı';unlockBtn('weekly-plan-btn');}
+    weeklyPlanDays=plan.days||[];
+    sessionStorage.setItem(cacheKey,JSON.stringify(weeklyPlanDays));
+    activePlanDay=0;
+    renderWeeklyPlanTabs();
+  }catch(e){res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;"><div style="font-size:32px;margin-bottom:8px;">⚠️</div>Plan oluşturulamadı. <br/><button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;padding:8px 16px;">Tekrar Dene</button></div>';}
+}
+
+function renderWeeklyPlanTabs(){
+  const res=document.getElementById('weekly-plan-result');
+  if(!res||!weeklyPlanDays.length)return;
+  const dayNames=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+  let tabsHtml='<div style="display:flex;gap:4px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:none;">';
+  weeklyPlanDays.forEach((day,i)=>{
+    const isActive=i===activePlanDay;
+    tabsHtml+=`<button onclick="switchPlanDay(${i})" style="flex-shrink:0;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;${isActive?'background:var(--accent);color:#fff;border:none;':'background:var(--card);color:var(--text2);border:1px solid var(--border);'}">${dayNames[i]||day.day}</button>`;
+  });
+  tabsHtml+='</div>';
+  const day=weeklyPlanDays[activePlanDay];
+  const dayContent=`<div class="card" style="margin-bottom:8px;">
+    <div style="font-weight:600;font-size:15px;margin-bottom:10px;color:var(--accent);">${day.day}</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;">
+        <div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px;">🌅 KAHVALTI</div>
+        <div style="font-size:13px;color:var(--text);">${day.breakfast}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;">
+        <div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px;">☀️ ÖĞLE</div>
+        <div style="font-size:13px;color:var(--text);">${day.lunch}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;">
+        <div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px;">🌙 AKŞAM</div>
+        <div style="font-size:13px;color:var(--text);">${day.dinner}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;">
+        <div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px;">🍎 ARA ÖĞÜN</div>
+        <div style="font-size:13px;color:var(--text);">${day.snack}</div>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;font-size:11px;color:var(--text3);">↻ Planı Yenile</button>
+  </div>`;
+  res.innerHTML='<div class="sec-title" style="margin-top:0;">7 Günlük Yemek Planın 📋</div>'+tabsHtml+dayContent;
+}
+
+function switchPlanDay(i){
+  activePlanDay=i;
+  renderWeeklyPlanTabs();
 }
 
 // ============ EXERCISE ============
@@ -1351,7 +1400,8 @@ async function renderExPlan(exLogs){
   if(extras.length>0){
     html+='<div class="sec-title">Ekstra Sporlar</div>';
     extras.forEach(e=>{
-      html+=`<div style="background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);border-radius:12px;padding:10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:13px;font-weight:500;">${e.exercise_name}</div><div style="font-size:11px;color:var(--text3);">${e.duration_minutes||0} dk</div></div><span style="font-size:20px;">✅</span></div>`;
+      const estCal=Math.round((e.duration_minutes||0)*6);
+      html+=`<div style="background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);border-radius:12px;padding:10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:13px;font-weight:500;">${e.exercise_name}</div><div style="font-size:11px;color:var(--text3);">${e.duration_minutes||0} dk · ~${estCal} kcal</div></div><span style="font-size:20px;">✅</span></div>`;
     });
   }
   c.innerHTML=html;
@@ -1376,7 +1426,7 @@ async function saveExerciseDone(){
     if(existing&&existing.length>0){toast('Bu egzersiz zaten kayıtlı','');closeModal('ex-done-modal');return;}
     const{error}=await sb.from('exercise_logs').insert({
       user_id:CU.id,log_date:today(),exercise_name:curExData.name,
-      exercise_id:curExData.id||null,duration_minutes:dur,completed:true
+      duration_minutes:dur,completed:true
     });
     if(error){err('Kaydedilemedi: '+error.message);return;}
     closeModal('ex-done-modal');confetti();ok('Harika iş! Egzersiz kaydedildi 🎉');
@@ -1405,12 +1455,16 @@ async function saveExtraEx(){
 
 function renderWater(filled){
   const goal=UP?.water_goal||8;
-  document.getElementById('water-label').textContent=filled+' / '+goal+' bardak';
+  const mlPerGlass=250;
+  document.getElementById('water-label').textContent=filled+' / '+goal+' bardak ('+filled*mlPerGlass+'ml)';
   let h='';
-  for(let i=0;i<goal;i++){
-    h+=`<button class="water-drop ${i<filled?'filled':'empty'}" onclick="setWater(${i+1})">💧</button>`;
+  // Show goal + up to 3 extra drops
+  const showCount=Math.max(goal, filled+1, goal);
+  for(let i=0;i<showCount;i++){
+    const over=i>=goal;
+    h+=`<button class="water-drop ${i<filled?'filled':'empty'}" onclick="setWater(${i+1})" style="${over?'border-color:rgba(96,165,250,0.3);opacity:0.5;':''}" title="${(i+1)*mlPerGlass}ml">💧</button>`;
   }
-  document.getElementById('water-drops').innerHTML=h;
+  document.getElementById('water-drops').innerHTML=h+'<div style="font-size:11px;color:var(--text3);width:100%;margin-top:4px;">1 bardak = 250ml</div>';
 }
 
 async function setWater(n){
@@ -1493,8 +1547,11 @@ function showSwCard(){
   document.getElementById('sw-label-no').style.opacity='0';
   document.getElementById('sw-label-yes').style.opacity='0';
   const img=document.getElementById('sw-img');
-  if(item.photo_url){img.src=item.photo_url;img.style.display='block';}
-  else{img.src='';img.style.display='none';}
+  if(item.photo_url){
+    img.src=item.photo_url;
+    img.style.display='block';
+    img.onerror=()=>{img.style.display='none';};
+  }else{img.src='';img.style.display='none';}
   document.getElementById('sw-name').textContent=item.name||'';
   if(swType==='food'){
     const pG=item.default_portion_g||100;
@@ -1560,8 +1617,9 @@ async function doSwipe(dir){
         fat_g:+((item.fat_per_100g||0)*r).toFixed(1),
         portion_desc:item.default_portion_name||pG+'g',photo_url:item.photo_url||null
       });}catch(e){}
-      ok(item.name+' plana eklendi ✓');
-    }else ok(item.name+' plana eklendi ✓');
+      const mealNames={breakfast:'Kahvaltı',lunch:'Öğle',dinner:'Akşam',snack:'Ara Öğün'};
+      ok(item.name+' '+mealNames[meal]+' öğününe eklendi ✓');
+    }else ok(item.name+' bugünkü plana eklendi ✓');
   }
   swHist.push({idx:swIdx,item,dir});swIdx++;
   setTimeout(()=>showSwCard(),320);
@@ -1733,8 +1791,15 @@ async function updateChScore(){
   try{await sb.from('challenge_participants').upsert({user_id:CU.id,challenge_date:d,daily_score:score,is_active:true},{onConflict:'user_id,challenge_date'});}catch(e){}
 }
 
+async function confirmChallengeToggle(){
+  const{data:part}=await sb.from('challenge_participants').select('is_active').eq('user_id',CU.id).eq('challenge_date',today()).limit(1);
+  const isActive=part&&part[0]&&part[0].is_active;
+  if(isActive){
+    if(!confirm('Challenge'den ayrılmak istediğine emin misin? Sıralama geçmişin kaybolmaz.'))return;
+  }
+  await toggleChallenge();
+}
 async function toggleChallenge(){
-  if(!lockBtn('ch-join-btn'))return;
   setBtn('ch-join-btn',true,'...');
   try{
     const d=today();
@@ -1750,7 +1815,7 @@ async function toggleChallenge(){
     }
     await loadChallenge();
   }catch(e){err('Bir hata oluştu. Tekrar dene.');}
-  finally{setBtn('ch-join-btn',false,'...');unlockBtn('ch-join-btn');}
+  finally{document.getElementById('ch-join-btn').disabled=false;}
 }
 
 async function loadLeaderboard(period){
@@ -1858,7 +1923,7 @@ KURALLAR: Türkçe yaz. Markdown kullanma (**, ##). Kısa ve samimi ol (max 4 c�
     loadEl.classList.remove('typing-dots');loadEl.textContent=reply;
     loadEl.scrollIntoView({behavior:'smooth',block:'end'});
     chatHist.push({role:'assistant',content:reply});
-    await sb.from('chat_logs').insert({user_id:CU.id,role:'assistant',content:reply,log_date:today()}).catch(()=>{});
+    try{await sb.from('chat_logs').insert({user_id:CU.id,role:'assistant',content:reply,log_date:today()});}catch(e){}
   }catch(e){loadEl.classList.remove('typing-dots');loadEl.textContent='Bağlantı hatası. İnternetini kontrol et.';}
   finally{chatLoading=false;setBtn('chat-send-btn',false,'');}
 }
@@ -1912,12 +1977,23 @@ async function calcStreak(){
   return streak;
 }
 
+function buildSelect(id,min,max,step,unit,current){
+  const sel=document.getElementById(id);
+  if(!sel)return;
+  sel.innerHTML='';
+  for(let v=min;v<=max;v+=step){
+    const o=document.createElement('option');
+    o.value=v;o.textContent=v+(unit?' '+unit:'');
+    if(Math.abs(v-current)<step/2)o.selected=true;
+    sel.appendChild(o);
+  }
+}
 function openEditProfileModal(){
   document.getElementById('edit-name').value=UP?.name||'';
-  document.getElementById('edit-weight').value=UP?.current_weight||'';
-  document.getElementById('edit-goal-weight').value=UP?.goal_weight||'';
-  document.getElementById('edit-height').value=UP?.height_cm||'';
-  document.getElementById('edit-age').value=UP?.age||'';
+  buildSelect('edit-weight',30,200,0.5,'kg',UP?.current_weight||70);
+  buildSelect('edit-goal-weight',30,200,0.5,'kg',UP?.goal_weight||70);
+  buildSelect('edit-height',130,220,1,'cm',UP?.height_cm||165);
+  buildSelect('edit-age',10,100,1,'yaş',UP?.age||25);
   openModal('edit-profile-modal');
 }
 
@@ -1984,9 +2060,12 @@ async function applyCoupon(){
 async function saveMood(mood){
   const labels={great:'Harika 😄',good:'İyi 😊',ok:'Orta 😐',bad:'Kötü 😔',terrible:'Berbat 😞'};
   try{
-    await sb.from('mood_logs').insert({user_id:CU.id,log_date:today(),mood}).catch(()=>{});
-    closeModal('mood-modal');ok('Ruh hali kaydedildi: '+labels[mood]);
-  }catch(e){err('Kaydedilemedi');}
+    const{error}=await sb.from('mood_logs').insert({user_id:CU.id,log_date:today(),mood});
+    if(error&&(error.code==='23505'||error.message.includes('duplicate'))){
+      await sb.from('mood_logs').update({mood}).eq('user_id',CU.id).eq('log_date',today());
+    }
+  }catch(e){}
+  closeModal('mood-modal');ok('Ruh hali kaydedildi: '+labels[mood]);
 }
 
 async function addWin(pts,reason){
@@ -2000,18 +2079,60 @@ async function addWin(pts,reason){
 
 // ============ INIT ============
 async function init(){
+  // Show loader max 8 seconds then hide anyway
+  const loaderTimeout=setTimeout(()=>{
+    document.getElementById('loader').style.display='none';
+    err('Yükleme uzun sürdü. İnternetini kontrol et.');
+  },8000);
+  
   sb.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_OUT'){CU=null;UP=null;}
-    else if(event==='SIGNED_IN'&&session&&!CU){CU=session.user;await afterLogin();}
+    else if(event==='SIGNED_IN'&&session&&!CU){clearTimeout(loaderTimeout);CU=session.user;await afterLogin();}
   });
   try{
     const{data:{session}}=await sb.auth.getSession();
+    clearTimeout(loaderTimeout);
     if(session){CU=session.user;await afterLogin();}
     else document.getElementById('loader').style.display='none';
   }catch(e){
+    clearTimeout(loaderTimeout);
     document.getElementById('loader').style.display='none';
     err('Bağlantı kurulamadı. İnternetini kontrol et.');
   }
+}
+
+// Photo meal analysis
+function openMealPhoto(){
+  // Create file input
+  const inp=document.createElement('input');
+  inp.type='file';inp.accept='image/*';inp.capture='environment';
+  inp.onchange=async(e)=>{
+    const file=e.target.files[0];if(!file)return;
+    toast('Fotoğraf analiz ediliyor...','',5000);
+    try{
+      // Convert to base64
+      const b64=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result.split(',')[1]);fr.readAsDataURL(file);});
+      const resp=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',max_tokens:200,
+        system:'Diyetisyensin. Fotoğraftaki yemeği analiz et. Sadece JSON döndür: {"name":"yemek adı","kcal":250,"protein":20,"carbs":30,"fat":8,"portion":"1 porsiyon"} Başka hiçbir şey yazma.',
+        messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:file.type,data:b64}},{type:'text',text:'Bu yemeğin kalorisi nedir?'}]}]
+      })});
+      if(!resp.ok){err('Fotoğraf analiz edilemedi');return;}
+      const d=await resp.json();
+      const raw=d.content[0].text.replace(/```json|```/g,'').trim();
+      let p;try{p=JSON.parse(raw);}catch(e){err('Analiz başarısız, tekrar dene');return;}
+      pendingFood={food_name:p.name||'Yemek',calories:p.kcal||0,protein_g:p.protein||0,carbs_g:p.carbs||0,fat_g:p.fat||0,portion_desc:p.portion||'1 porsiyon'};
+      curMeal=mealByTime();
+      // Show food modal with result
+      openModal('food-modal');
+      document.getElementById('food-modal-title').textContent='📷 Fotoğraf Analizi';
+      document.getElementById('food-ai-result').style.display='block';
+      document.getElementById('food-ai-kcal').textContent=(p.kcal||0)+' kcal';
+      document.getElementById('food-ai-macros').textContent=`${p.name||'Yemek'} · P:${p.protein||0}g K:${p.carbs||0}g Y:${p.fat||0}g`;
+      document.getElementById('food-save-btn').style.display='flex';
+    }catch(e){err('Fotoğraf analizi başarısız.');}
+  };
+  inp.click();
 }
 
 // PWA Service Worker
