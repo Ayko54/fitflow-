@@ -838,6 +838,32 @@ function toast(msg,type='',dur=2800){
 const err=(m)=>toast(m,'error',3500);
 const ok=(m)=>toast(m,'success',2500);
 
+function getExEmoji(cat){
+  const map={ev:'🏠',yuruyus:'🚶',yoga:'🧘',pilates:'🩰',gym:'🏋️',kardio:'🔥',esneme:'🤸'};
+  return map[cat]||'💪';
+}
+function getFoodEmoji(name){
+  const n=(name||'').toLowerCase();
+  const map=[
+    ['menemen','🍳'],['yumurta','🥚'],['omlet','🍳'],['peynir','🧀'],['zeytin','🫒'],
+    ['ekmek','🍞'],['simit','🥨'],['bal','🍯'],['yulaf','🥣'],['granola','🥣'],
+    ['süt','🥛'],['yoğurt','🫙'],['kahve','☕'],['çay','🍵'],['portakal suyu','🍊'],
+    ['tavuk','🍗'],['köfte','🥩'],['makarna','🍝'],['pilav','🍚'],['bulgur','🍚'],
+    ['çorba','🍲'],['mercimek','🫘'],['nohut','🫘'],['fasulye','🫘'],
+    ['balık','🐟'],['somon','🐟'],['ton','🐟'],['hamsi','🐟'],
+    ['kebap','🍖'],['şiş','🍢'],['döner','🥙'],['lahmacun','🫓'],['pide','🫓'],
+    ['salata','🥗'],['çoban','🥗'],['humus','🫘'],
+    ['baklava','🍰'],['sütlaç','🍮'],['dondurma','🍦'],['kek','🎂'],
+    ['elma','🍎'],['muz','🍌'],['portakal','🍊'],['çilek','🍓'],['karpuz','🍉'],
+    ['üzüm','🍇'],['kiraz','🍒'],['kivi','🥝'],['avokado','🥑'],['nar','🍎'],
+    ['badem','🥜'],['ceviz','🥜'],['fıstık','🥜'],['leblebi','🫘'],
+    ['ayran','🥛'],['su','💧'],['limonata','🍋'],['smoothie','🥤'],
+    ['protein','💪'],['kinoa','🌾'],['hindi','🦃'],
+  ];
+  for(const[k,v] of map){if(n.includes(k))return v;}
+  return '🍽️';
+}
+
 function setBtn(id,dis,txt){
   const b=document.getElementById(id);
   if(!b)return;
@@ -1163,9 +1189,12 @@ async function loadFood(){
     }else{
       (items||[]).forEach(item=>{
         html+=`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);">
-          ${item.photo_url?`<img src="${item.photo_url}" class="food-img" onerror="this.style.display='none'" loading="lazy"/>`:'<div class="food-img" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🍽️</div>'}
+          <div class="food-img" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:rgba(255,255,255,0.06);">${getFoodEmoji(item.food_name||'')}</div>
           <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.food_name}</div>${item.portion_desc?`<div style="font-size:11px;color:var(--text3);">${item.portion_desc}</div>`:''}</div>
-          <span class="badge badge-accent">${item.calories||0}</span>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+            <span class="badge badge-accent">${item.calories||0}</span>
+            <button onclick="deleteFoodLog('${item.id}')" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;width:26px;height:26px;border-radius:50%;font-size:16px;cursor:pointer;line-height:1;" title="Sil">×</button>
+          </div>
         </div>`;
       });
     }
@@ -1216,8 +1245,12 @@ async function searchFoods(q){
         // Safely stringify for onclick
         const safe={id:f.id,name:f.name,calories_per_100g:f.calories_per_100g||0,protein_per_100g:f.protein_per_100g||0,carbs_per_100g:f.carbs_per_100g||0,fat_per_100g:f.fat_per_100g||0,default_portion_g:pG,default_portion_name:f.default_portion_name||pG+'g',photo_url:f.photo_url||''};
         const key='_food_'+f.id.replace(/-/g,'');window[key]=safe;
+        const foodEmojis={'tavuk':'🍗','et':'🥩','balık':'🐟','yumurta':'🥚','peynir':'🧀','ekmek':'🍞','pilav':'🍚','çorba':'🍲','salata':'🥗','meyve':'🍎','sebze':'🥦','kahve':'☕','çay':'🍵','süt':'🥛','yoğurt':'🍦','makarna':'🍝','köfte':'🥩','kebap':'🍖','baklava':'🍰','muz':'🍌','elma':'🍎','portakal':'🍊','su':'💧','ayran':'🥛'};
+        const fname=(f.name||'').toLowerCase();
+        let fEmoji='🍽️';
+        for(const[k,v] of Object.entries(foodEmojis)){if(fname.includes(k)){fEmoji=v;break;}}
         return`<div class="food-list-item" onclick="selectFood(window['${key}'])">
-          ${f.photo_url?`<img src="${f.photo_url}" class="food-img" onerror="this.style.display='none'" loading="lazy"/>`:'<div class="food-img" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🍽️</div>'}
+          <div class="food-img" style="display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(255,255,255,0.06);">${fEmoji}</div>
           <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name}</div><div style="font-size:11px;color:var(--text3);">${f.default_portion_name||pG+'g'} · ${kcal} kcal</div></div>
           <span style="font-size:12px;color:var(--accent);">Ekle ›</span>
         </div>`;
@@ -1276,8 +1309,9 @@ async function saveFoodEntry(){
   if(!lockBtn('food-save-btn'))return;
   setBtn('food-save-btn',true,'Ekleniyor...');
   try{
+    const{photo_url:_p,...foodData}=pendingFood||{};
     const{error}=await sb.from('food_logs').insert({
-      user_id:CU.id,log_date:today(),meal_type:curMeal||'snack',...pendingFood
+      user_id:CU.id,log_date:today(),meal_type:curMeal||'snack',...foodData
     });
     if(error){err('Yemek eklenemedi: '+error.message);return;}
     closeModal('food-modal');ok('Yemek eklendi ✓');
@@ -1287,6 +1321,15 @@ async function saveFoodEntry(){
 }
 
 let weeklyPlanDays=[];let activePlanDay=0;
+
+async function deleteFoodLog(id){
+  if(!id)return;
+  try{
+    const{error}=await sb.from('food_logs').delete().eq('id',id).eq('user_id',CU.id);
+    if(error){err('Silinemedi: '+error.message);return;}
+    ok('Silindi ✓');loadFood();
+  }catch(e){err('Silinemedi');}
+}
 async function generateWeeklyPlan(force=false){
   const res=document.getElementById('weekly-plan-result');
   if(!res)return;
@@ -1407,7 +1450,7 @@ async function renderExPlan(exLogs){
     const k='_ex_'+ex.id.replace(/-/g,'');
     window[k]={name:ex.name,id:ex.id,dur:ex.duration_min};
     html+=`<div style="background:${done?'rgba(74,222,128,0.06)':'rgba(255,255,255,0.04)'};border:1px solid ${done?'rgba(74,222,128,0.2)':'var(--border-accent)'};border-radius:14px;padding:12px;margin-bottom:8px;">
-      ${ex.photo_url?`<img src="${ex.photo_url}" style="width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:8px;" loading="lazy" onerror="this.style.display='none'"/>`:''}
+      <div style="font-size:48px;text-align:center;padding:14px 0;">${getExEmoji(ex.category||'')}</div>
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
         <div style="flex:1;">
           ${done?'<div style="font-size:10px;color:#86efac;font-weight:600;margin-bottom:3px;">✓ TAMAMLANDI</div>':''}
@@ -1528,9 +1571,7 @@ async function saveSteps(){
   const v=parseInt(document.getElementById('steps-input').value)||0;
   if(v<0||v>99999){err('Geçerli bir adım sayısı gir (0-99999)');return;}
   const d=today();
-  const{data:ex}=await sb.from('steps_logs').select('id').eq('user_id',CU.id).eq('log_date',d).limit(1);
-  if(ex&&ex[0]){await sb.from('steps_logs').update({steps:v}).eq('user_id',CU.id).eq('log_date',d);}
-  else{await sb.from('steps_logs').insert({user_id:CU.id,log_date:d,steps:v});}
+  await sb.from('steps_logs').upsert({user_id:CU.id,log_date:d,steps:v},{onConflict:'user_id,log_date'});
   document.getElementById('steps-input').value='';
   const sGoal=UP?.steps_goal||10000;
   document.getElementById('steps-val').textContent=v>=1000?(v/1000).toFixed(1)+'k':v;
@@ -1644,8 +1685,9 @@ async function doSwipe(dir){
         protein_g:+((item.protein_per_100g||0)*r).toFixed(1),
         carbs_g:+((item.carbs_per_100g||0)*r).toFixed(1),
         fat_g:+((item.fat_per_100g||0)*r).toFixed(1),
-        portion_desc:item.default_portion_name||pG+'g',photo_url:item.photo_url||null
-      });}catch(e){}
+        portion_desc:item.default_portion_name||pG+'g',});
+        if(swErr)console.error("swipe err:",swErr);
+      }catch(e){console.error("swipe catch",e);}
       const mealNames={breakfast:'Kahvaltı',lunch:'Öğle',dinner:'Akşam',snack:'Ara Öğün'};
       ok(item.name+' '+mealNames[meal]+' öğününe eklendi ✓');
     }else ok(item.name+' bugünkü plana eklendi ✓');
@@ -1952,7 +1994,7 @@ KURALLAR: Türkçe yaz. Markdown kullanma (**, ##). Kısa ve samimi ol (max 4 c�
     loadEl.classList.remove('typing-dots');loadEl.textContent=reply;
     loadEl.scrollIntoView({behavior:'smooth',block:'end'});
     chatHist.push({role:'assistant',content:reply});
-    try{await sb.from('chat_logs').insert({user_id:CU.id,role:'assistant',content:reply,log_date:today()});}catch(e){}
+    try{const _r2=await sb.from('chat_logs').insert({user_id:CU.id,role:'assistant',content:reply,log_date:today()});}catch(e){console.log('chat log err2',e);}
   }catch(e){loadEl.classList.remove('typing-dots');loadEl.textContent='Bağlantı hatası. İnternetini kontrol et.';}
   finally{chatLoading=false;setBtn('chat-send-btn',false,'');}
 }
