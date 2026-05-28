@@ -174,8 +174,12 @@ select.form-input option{background:#1a0a2e;color:#fff;}
 <div id="toast"></div>
 <div id="loader">
   <div style="font-family:'Playfair Display',serif;font-size:40px;color:var(--accent);">🌿 FitFlow</div>
-  <div style="font-size:14px;color:var(--text3);margin-top:6px;">Yükleniyor...</div>
+  <div style="font-size:14px;color:var(--text3);margin-top:6px;" id="loader-text">Yükleniyor...</div>
   <div class="spinner"></div>
+  <div id="loader-retry" style="display:none;margin-top:20px;text-align:center;">
+    <div style="font-size:13px;color:var(--text3);margin-bottom:10px;">Bağlantı kurulamadı</div>
+    <button onclick="location.reload()" style="background:var(--accent);color:#fff;border:none;padding:10px 24px;border-radius:10px;font-size:14px;cursor:pointer;font-family:'Outfit',sans-serif;">🔄 Yenile</button>
+  </div>
 </div>
 
 <!-- ======= MODALS ======= -->
@@ -788,7 +792,13 @@ select.form-input option{background:#1a0a2e;color:#fff;}
 const SB_URL='https://cmsvgmvymlrfdhhvpuwt.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtc3ZnbXZ5bWxyZmRoaHZwdXd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MDI2NzIsImV4cCI6MjA5NTQ3ODY3Mn0.yAhOYz2-z0VL3bSfc5YL7nS3Dh1_eOVlxzD-HYjN9sw';
 const DAILY_LIMIT=10;
-const sb=supabase.createClient(SB_URL,SB_KEY);
+let sb;
+try{sb=supabase.createClient(SB_URL,SB_KEY);}
+catch(e){
+  console.error('Supabase init failed',e);
+  document.getElementById('loader').style.display='none';
+  document.getElementById('screen-auth').classList.add('active');
+}
 
 // ============ STATE ============
 let CU=null,UP=null,obD={};
@@ -2079,26 +2089,38 @@ async function addWin(pts,reason){
 
 // ============ INIT ============
 async function init(){
-  // Show loader max 8 seconds then hide anyway
-  const loaderTimeout=setTimeout(()=>{
-    document.getElementById('loader').style.display='none';
-    err('Yükleme uzun sürdü. İnternetini kontrol et.');
-  },8000);
-  
-  sb.auth.onAuthStateChange(async(event,session)=>{
-    if(event==='SIGNED_OUT'){CU=null;UP=null;}
-    else if(event==='SIGNED_IN'&&session&&!CU){clearTimeout(loaderTimeout);CU=session.user;await afterLogin();}
-  });
+  // Hard timeout - if nothing happens in 5s, show auth screen
+  const loaderEl=document.getElementById('loader');
+  const hardTimeout=setTimeout(()=>{
+    loaderEl.style.display='none';
+    document.getElementById('screen-auth').classList.add('active');
+    document.querySelectorAll('.screen:not(#screen-auth)').forEach(s=>s.classList.remove('active'));
+  },5000);
+
   try{
-    const{data:{session}}=await sb.auth.getSession();
-    clearTimeout(loaderTimeout);
+    // Race between getSession and a 4s timeout
+    const sessionPromise=sb.auth.getSession();
+    const timeoutPromise=new Promise(r=>setTimeout(()=>r({data:{session:null},timedOut:true}),4000));
+    const result=await Promise.race([sessionPromise,timeoutPromise]);
+    clearTimeout(hardTimeout);
+    const session=result.data?.session;
     if(session){CU=session.user;await afterLogin();}
-    else document.getElementById('loader').style.display='none';
+    else{loaderEl.style.display='none';}
   }catch(e){
-    clearTimeout(loaderTimeout);
-    document.getElementById('loader').style.display='none';
-    err('Bağlantı kurulamadı. İnternetini kontrol et.');
+    clearTimeout(hardTimeout);
+    loaderEl.style.display='none';
+    err('Bağlantı hatası. Sayfayı yenile.');
   }
+
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_OUT'){
+      CU=null;UP=null;
+      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+      document.getElementById('screen-auth').classList.add('active');
+    }else if(event==='SIGNED_IN'&&session&&!CU){
+      CU=session.user;await afterLogin();
+    }
+  });
 }
 
 // Photo meal analysis
@@ -2134,6 +2156,17 @@ function openMealPhoto(){
   };
   inp.click();
 }
+
+// Show retry button if loading takes too long
+setTimeout(()=>{
+  const r=document.getElementById('loader-retry');
+  const loader=document.getElementById('loader');
+  if(r&&loader&&loader.style.display!=='none'){
+    r.style.display='block';
+    const lt=document.getElementById('loader-text');
+    if(lt)lt.textContent='Bağlantı yavaş...';
+  }
+},4000);
 
 // PWA Service Worker
 if('serviceWorker' in navigator){
