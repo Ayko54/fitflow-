@@ -108,7 +108,9 @@ select.form-input option{background:#1a0a2e;color:#fff;}
 .modal-title{font-size:17px;font-weight:600;margin-bottom:14px;}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 /* FOOD */
-.food-img{width:44px;height:44px;border-radius:10px;object-fit:cover;background:rgba(255,255,255,0.06);flex-shrink:0;}
+.food-img{width:44px;height:44px;border-radius:10px;object-fit:cover;background:rgba(255,255,255,0.06);flex-shrink:0;transition:opacity .2s;}
+.food-img[src]{opacity:1;}
+.food-img:not([src]),.food-img[src=""]{opacity:0;}
 .food-list-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;}
 .food-list-item:last-child{border-bottom:none;}
 .food-list-item:active{opacity:.7;}
@@ -838,6 +840,84 @@ function toast(msg,type='',dur=2800){
 const err=(m)=>toast(m,'error',3500);
 const ok=(m)=>toast(m,'success',2500);
 
+function getFoodPhoto(name){
+  const n=(name||'').toLowerCase();
+  // Direct Unsplash photo IDs - stable, fast, no redirect
+  const photos={
+    'menemen':'photo-1565299624946-b28f40a0ae38',
+    'yumurta':'photo-1482049016688-2d3e1b311543',
+    'omlet':'photo-1525351484163-7529414344d8',
+    'peynir':'photo-1486297678162-eb2a19b0a32d',
+    'simit':'photo-1509042239860-f550ce710b93',
+    'bal':'photo-1587049352846-4a222e784d38',
+    'yulaf':'photo-1494597564530-871f2b93ac55',
+    'granola':'photo-1484723091739-30a097e8f929',
+    'kahve':'photo-1509042239860-f550ce710b93',
+    'çay':'photo-1544787219-7f47ccb76574',
+    'tavuk göğsü':'photo-1532550907401-a500c9a57435',
+    'tavuk çorbası':'photo-1547592166-23ac45744acd',
+    'tavuk':'photo-1598515214211-89d3c73ae83b',
+    'köfte':'photo-1529042410759-befb1204b468',
+    'şiş kebap':'photo-1544025162-d76538a0a1d5',
+    'kebap':'photo-1544025162-d76538a0a1d5',
+    'döner':'photo-1561626423-a51b45aef0a1',
+    'lahmacun':'photo-1565958011703-44f9829ba187',
+    'pide':'photo-1565958011703-44f9829ba187',
+    'biftek':'photo-1546039907-7fa05f864c02',
+    'et':'photo-1546039907-7fa05f864c02',
+    'sucuk':'photo-1555939594-58d7cb561ad1',
+    'somon':'photo-1519708227418-c8fd9a32b7a2',
+    'balık':'photo-1467003909585-2f8a72700288',
+    'ton':'photo-1490645935967-10de6ba17061',
+    'pilav':'photo-1536304929831-ee1ca9d44906',
+    'bulgur':'photo-1609951651556-5334e2706168',
+    'makarna':'photo-1555949258-eb67b1ef0ceb',
+    'spagetti':'photo-1587740908075-9e245070dfaa',
+    'mercimek çorbası':'photo-1547592166-23ac45744acd',
+    'mercimek':'photo-1567647753830-de3fe7ce9f28',
+    'nohut':'photo-1515543237350-b3eea1ec8082',
+    'fasulye':'photo-1536183922588-166604504d5e',
+    'çorba':'photo-1547592166-23ac45744acd',
+    'domates çorbası':'photo-1476718406336-bb5a9690ee2a',
+    'çoban salatası':'photo-1540189549336-e6e99c3679fe',
+    'salata':'photo-1512621776951-a57141f2eefd',
+    'humus':'photo-1577805947697-89e18249d767',
+    'patlıcan':'photo-1630374415729-9e7f1bb95d35',
+    'patates':'photo-1518977676601-b53f82aba655',
+    'ıspanak':'photo-1576045057995-568f588f82fb',
+    'sebze':'photo-1540420773420-3366772f4999',
+    'baklava':'photo-1571877227200-a0d98ea607e9',
+    'sütlaç':'photo-1488477181946-6428a0291777',
+    'dondurma':'photo-1497034825429-c343d7c6a68f',
+    'kek':'photo-1578985545062-69928b1d9587',
+    'kurabiye':'photo-1499636136210-6f4ee915583e',
+    'helva':'photo-1571877227200-a0d98ea607e9',
+    'lokum':'photo-1571877227200-a0d98ea607e9',
+    'elma':'photo-1570913149827-d2ac84ab3f9a',
+    'muz':'photo-1571771894821-ce9b6c11b08e',
+    'portakal':'photo-1547514701-42782101795e',
+    'çilek':'photo-1464965911861-746a04b4bca6',
+    'karpuz':'photo-1563114773-84221bd62daa',
+    'üzüm':'photo-1537640538966-79f369143f8f',
+    'kiraz':'photo-1528821128474-27f963b062bf',
+    'kivi':'photo-1548567750-d5f7e7fd0e61',
+    'avokado':'photo-1508061253366-f7da158b6d46',
+    'nar':'photo-1514756331096-242fdeb70d4a',
+    'ayran':'photo-1563805042-7684c019e1cb',
+    'smoothie':'photo-1502741224143-90386d7f8c82',
+    'süt':'photo-1550583724-b2692b85b150',
+    'yoğurt':'photo-1488477181946-6428a0291777',
+    'protein shake':'photo-1593095948071-474c5cc2989d',
+    'kinoa':'photo-1586201375761-83865001e31c',
+    'tofu':'photo-1546069901-ba9599a7e63c',
+  };
+  for(const[k,id] of Object.entries(photos)){
+    if(n.includes(k)) return`https://images.unsplash.com/${id}?w=80&h=80&fit=crop&auto=format&q=80`;
+  }
+  // Generic fallback via source API
+  const first=n.split(' ')[0]||'food';
+  return`https://source.unsplash.com/80x80/?${encodeURIComponent(first)},food`;
+}
 function getExEmoji(cat){
   const map={ev:'🏠',yuruyus:'🚶',yoga:'🧘',pilates:'🩰',gym:'🏋️',kardio:'🔥',esneme:'🤸'};
   return map[cat]||'💪';
@@ -1189,7 +1269,7 @@ async function loadFood(){
     }else{
       (items||[]).forEach(item=>{
         html+=`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);">
-          <div class="food-img" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:rgba(255,255,255,0.06);">${getFoodEmoji(item.food_name||'')}</div>
+          <img class="food-img" src="${getFoodPhoto(item.food_name||'')}" alt="${item.food_name||''}" loading="lazy" style="object-fit:cover;border-radius:10px;flex-shrink:0;" onerror="this.style.display='none'"/>
           <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.food_name}</div>${item.portion_desc?`<div style="font-size:11px;color:var(--text3);">${item.portion_desc}</div>`:''}</div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
             <span class="badge badge-accent">${item.calories||0}</span>
@@ -1245,12 +1325,9 @@ async function searchFoods(q){
         // Safely stringify for onclick
         const safe={id:f.id,name:f.name,calories_per_100g:f.calories_per_100g||0,protein_per_100g:f.protein_per_100g||0,carbs_per_100g:f.carbs_per_100g||0,fat_per_100g:f.fat_per_100g||0,default_portion_g:pG,default_portion_name:f.default_portion_name||pG+'g',photo_url:f.photo_url||''};
         const key='_food_'+f.id.replace(/-/g,'');window[key]=safe;
-        const foodEmojis={'tavuk':'🍗','et':'🥩','balık':'🐟','yumurta':'🥚','peynir':'🧀','ekmek':'🍞','pilav':'🍚','çorba':'🍲','salata':'🥗','meyve':'🍎','sebze':'🥦','kahve':'☕','çay':'🍵','süt':'🥛','yoğurt':'🍦','makarna':'🍝','köfte':'🥩','kebap':'🍖','baklava':'🍰','muz':'🍌','elma':'🍎','portakal':'🍊','su':'💧','ayran':'🥛'};
-        const fname=(f.name||'').toLowerCase();
-        let fEmoji='🍽️';
-        for(const[k,v] of Object.entries(foodEmojis)){if(fname.includes(k)){fEmoji=v;break;}}
+        const imgUrl=getFoodPhoto(f.name||'');
         return`<div class="food-list-item" onclick="selectFood(window['${key}'])">
-          <div class="food-img" style="display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(255,255,255,0.06);">${fEmoji}</div>
+          <img class="food-img" src="${imgUrl}" alt="${f.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.style.display='flex')" style="object-fit:cover;"/>
           <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name}</div><div style="font-size:11px;color:var(--text3);">${f.default_portion_name||pG+'g'} · ${kcal} kcal</div></div>
           <span style="font-size:12px;color:var(--accent);">Ekle ›</span>
         </div>`;
@@ -1617,8 +1694,20 @@ function showSwCard(){
   document.getElementById('sw-label-no').style.opacity='0';
   document.getElementById('sw-label-yes').style.opacity='0';
   const img=document.getElementById('sw-img');
-  if(item.photo_url){
-    img.src=item.photo_url;
+  // Use photo_url if valid, otherwise generate from name
+  // For swipe cards use larger size
+  let photoSrc='';
+  if(swType==='food'){
+    const n=(item.name||'').toLowerCase();
+    const photos={'menemen':'photo-1565299624946-b28f40a0ae38','yumurta':'photo-1482049016688-2d3e1b311543','tavuk göğsü':'photo-1532550907401-a500c9a57435','tavuk çorbası':'photo-1547592166-23ac45744acd','tavuk':'photo-1598515214211-89d3c73ae83b','köfte':'photo-1529042410759-befb1204b468','kebap':'photo-1544025162-d76538a0a1d5','döner':'photo-1561626423-a51b45aef0a1','et':'photo-1546039907-7fa05f864c02','somon':'photo-1519708227418-c8fd9a32b7a2','balık':'photo-1467003909585-2f8a72700288','pilav':'photo-1536304929831-ee1ca9d44906','bulgur':'photo-1609951651556-5334e2706168','makarna':'photo-1555949258-eb67b1ef0ceb','mercimek':'photo-1567647753830-de3fe7ce9f28','nohut':'photo-1515543237350-b3eea1ec8082','çorba':'photo-1547592166-23ac45744acd','salata':'photo-1512621776951-a57141f2eefd','humus':'photo-1577805947697-89e18249d767','baklava':'photo-1571877227200-a0d98ea607e9','dondurma':'photo-1497034825429-c343d7c6a68f','kek':'photo-1578985545062-69928b1d9587','elma':'photo-1570913149827-d2ac84ab3f9a','muz':'photo-1571771894821-ce9b6c11b08e','portakal':'photo-1547514701-42782101795e','çilek':'photo-1464965911861-746a04b4bca6','avokado':'photo-1508061253366-f7da158b6d46','yoğurt':'photo-1488477181946-6428a0291777','smoothie':'photo-1502741224143-90386d7f8c82','pilav':'photo-1536304929831-ee1ca9d44906'};
+    let photoId='';
+    for(const[k,id] of Object.entries(photos)){if(n.includes(k)){photoId=id;break;}}
+    photoSrc=photoId?`https://images.unsplash.com/${photoId}?w=400&h=300&fit=crop&auto=format&q=85`:`https://source.unsplash.com/400x300/?${encodeURIComponent(item.name||'food')},food`;
+  } else {
+    photoSrc=item.photo_url||'';
+  }
+  if(photoSrc){
+    img.src=photoSrc;
     img.style.display='block';
     img.onerror=()=>{img.style.display='none';};
   }else{img.src='';img.style.display='none';}
