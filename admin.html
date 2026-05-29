@@ -74,6 +74,7 @@ select{background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;pad
 
 <div class="topbar">
   <h1>🛠️ FitFlow Admin</h1>
+  <button class="btn" onclick="resetKey()" style="font-size:11px;padding:4px 10px">🔑 Key Değiştir</button>
   <div class="stats">
     <div class="stat g"><b id="s-ok">0</b> Onaylı</div>
     <div class="stat r"><b id="s-bad">0</b> Reddedilen</div>
@@ -163,10 +164,22 @@ if(localStorage.getItem('ff_admin')!=='aykan2024'){
   if(p!=='aykan2024'){document.body.innerHTML='<h2 style="color:red;padding:40px">Yetkisiz</h2>';throw 0;}
   localStorage.setItem('ff_admin','aykan2024');
 }
+// Service role key - upload için gerekli
+let SERVICE_KEY = localStorage.getItem('ff_service_key')||'';
+if(!SERVICE_KEY){
+  SERVICE_KEY = prompt('Supabase Service Role Key (upload için):\nSettings > API > service_role');
+  if(SERVICE_KEY) localStorage.setItem('ff_service_key', SERVICE_KEY);
+}
 
 let foods=[],filtered=[],page=0;
 const PER=60;
 let currentFood=null,selectedUrl=null,currentSource='pexels';
+
+function resetKey(){
+  localStorage.removeItem('ff_service_key');
+  SERVICE_KEY = prompt('Yeni Service Role Key:');
+  if(SERVICE_KEY) localStorage.setItem('ff_service_key', SERVICE_KEY);
+}
 
 function toSlug(n){
   return(n||'').toLowerCase()
@@ -345,11 +358,12 @@ async function processFile(file){
     
     // Supabase REST API ile yükle
     const uploadUrl=`${SB_URL}/storage/v1/object/food-images/${filename}`;
+    const uploadKey = SERVICE_KEY || SB_KEY;
     const r=await fetch(uploadUrl,{
       method:'POST',
       headers:{
-        'Authorization':'Bearer '+SB_KEY,
-        'apikey':SB_KEY,
+        'Authorization':'Bearer '+uploadKey,
+        'apikey':uploadKey,
         'Content-Type':file.type,
         'x-upsert':'true'
       },
