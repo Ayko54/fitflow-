@@ -8,536 +8,421 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,sans-serif;background:#0a0612;color:#fff;}
-.topbar{background:#160a1e;border-bottom:1px solid #2a2a2a;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
-h1{font-size:17px;color:#e8547a;flex-shrink:0;}
-.stats{display:flex;gap:8px;flex-wrap:wrap;}
+.top{background:#160a1e;border-bottom:1px solid #2a2a2a;padding:12px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+h1{font-size:16px;color:#e8547a;}
 .stat{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:4px 12px;font-size:12px;color:#888;}
-.stat b{color:#fff;}
-.stat.g b{color:#22c55e;}.stat.r b{color:#ef4444;}.stat.y b{color:#f59e0b;}
-.filters{padding:12px 20px;background:#0f0a1a;border-bottom:1px solid #2a2a2a;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-input[type=text]{background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:7px 12px;font-size:13px;outline:none;}
-input[type=text]:focus{border-color:#e8547a;}
-select{background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:7px 12px;font-size:13px;outline:none;}
-.btn{padding:7px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;font-size:12px;cursor:pointer;white-space:nowrap;}
-.btn:hover{background:#252525;}
-.btn-g{background:#16a34a;border-color:#15803d;}
-.btn-r{background:#dc2626;border-color:#b91c1c;}
-.btn-b{background:#2563eb;border-color:#1d4ed8;}
-.btn-o{background:#ea580c;border-color:#c2410c;}
-
-/* ANA GRID */
+.stat b{color:#fff;}.stat.g b{color:#22c55e;}.stat.r b{color:#ef4444;}.stat.y b{color:#f59e0b;}
+.filters{padding:10px 20px;background:#0f0a1a;border-bottom:1px solid #2a2a2a;display:flex;gap:8px;flex-wrap:wrap;}
+input,select{background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:7px 12px;font-size:13px;outline:none;}
+.btn{padding:7px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;font-size:12px;cursor:pointer;}
+.bg{background:#16a34a;border-color:#15803d;}
+.br{background:#dc2626;border-color:#b91c1c;}
+.bb{background:#2563eb;border-color:#1d4ed8;}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;padding:16px 20px;}
-.card{background:#1a1a1a;border:1.5px solid #2a2a2a;border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .15s;}
-.card:hover{border-color:#555;}
-.card.approved{border-color:#22c55e;}
-.card.rejected{border-color:#ef4444;}
-.img-box{width:100%;height:130px;background:#111;overflow:hidden;position:relative;}
-.img-box img{width:100%;height:100%;object-fit:cover;display:block;}
-.img-box .noimg{display:flex;align-items:center;justify-content:center;height:100%;font-size:36px;color:#333;}
-.status-dot{position:absolute;top:6px;left:6px;width:10px;height:10px;border-radius:50%;}
-.dot-ok{background:#22c55e;} .dot-bad{background:#ef4444;} .dot-wait{background:#f59e0b;}
-.card-info{padding:8px 10px;}
-.card-name{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px;}
-.card-btns{display:flex;gap:4px;}
-.card-btns button{flex:1;padding:4px 0;border-radius:6px;border:none;font-size:11px;cursor:pointer;font-weight:600;}
-.b-ok{background:#16a34a;color:#fff;}
-.b-bad{background:#dc2626;color:#fff;}
-.b-pick{background:#2563eb;color:#fff;}
-
-/* MODAl - resim seçici */
+.card{background:#1a1a1a;border:1.5px solid #2a2a2a;border-radius:12px;overflow:hidden;}
+.card.ok{border-color:#22c55e44;}.card.bad{border-color:#ef444444;}
+.imgbox{width:100%;height:130px;background:#111;overflow:hidden;position:relative;}
+.imgbox img{width:100%;height:100%;object-fit:cover;}
+.imgbox .ni{display:flex;align-items:center;justify-content:center;height:100%;font-size:36px;color:#333;}
+.dot{position:absolute;top:6px;left:6px;width:10px;height:10px;border-radius:50%;}
+.dok{background:#22c55e;}.dbad{background:#ef4444;}.dwait{background:#f59e0b;}
+.ci{padding:8px 10px;}
+.cn{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px;}
+.cb{display:flex;gap:4px;}
+.cb button{flex:1;padding:4px 0;border-radius:6px;border:none;font-size:11px;cursor:pointer;font-weight:600;}
+.bok{background:#16a34a;color:#fff;}.bbad{background:#dc2626;color:#fff;}.bpick{background:#2563eb;color:#fff;}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
 .overlay.show{display:flex;}
-.modal{background:#160a1e;border:1px solid #333;border-radius:16px;width:100%;max-width:900px;max-height:90vh;display:flex;flex-direction:column;}
-.modal-head{padding:16px 20px;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;justify-content:space-between;}
-.modal-head h2{font-size:15px;}
-.modal-body{flex:1;overflow-y:auto;padding:16px;}
-.search-bar{display:flex;gap:8px;margin-bottom:14px;}
-.search-bar input{flex:1;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:9px 14px;font-size:14px;outline:none;}
-.search-bar input:focus{border-color:#e8547a;}
-.sources{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
-.src-btn{padding:5px 12px;border-radius:20px;border:1px solid #333;background:#1a1a1a;color:#888;font-size:12px;cursor:pointer;}
-.src-btn.active{background:#e8547a;border-color:#e8547a;color:#fff;}
-.img-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
-.result-item{border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid transparent;position:relative;aspect-ratio:1;}
-.result-item:hover{border-color:#e8547a;}
-.result-item.selected{border-color:#22c55e;}
-.result-item img{width:100%;height:100%;object-fit:cover;display:block;}
-.result-item .src-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.7);font-size:9px;color:#aaa;padding:3px 5px;text-align:center;}
-.modal-foot{padding:14px 20px;border-top:1px solid #2a2a2a;display:flex;gap:8px;justify-content:flex-end;}
-.loading-msg{text-align:center;padding:30px;color:#666;font-size:14px;}
-.pagination{display:flex;gap:8px;justify-content:center;margin-top:14px;}
-.custom-url-row{margin-top:10px;display:flex;gap:8px;}
-.custom-url-row input{flex:1;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:8px 12px;font-size:13px;outline:none;}
+.modal{background:#160a1e;border:1px solid #333;border-radius:16px;width:100%;max-width:860px;max-height:90vh;display:flex;flex-direction:column;}
+.mhead{padding:14px 18px;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;justify-content:space-between;}
+.mhead h2{font-size:14px;}
+.mbody{flex:1;overflow-y:auto;padding:14px;}
+.sbar{display:flex;gap:8px;margin-bottom:12px;}
+.sbar input{flex:1;}
+.srcs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.sb{padding:5px 12px;border-radius:20px;border:1px solid #333;background:#1a1a1a;color:#888;font-size:12px;cursor:pointer;}
+.sb.on{background:#e8547a;border-color:#e8547a;color:#fff;}
+.rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
+.ri{border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;aspect-ratio:1;position:relative;}
+.ri:hover{border-color:#e8547a;}.ri.sel{border-color:#22c55e;}
+.ri img{width:100%;height:100%;object-fit:cover;display:block;}
+.rsrc{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);font-size:9px;color:#aaa;padding:2px 5px;text-align:center;}
+.mfoot{padding:12px 18px;border-top:1px solid #2a2a2a;display:flex;gap:8px;justify-content:flex-end;align-items:center;}
+.msg{color:#666;font-size:12px;}
+.upload-area{border:2px dashed #333;border-radius:12px;padding:32px;text-align:center;cursor:pointer;margin-bottom:10px;}
+.upload-area:hover{border-color:#e8547a;}
+.pag{display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap;}
+.lm{text-align:center;padding:30px;color:#666;}
+.curl{display:flex;gap:8px;margin-top:10px;}
+.curl input{flex:1;}
 </style>
 </head>
 <body>
-
-<div class="topbar">
-  <h1>🛠️ FitFlow Admin</h1>
-  <button class="btn" onclick="resetKey()" style="font-size:11px;padding:4px 10px">🔑 Key Değiştir</button>
-  <div class="stats">
-    <div class="stat g"><b id="s-ok">0</b> Onaylı</div>
-    <div class="stat r"><b id="s-bad">0</b> Reddedilen</div>
-    <div class="stat y"><b id="s-pend">0</b> Bekleyen</div>
-    <div class="stat"><b id="s-total">0</b> Toplam</div>
-  </div>
+<div class="top">
+  <h1>🛠 FitFlow Admin</h1>
+  <div class="stat g"><b id="sok">0</b> Onaylı</div>
+  <div class="stat r"><b id="sbad">0</b> Reddedilen</div>
+  <div class="stat y"><b id="spend">0</b> Bekleyen</div>
+  <div class="stat"><b id="stot">0</b> Toplam</div>
+  <button class="btn" onclick="resetKeys()">🔑 Key</button>
 </div>
-
 <div class="filters">
-  <input type="text" id="q" placeholder="🔍 Yemek ara..." oninput="applyFilter()" style="width:200px">
-  <select id="f-status" onchange="applyFilter()">
+  <input id="fq" placeholder="🔍 Ara..." oninput="applyFilter()" style="width:180px">
+  <select id="fst" onchange="applyFilter()">
     <option value="all">Tümü</option>
     <option value="pending" selected>Bekleyenler</option>
     <option value="approved">Onaylılar</option>
     <option value="rejected">Reddedilenler</option>
   </select>
-  <select id="f-cat" onchange="applyFilter()">
-    <option value="all">Tüm Kategoriler</option>
-  </select>
-  <button class="btn btn-g" onclick="approveAll()">✓ Sayfayı Onayla</button>
-  <button class="btn" onclick="load()">↻ Yenile</button>
-  <span style="color:#666;font-size:12px" id="pinfo"></span>
+  <select id="fcat" onchange="applyFilter()"><option value="all">Tüm Kategoriler</option></select>
+  <button class="btn bg" onclick="approveAll()">✓ Sayfayı Onayla</button>
+  <button class="btn" onclick="loadFoods()">↻ Yenile</button>
+  <span id="pinfo" style="color:#666;font-size:12px"></span>
 </div>
+<div id="grid" class="grid"><div class="lm">Yükleniyor...</div></div>
+<div class="pag" id="pag"></div>
 
-<div id="grid" class="grid"></div>
-<div class="pagination" id="pag"></div>
-
-<!-- RESİM SEÇİCİ MODAL -->
-<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-head">
-      <h2 id="modal-title">Resim Seç</h2>
-      <button class="btn btn-r" onclick="closeModal()">✕ Kapat</button>
+<div class="overlay" id="ov" onclick="if(event.target===this)closeM()">
+<div class="modal">
+  <div class="mhead">
+    <h2 id="mtitle">Resim Seç</h2>
+    <button class="btn br" onclick="closeM()">✕</button>
+  </div>
+  <div class="mbody">
+    <div class="sbar">
+      <input id="iq" placeholder="Ara..." onkeydown="if(event.key==='Enter')doSearch()">
+      <button class="btn bb" onclick="doSearch()">🔍 Ara</button>
     </div>
-    <div class="modal-body">
-      <div class="search-bar">
-        <input type="text" id="img-q" placeholder="Arama..." onkeydown="if(event.key==='Enter')searchImages()">
-        <button class="btn btn-b" onclick="searchImages()">🔍 Ara</button>
+    <div class="srcs">
+      <button class="sb on" onclick="setSrc('pexels',this)">Pexels</button>
+      <button class="sb" onclick="setSrc('pixabay',this)">Pixabay</button>
+      <button class="sb" onclick="setSrc('storage',this)">Storage</button>
+      <button class="sb" onclick="setSrc('upload',this)">📁 PC'den</button>
+    </div>
+    <div id="uarea" style="display:none">
+      <div class="upload-area" onclick="document.getElementById('finp').click()"
+        ondragover="event.preventDefault()" ondrop="onDrop(event)">
+        <div style="font-size:36px">📁</div>
+        <div style="color:#888;font-size:13px;margin-top:8px">Tıkla veya sürükle bırak</div>
+        <input type="file" id="finp" accept="image/*" style="display:none" onchange="onFileSelect(event)">
       </div>
-      <div class="sources">
-        <button class="src-btn active" onclick="setSource('pexels',this)">Pexels</button>
-        <button class="src-btn" onclick="setSource('unsplash',this)">Unsplash</button>
-        <button class="src-btn" onclick="setSource('pixabay',this)">Pixabay</button>
-        <button class="src-btn" onclick="setSource('supabase',this)">Supabase Storage</button>
-        <button class="src-btn" onclick="setSource('upload',this)">📁 PC'den Yükle</button>
-      </div>
-      <div id="upload-area" style="display:none;border:2px dashed #333;border-radius:12px;padding:40px;text-align:center;cursor:pointer;margin-bottom:12px;" 
-        onclick="document.getElementById('file-inp').click()"
-        ondragover="event.preventDefault();this.style.borderColor='#e8547a'"
-        ondragleave="this.style.borderColor='#333'"
-        ondrop="handleDrop(event)">
-        <div style="font-size:40px;margin-bottom:10px">📁</div>
-        <div style="color:#888;font-size:14px">Tıkla veya dosyayı sürükle bırak</div>
-        <div style="color:#555;font-size:12px;margin-top:6px">JPG, PNG, WEBP desteklenir</div>
-        <input type="file" id="file-inp" accept="image/*" style="display:none" onchange="handleFileSelect(event)">
-      </div>
-      <div id="upload-preview" style="display:none;margin-bottom:12px;">
-        <img id="upload-thumb" style="max-width:200px;max-height:200px;border-radius:10px;object-fit:cover;display:block;margin:0 auto;">
-        <div id="upload-status" style="text-align:center;margin-top:8px;font-size:13px;color:#888"></div>
-      </div>
-      <div id="img-results" class="img-results">
-        <div class="loading-msg">Yukarıdan arama yap veya kaynak seç</div>
-      </div>
-      <div class="custom-url-row">
-        <input type="text" id="custom-url" placeholder="Veya direkt URL yapıştır...">
-        <button class="btn btn-o" onclick="useCustomUrl()">Kullan</button>
+      <div id="uprev" style="display:none;text-align:center">
+        <img id="uthumb" style="max-height:160px;border-radius:8px;max-width:100%">
+        <div id="umsg" style="margin-top:8px;font-size:13px;color:#888"></div>
       </div>
     </div>
-    <div class="modal-foot">
-      <span id="selected-info" style="color:#666;font-size:12px;align-self:center"></span>
-      <button class="btn" onclick="closeModal()">İptal</button>
-      <button class="btn btn-g" id="save-btn" onclick="saveSelected()" disabled>✓ Kaydet</button>
+    <div id="rg" class="rg"><div class="lm">Kaynak seç ve ara</div></div>
+    <div class="curl">
+      <input id="curl" placeholder="Veya URL yapıştır...">
+      <button class="btn bg" onclick="useUrl()">Kullan</button>
     </div>
   </div>
+  <div class="mfoot">
+    <span id="selinfo" class="msg"></span>
+    <button class="btn" onclick="closeM()">İptal</button>
+    <button class="btn bg" id="savebtn" onclick="doSave()" disabled>✓ Kaydet</button>
+  </div>
+</div>
 </div>
 
 <script>
-const SB_URL='https://cmsvgmvymlrfdhhvpuwt.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtc3ZnbXZ5bWxyZmRoaHZwdXd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MDI2NzIsImV4cCI6MjA5NTQ3ODY3Mn0.yAhOYz2-z0VL3bSfc5YL7nS3Dh1_eOVlxzD-HYjN9sw';
-const PEXELS_KEY='q80iZBRqts5DwaM1EmkDMTph6DGlkEwY6Pggsqrc18o6j6bt4gkiuX4y';
-const STORAGE_URL='https://cmsvgmvymlrfdhhvpuwt.supabase.co/storage/v1/object/public/food-images/';
-const sb=supabase.createClient(SB_URL,SB_KEY);
+var SB_URL='https://cmsvgmvymlrfdhhvpuwt.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtc3ZnbXZ5bWxyZmRoaHZwdXd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MDI2NzIsImV4cCI6MjA5NTQ3ODY3Mn0.yAhOYz2-z0VL3bSfc5YL7nS3Dh1_eOVlxzD-HYjN9sw';
+var PEXELS='q80iZBRqts5DwaM1EmkDMTph6DGlkEwY6Pggsqrc18o6j6bt4gkiuX4y';
+var STURL='https://cmsvgmvymlrfdhhvpuwt.supabase.co/storage/v1/object/public/food-images/';
+var sb=supabase.createClient(SB_URL,SB_KEY);
 
-// Şifre
-if(localStorage.getItem('ff_admin')!=='aykan2024'){
-  const p=prompt('Admin şifresi:');
+// Auth
+if(localStorage.getItem('ffa')!=='aykan2024'){
+  var p=prompt('Admin sifre:');
   if(p!=='aykan2024'){document.body.innerHTML='<h2 style="color:red;padding:40px">Yetkisiz</h2>';throw 0;}
-  localStorage.setItem('ff_admin','aykan2024');
+  localStorage.setItem('ffa','aykan2024');
 }
-// Service role key - upload için gerekli
-let SERVICE_KEY = localStorage.getItem('ff_service_key')||'';
-if(!SERVICE_KEY){
-  SERVICE_KEY = prompt('Supabase Service Role Key (upload için):\nSettings > API > service_role');
-  if(SERVICE_KEY) localStorage.setItem('ff_service_key', SERVICE_KEY);
+var SVCKEY=localStorage.getItem('ffsvc')||'';
+if(!SVCKEY){
+  SVCKEY=prompt('Supabase Service Role Key (Storage upload icin):');
+  if(SVCKEY)localStorage.setItem('ffsvc',SVCKEY);
 }
-
-let foods=[],filtered=[],page=0;
-const PER=60;
-let currentFood=null,selectedUrl=null,currentSource='pexels';
-
-function resetKey(){
-  localStorage.removeItem('ff_service_key');
-  SERVICE_KEY = prompt('Yeni Service Role Key:');
-  if(SERVICE_KEY) localStorage.setItem('ff_service_key', SERVICE_KEY);
+function resetKeys(){
+  localStorage.removeItem('ffa');
+  localStorage.removeItem('ffsvc');
+  location.reload();
 }
 
-function toSlug(n){
+var foods=[],filtered=[],pg=0,PER=60;
+var curFood=null,selUrl=null,curSrc='pexels';
+
+function slug(n){
   return(n||'').toLowerCase()
-    .replace(/ş/g,'s').replace(/ğ/g,'g').replace(/ü/g,'u')
-    .replace(/ö/g,'o').replace(/ç/g,'c').replace(/ı/g,'i')
-    .replace(/İ/g,'i').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    .replace(/\u015f/g,'s').replace(/\u011f/g,'g').replace(/\xfc/g,'u')
+    .replace(/\xf6/g,'o').replace(/\xe7/g,'c').replace(/\u0131/g,'i')
+    .replace(/\u0130/g,'i').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 }
 
-async function load(){
-  document.getElementById('grid').innerHTML='<div class="loading-msg">Yükleniyor...</div>';
-  const{data}=await sb.from('foods').select('id,name,category,photo_url,photo_status').order('name').limit(5000);
-  foods=data||[];
-  // Kategori filtresi
-  const cats=[...new Set(foods.map(f=>f.category).filter(Boolean))].sort();
-  const sel=document.getElementById('f-cat');
-  sel.innerHTML='<option value="all">Tüm Kategoriler</option>';
-  cats.forEach(c=>sel.innerHTML+=`<option value="${c}">${c}</option>`);
-  updateStats();
-  applyFilter();
+async function loadFoods(){
+  document.getElementById('grid').innerHTML='<div class="lm">Yukleniyor...</div>';
+  var r=await sb.from('foods').select('id,name,category,photo_url,photo_status').order('name').limit(5000);
+  foods=r.data||[];
+  var cats=[...new Set(foods.map(function(f){return f.category;}).filter(Boolean))].sort();
+  var s=document.getElementById('fcat');
+  s.innerHTML='<option value="all">Tum Kategoriler</option>';
+  cats.forEach(function(c){s.innerHTML+='<option value="'+c+'">'+c+'</option>';});
+  updateStats();applyFilter();
 }
 
 function updateStats(){
-  document.getElementById('s-ok').textContent=foods.filter(f=>f.photo_status==='approved').length;
-  document.getElementById('s-bad').textContent=foods.filter(f=>f.photo_status==='rejected').length;
-  document.getElementById('s-pend').textContent=foods.filter(f=>!f.photo_status).length;
-  document.getElementById('s-total').textContent=foods.length;
+  document.getElementById('sok').textContent=foods.filter(function(f){return f.photo_status==='approved';}).length;
+  document.getElementById('sbad').textContent=foods.filter(function(f){return f.photo_status==='rejected';}).length;
+  document.getElementById('spend').textContent=foods.filter(function(f){return !f.photo_status;}).length;
+  document.getElementById('stot').textContent=foods.length;
 }
 
 function applyFilter(){
-  const q=document.getElementById('q').value.toLowerCase();
-  const st=document.getElementById('f-status').value;
-  const cat=document.getElementById('f-cat').value;
-  filtered=foods.filter(f=>{
-    if(q&&!(f.name||'').toLowerCase().includes(q))return false;
+  var q=document.getElementById('fq').value.toLowerCase();
+  var st=document.getElementById('fst').value;
+  var cat=document.getElementById('fcat').value;
+  filtered=foods.filter(function(f){
+    if(q&&(f.name||'').toLowerCase().indexOf(q)<0)return false;
     if(cat!=='all'&&f.category!==cat)return false;
     if(st==='approved'&&f.photo_status!=='approved')return false;
     if(st==='rejected'&&f.photo_status!=='rejected')return false;
     if(st==='pending'&&f.photo_status)return false;
     return true;
   });
-  page=0;render();
+  pg=0;render();
 }
 
 function render(){
-  const items=filtered.slice(page*PER,(page+1)*PER);
-  document.getElementById('pinfo').textContent=`${filtered.length} sonuç`;
-  if(!items.length){document.getElementById('grid').innerHTML='<div class="loading-msg">Sonuç yok</div>';renderPag();return;}
-  
-  document.getElementById('grid').innerHTML=items.map(f=>{
-    const slug=toSlug(f.name);
-    const imgUrl=f.photo_url||(STORAGE_URL+slug+'.jpg');
-    const st=f.photo_status||'pending';
-    return`<div class="card ${st==='approved'?'approved':st==='rejected'?'rejected':''}" id="c${f.id}">
-      <div class="img-box">
-        <img src="${imgUrl}" alt="${f.name}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=noimg>🍽️</div>'">
-        <div class="status-dot ${st==='approved'?'dot-ok':st==='rejected'?'dot-bad':'dot-wait'}"></div>
-      </div>
-      <div class="card-info">
-        <div class="card-name" title="${f.name}">${f.name}</div>
-        <div class="card-btns">
-          <button class="b-ok" onclick="approve('${f.id}',event)">✓</button>
-          <button class="b-bad" onclick="reject('${f.id}',event)">✗</button>
-          <button class="b-pick" onclick="openPickerById('${f.id}',event)">🔍</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+  var items=filtered.slice(pg*PER,(pg+1)*PER);
+  document.getElementById('pinfo').textContent=filtered.length+' sonuc';
+  if(!items.length){document.getElementById('grid').innerHTML='<div class="lm">Sonuc yok</div>';renderPag();return;}
+  var html='';
+  items.forEach(function(f){
+    var s=f.photo_status||'pending';
+    var img=f.photo_url||(STURL+slug(f.name)+'.jpg');
+    var cls=s==='approved'?'ok':s==='rejected'?'bad':'';
+    var dcls=s==='approved'?'dok':s==='rejected'?'dbad':'dwait';
+    html+='<div class="card '+cls+'" id="c'+f.id+'">'
+      +'<div class="imgbox">'
+      +'<img src="'+img+'" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=ni>&#127374;</div>\'">'
+      +'<div class="dot '+dcls+'"></div>'
+      +'</div>'
+      +'<div class="ci">'
+      +'<div class="cn" title="'+f.name+'">'+f.name+'</div>'
+      +'<div class="cb">'
+      +'<button class="bok" onclick="doApprove(\''+f.id+'\')">&#10003;</button>'
+      +'<button class="bbad" onclick="doReject(\''+f.id+'\')">&#10007;</button>'
+      +'<button class="bpick" onclick="openPick(\''+f.id+'\')">&#128269;</button>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  });
+  document.getElementById('grid').innerHTML=html;
   renderPag();
 }
 
 function renderPag(){
-  const tot=Math.ceil(filtered.length/PER);
-  const el=document.getElementById('pag');
+  var tot=Math.ceil(filtered.length/PER);
+  var el=document.getElementById('pag');
   if(tot<=1){el.innerHTML='';return;}
-  el.innerHTML=(page>0?`<button class="btn" onclick="goPage(${page-1})">← Önceki</button>`:'')
-    +`<span style="color:#666;font-size:13px;padding:8px">${page+1}/${tot}</span>`
-    +(page<tot-1?`<button class="btn" onclick="goPage(${page+1})">Sonraki →</button>`:'');
+  el.innerHTML=(pg>0?'<button class="btn" onclick="goPage('+(pg-1)+')">&#8592; Onceki</button>':'')
+    +'<span style="color:#666;font-size:13px;padding:8px">'+(pg+1)+'/'+tot+'</span>'
+    +(pg<tot-1?'<button class="btn" onclick="goPage('+(pg+1)+')">Sonraki &#8594;</button>':'');
 }
-function goPage(p){page=p;render();window.scrollTo(0,0);}
+function goPage(p){pg=p;render();window.scrollTo(0,0);}
 
-async function approve(id,e){
-  e&&e.stopPropagation();
-  const{data,error}=await sb.from('foods').update({photo_status:'approved'}).eq('id',id).select();
-  if(error){alert('Hata: '+error.message);return;}
-  if(!data||!data.length){alert('Kayit guncellenemedi. RLS policy eksik olabilir.');return;}
-  const f=foods.find(x=>x.id==id);if(f)f.photo_status='approved';
-  const c=document.getElementById('c'+id);
-  if(c){c.className='card approved';c.querySelector('.status-dot').className='status-dot dot-ok';}
+async function doApprove(id){
+  var r=await sb.from('foods').update({photo_status:'approved'}).eq('id',id).select();
+  if(r.error){alert('Hata: '+r.error.message);return;}
+  var f=foods.find(function(x){return x.id==id;});
+  if(f)f.photo_status='approved';
+  var c=document.getElementById('c'+id);
+  if(c){c.className='card ok';c.querySelector('.dot').className='dot dok';}
   updateStats();
 }
 
-async function reject(id,e){
-  e&&e.stopPropagation();
-  await sb.from('foods').update({photo_status:'rejected'}).eq('id',id);
-  const f=foods.find(x=>x.id==id);if(f)f.photo_status='rejected';
-  const c=document.getElementById('c'+id);
-  if(c){c.className='card rejected';c.querySelector('.status-dot').className='status-dot dot-bad';}
+async function doReject(id){
+  var r=await sb.from('foods').update({photo_status:'rejected'}).eq('id',id).select();
+  if(r.error){alert('Hata: '+r.error.message);return;}
+  var f=foods.find(function(x){return x.id==id;});
+  if(f)f.photo_status='rejected';
+  var c=document.getElementById('c'+id);
+  if(c){c.className='card bad';c.querySelector('.dot').className='dot dbad';}
   updateStats();
 }
 
 async function approveAll(){
-  const items=filtered.slice(page*PER,(page+1)*PER);
-  if(!confirm(`${items.length} yemeği onayla?`))return;
-  for(const f of items){
-    await sb.from('foods').update({photo_status:'approved'}).eq('id',f.id);
-    f.photo_status='approved';
+  var items=filtered.slice(pg*PER,(pg+1)*PER);
+  if(!confirm(items.length+' yemegi onayla?'))return;
+  for(var i=0;i<items.length;i++){
+    await sb.from('foods').update({photo_status:'approved'}).eq('id',items[i].id);
+    items[i].photo_status='approved';
   }
   updateStats();render();
 }
 
-// ── RESİM SEÇİCİ ──
-function openPickerById(id,e){
-  const food = foods.find(f=>f.id==id);
-  if(food) openPicker(id, food.name, e);
+function openPick(id){
+  var f=foods.find(function(x){return x.id==id;});
+  if(!f)return;
+  curFood=f;selUrl=null;
+  document.getElementById('mtitle').textContent='Resim Sec: '+f.name;
+  document.getElementById('iq').value=f.name;
+  document.getElementById('savebtn').disabled=true;
+  document.getElementById('selinfo').textContent='';
+  document.getElementById('curl').value='';
+  document.getElementById('rg').innerHTML='<div class="lm">Aranıyor...</div>';
+  document.getElementById('ov').classList.add('show');
+  setSrcActive('pexels');
+  doSearch();
+}
+function closeM(){document.getElementById('ov').classList.remove('show');}
+
+function setSrcActive(src){
+  curSrc=src;
+  document.querySelectorAll('.sb').forEach(function(b){b.classList.remove('on');});
+  document.querySelectorAll('.sb').forEach(function(b){
+    if(b.textContent.toLowerCase().indexOf(src.toLowerCase())>=0)b.classList.add('on');
+  });
+  var ua=document.getElementById('uarea');
+  var sb2=document.querySelector('.sbar');
+  if(src==='upload'){ua.style.display='block';sb2.style.display='none';document.getElementById('rg').innerHTML='';}
+  else{ua.style.display='none';sb2.style.display='flex';}
 }
 
-function openPicker(id,name,e){
-  e&&e.stopPropagation();
-  currentFood={id,name};
-  selectedUrl=null;
-  document.getElementById('modal-title').textContent='📸 Resim Seç: '+name;
-  document.getElementById('img-q').value=name;
-  document.getElementById('save-btn').disabled=true;
-  document.getElementById('selected-info').textContent='';
-  document.getElementById('custom-url').value='';
-  document.getElementById('overlay').classList.add('show');
-  searchImages();
+function setSrc(src,btn){
+  setSrcActive(src);
+  if(src!=='upload')doSearch();
 }
 
-function closeModal(){document.getElementById('overlay').classList.remove('show');}
-
-function setSource(src,btn){
-  currentSource=src;
-  document.querySelectorAll('.src-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  // Upload modunda arama gösterme
-  const uploadArea=document.getElementById('upload-area');
-  const searchBar=document.querySelector('.search-bar');
-  if(src==='upload'){
-    uploadArea.style.display='block';
-    searchBar.style.display='none';
-    document.getElementById('img-results').innerHTML='';
-  } else {
-    uploadArea.style.display='none';
-    searchBar.style.display='flex';
-    searchImages();
-  }
-}
-
-function handleDrop(e){
-  e.preventDefault();
-  document.getElementById('upload-area').style.borderColor='#333';
-  const file=e.dataTransfer.files[0];
-  if(file) processFile(file);
-}
-
-function handleFileSelect(e){
-  const file=e.target.files[0];
-  if(file) processFile(file);
-}
-
-async function processFile(file){
-  if(!file.type.startsWith('image/')){alert('Sadece resim dosyası');return;}
-  
-  // Preview göster
-  const reader=new FileReader();
-  reader.onload=e=>{
-    document.getElementById('upload-thumb').src=e.target.result;
-    document.getElementById('upload-preview').style.display='block';
-  };
-  reader.readAsDataURL(file);
-  
-  document.getElementById('upload-status').textContent='⏳ Yükleniyor...';
-  
-  try{
-    // Supabase Storage'a yükle
-    const slug=toSlug(currentFood.name);
-    const ext=file.name.split('.').pop().toLowerCase()||'jpg';
-    const filename=slug+'.'+ext;
-    
-    const arrayBuffer=await file.arrayBuffer();
-    const blob=new Blob([arrayBuffer],{type:file.type});
-    
-    // Supabase REST API ile yükle
-    const uploadUrl=`${SB_URL}/storage/v1/object/food-images/${filename}`;
-    const uploadKey = SERVICE_KEY || SB_KEY;
-    const r=await fetch(uploadUrl,{
-      method:'POST',
-      headers:{
-        'Authorization':'Bearer '+uploadKey,
-        'apikey':uploadKey,
-        'Content-Type':file.type,
-        'x-upsert':'true'
-      },
-      body:blob
-    });
-    
-    if(r.ok){
-      const publicUrl=`${STORAGE_URL}${filename}`;
-      selectedUrl=publicUrl;
-      document.getElementById('upload-status').textContent='✅ Yüklendi! Kaydet butonuna bas.';
-      document.getElementById('save-btn').disabled=false;
-      document.getElementById('selected-info').textContent='Dosya yüklendi ✓';
-      document.getElementById('upload-thumb').src=publicUrl;
-    } else {
-      const err=await r.text();
-      document.getElementById('upload-status').textContent='❌ Hata: '+err.slice(0,100);
-    }
-  }catch(e){
-    document.getElementById('upload-status').textContent='❌ Hata: '+e.message;
-  }
-}
-
-async function searchImages(){
-  const q=document.getElementById('img-q').value.trim();
+async function doSearch(){
+  var q=document.getElementById('iq').value.trim();
   if(!q)return;
-  const res=document.getElementById('img-results');
-  res.innerHTML='<div class="loading-msg">🔍 Aranıyor...</div>';
-  selectedUrl=null;
-  document.getElementById('save-btn').disabled=true;
-
-  if(currentSource==='pexels') await searchPexels(q);
-  else if(currentSource==='unsplash') await searchUnsplash(q);
-  else if(currentSource==='pixabay') await searchPixabay(q);
-  else if(currentSource==='supabase') searchStorage(q);
+  document.getElementById('rg').innerHTML='<div class="lm">Aranıyor...</div>';
+  if(curSrc==='pexels')await searchPexels(q);
+  else if(curSrc==='pixabay')await searchPixabay(q);
+  else if(curSrc==='storage')searchStorage(q);
 }
 
 async function searchPexels(q){
   try{
-    const r=await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(q+' food turkish')}&per_page=24&orientation=square`,
-      {headers:{Authorization:PEXELS_KEY}});
-    const d=await r.json();
-    showResults((d.photos||[]).map(p=>({url:p.src.medium,src:'Pexels',thumb:p.src.small})));
-  }catch(e){document.getElementById('img-results').innerHTML='<div class="loading-msg">Hata: '+e.message+'</div>';}
-}
-
-async function searchUnsplash(q){
-  // Unsplash public demo - sınırlı
-  try{
-    const r=await fetch(`https://source.unsplash.com/featured/?${encodeURIComponent(q)},food`);
-    // source.unsplash redirect verir, birkaç farklı sorgu göster
-    const queries=['turkish food','meal plate','cuisine dish','healthy food'];
-    const urls=queries.map((_,i)=>`https://source.unsplash.com/300x300/?${encodeURIComponent(q)},food,${i}`);
-    showResults(urls.map(url=>({url,src:'Unsplash',thumb:url})));
-  }catch(e){
-    document.getElementById('img-results').innerHTML='<div class="loading-msg">Unsplash erişim kısıtlı, Pexels dene</div>';
-  }
+    var r=await fetch('https://api.pexels.com/v1/search?query='+encodeURIComponent(q+' food')+'&per_page=24&orientation=square',
+      {headers:{Authorization:PEXELS}});
+    var d=await r.json();
+    showRes((d.photos||[]).map(function(p){return{url:p.src.medium,src:'Pexels'};}));
+  }catch(e){document.getElementById('rg').innerHTML='<div class="lm">Hata: '+e.message+'</div>';}
 }
 
 async function searchPixabay(q){
-  // Pixabay public API
   try{
-    const r=await fetch(`https://pixabay.com/api/?key=44971209-3e91d4aa0c3fb21a9e18e6c31&q=${encodeURIComponent(q+' food')}&image_type=photo&per_page=24&safesearch=true`);
-    const d=await r.json();
-    showResults((d.hits||[]).map(p=>({url:p.webformatURL,src:'Pixabay',thumb:p.previewURL})));
-  }catch(e){
-    document.getElementById('img-results').innerHTML='<div class="loading-msg">Pixabay hata: '+e.message+'</div>';
-  }
+    var r=await fetch('https://pixabay.com/api/?key=44971209-3e91d4aa0c3fb21a9e18e6c31&q='+encodeURIComponent(q+' food')+'&image_type=photo&per_page=24&safesearch=true');
+    var d=await r.json();
+    showRes((d.hits||[]).map(function(p){return{url:p.webformatURL,src:'Pixabay'};}));
+  }catch(e){document.getElementById('rg').innerHTML='<div class="lm">Hata: '+e.message+'</div>';}
 }
 
 function searchStorage(q){
-  // Supabase Storage'da slug ara
-  const slug=toSlug(q);
-  const variants=[
-    slug,
-    slug+'-kac-kalori',
-    slug+'tarifi',
-  ];
-  const urls=variants.map(v=>({
-    url:STORAGE_URL+v+'.jpg',
-    src:'Storage',
-    thumb:STORAGE_URL+v+'.jpg'
-  }));
-  // Ayrıca benzer isimler
-  showResults(urls);
+  var s=slug(q);
+  var variants=[s,s+'-kac-kalori',s+'tarifi',s+'-tarifi'];
+  showRes(variants.map(function(v){return{url:STURL+v+'.jpg',src:'Storage'};}));
 }
 
-function showResults(items){
-  const res=document.getElementById('img-results');
-  if(!items.length){res.innerHTML='<div class="loading-msg">Sonuç bulunamadı</div>';return;}
-  res.innerHTML=items.map((item,i)=>`
-    <div class="result-item" id="ri${i}" onclick="selectImg('${item.url.replace(/'/g,"\\'")}',${i})">
-      <img src="${item.thumb||item.url}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'">
-      <div class="src-label">${item.src}</div>
-    </div>
-  `).join('');
+function showRes(items){
+  if(!items.length){document.getElementById('rg').innerHTML='<div class="lm">Sonuc bulunamadi</div>';return;}
+  var html='';
+  items.forEach(function(item,i){
+    html+='<div class="ri" id="ri'+i+'" onclick="selImg(\''+item.url.replace(/'/g,'%27')+'\','+i+')">'
+      +'<img src="'+item.url+'" loading="lazy" onerror="this.parentElement.style.display=\'none\'">'
+      +'<div class="rsrc">'+item.src+'</div>'
+      +'</div>';
+  });
+  document.getElementById('rg').innerHTML=html;
 }
 
-function selectImg(url,idx){
-  document.querySelectorAll('.result-item').forEach(el=>el.classList.remove('selected'));
-  document.getElementById('ri'+idx)?.classList.add('selected');
-  selectedUrl=url;
-  document.getElementById('save-btn').disabled=false;
-  document.getElementById('selected-info').textContent='Seçildi ✓';
+function selImg(url,idx){
+  document.querySelectorAll('.ri').forEach(function(el){el.classList.remove('sel');});
+  var el=document.getElementById('ri'+idx);
+  if(el)el.classList.add('sel');
+  selUrl=decodeURIComponent(url);
+  document.getElementById('savebtn').disabled=false;
+  document.getElementById('selinfo').textContent='Secildi';
 }
 
-function useCustomUrl(){
-  const url=document.getElementById('custom-url').value.trim();
-  if(!url){alert('URL gir');return;}
-  selectedUrl=url;
-  document.getElementById('save-btn').disabled=false;
-  document.getElementById('selected-info').textContent='URL seçildi ✓';
+function useUrl(){
+  var url=document.getElementById('curl').value.trim();
+  if(!url)return;
+  selUrl=url;
+  document.getElementById('savebtn').disabled=false;
+  document.getElementById('selinfo').textContent='URL secildi';
 }
 
-async function saveSelected(){
-  if(!selectedUrl||!currentFood){alert('Resim seçilmedi!');return;}
-  
-  document.getElementById('save-btn').textContent='Kaydediliyor...';
-  document.getElementById('save-btn').disabled=true;
-  
-  // Önce mevcut kaydı kontrol et
-  const{data:existing}=await sb.from('foods').select('id,name').eq('id',currentFood.id).limit(1);
-  console.log('Kayıt bulundu:', existing);
-  
-  const{data,error}=await sb.from('foods')
-    .update({photo_url:selectedUrl, photo_status:'approved'})
-    .eq('id',currentFood.id)
-    .select();
-  
-  console.log('Update result:', data, error);
-  
-  if(error){
-    alert('DB Hata: '+error.message+'\n\nKod: '+error.code);
-    document.getElementById('save-btn').textContent='✓ Kaydet';
-    document.getElementById('save-btn').disabled=false;
-    return;
-  }
-  
-  if(!data||data.length===0){
-    alert('Kayit guncellenemedi. RLS policy eksik olabilir.');
-    document.getElementById('save-btn').textContent='✓ Kaydet';
-    document.getElementById('save-btn').disabled=false;
-    return;
-  }
-  
-  // Local güncelle
-  const f=foods.find(x=>x.id==currentFood.id);
-  if(f){f.photo_url=selectedUrl;f.photo_status='approved';}
-  
-  const c=document.getElementById('c'+currentFood.id);
+function onDrop(e){
+  e.preventDefault();
+  var file=e.dataTransfer.files[0];
+  if(file)processFile(file);
+}
+function onFileSelect(e){
+  var file=e.target.files[0];
+  if(file)processFile(file);
+}
+
+async function processFile(file){
+  if(!file.type.startsWith('image/')){alert('Sadece resim');return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    document.getElementById('uthumb').src=e.target.result;
+    document.getElementById('uprev').style.display='block';
+  };
+  reader.readAsDataURL(file);
+  document.getElementById('umsg').textContent='Yukleniyor...';
+  try{
+    var s=slug(curFood.name);
+    var ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+    var fname=s+'.'+ext;
+    var ab=await file.arrayBuffer();
+    var blob=new Blob([ab],{type:file.type});
+    var key=SVCKEY||SB_KEY;
+    var r=await fetch(SB_URL+'/storage/v1/object/food-images/'+fname,{
+      method:'POST',
+      headers:{Authorization:'Bearer '+key,apikey:key,'Content-Type':file.type,'x-upsert':'true'},
+      body:blob
+    });
+    if(r.ok){
+      selUrl=STURL+fname;
+      document.getElementById('umsg').textContent='Yuklendi! Kaydet e bas.';
+      document.getElementById('uthumb').src=selUrl;
+      document.getElementById('savebtn').disabled=false;
+      document.getElementById('selinfo').textContent='Dosya yuklendi';
+    }else{
+      var err=await r.text();
+      document.getElementById('umsg').textContent='Hata: '+err.slice(0,80);
+    }
+  }catch(e){document.getElementById('umsg').textContent='Hata: '+e.message;}
+}
+
+async function doSave(){
+  if(!selUrl||!curFood){alert('Resim secilmedi');return;}
+  document.getElementById('savebtn').disabled=true;
+  document.getElementById('savebtn').textContent='Kaydediliyor...';
+  var r=await sb.from('foods').update({photo_url:selUrl,photo_status:'approved'}).eq('id',curFood.id).select();
+  document.getElementById('savebtn').textContent='Kaydet';
+  if(r.error){alert('DB Hata: '+r.error.message);document.getElementById('savebtn').disabled=false;return;}
+  var f=foods.find(function(x){return x.id==curFood.id;});
+  if(f){f.photo_url=selUrl;f.photo_status='approved';}
+  var c=document.getElementById('c'+curFood.id);
   if(c){
-    const img=c.querySelector('img');
-    if(img){img.src=selectedUrl+'?t='+Date.now();} // cache bust
-    c.className='card approved';
-    c.querySelector('.status-dot').className='status-dot dot-ok';
+    var img=c.querySelector('img');
+    if(img)img.src=selUrl+'?t='+Date.now();
+    c.className='card ok';
+    c.querySelector('.dot').className='dot dok';
   }
-  
   updateStats();
-  closeModal();
-  document.getElementById('save-btn').textContent='✓ Kaydet';
-  document.getElementById('save-btn').disabled=false;
+  closeM();
 }
 
-// Supabase'de photo_status kolonu yoksa ekle uyarısı
-sb.from('foods').select('photo_status').limit(1).then(({error})=>{
-  if(error&&error.message.includes('photo_status')){
-    alert('Supabase SQL Editor\'de çalıştır:\nALTER TABLE foods ADD COLUMN IF NOT EXISTS photo_status text;');
-  }else{load();}
+sb.from('foods').select('photo_status').limit(1).then(function(r){
+  if(r.error&&r.error.message.indexOf('photo_status')>=0){
+    alert('SQL Editor da su komutu calistir:\nALTER TABLE foods ADD COLUMN IF NOT EXISTS photo_status text;');
+  }else{loadFoods();}
 });
 </script>
 </body>
