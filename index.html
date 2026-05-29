@@ -1313,7 +1313,7 @@ async function loadFood(){
     }else{
       (items||[]).forEach(item=>{
         html+=`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);">
-          <img class="food-img" src="${getFoodPhoto(item.food_name||'')}" alt="${item.food_name||''}" loading="lazy" onerror="getFoodPhotoAsync('${(item.food_name||'').replace(/'/g,\'\'')}',this)"/>
+          <img class="food-img" src="${getFoodPhoto(item.food_name||'')}" alt="${item.food_name||''}" loading="lazy" onerror="this.style.display='none'"/>
           <div style="flex:1;min-width:0;">
             <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.food_name}</div>
             <div style="font-size:11px;color:var(--text3);">${item.portion_desc||''} · ${item.calories||0} kcal</div>
@@ -1376,7 +1376,7 @@ async function searchFoods(q){
         const safe={id:f.id,name:f.name,calories_per_100g:f.calories_per_100g||0,protein_per_100g:f.protein_per_100g||0,carbs_per_100g:f.carbs_per_100g||0,fat_per_100g:f.fat_per_100g||0,default_portion_g:pG,default_portion_name:f.default_portion_name||pG+'g',photo_url:f.photo_url||''};
         const key='_food_'+f.id.replace(/-/g,'');window[key]=safe;
         return`<div class="food-list-item" onclick="selectFood(window['${key}'])">
-          <img class="food-img" src="${getFoodPhoto(f.name||'')}" alt="${f.name||''}" loading="lazy" onerror="getFoodPhotoAsync('${(f.name||'').replace(/'/g,\'\'')}',this)"/>
+          <img class="food-img" src="${getFoodPhoto(f.name||'')}" alt="${f.name||''}" loading="lazy" onerror="this.style.display='none'"/>
           <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name}</div><div style="font-size:11px;color:var(--text3);">${f.default_portion_name||pG+'g'} · ${kcal} kcal</div></div>
           <span style="font-size:12px;color:var(--accent);">Ekle ›</span>
         </div>`;
