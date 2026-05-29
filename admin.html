@@ -7,300 +7,399 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,sans-serif;background:#0a0612;color:#fff;padding:20px;}
-h1{font-size:20px;margin-bottom:6px;color:#e8547a;}
-.sub{color:#666;font-size:13px;margin-bottom:20px;}
-.stats{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
-.stat{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:8px 16px;font-size:12px;color:#888;}
-.stat b{color:#fff;font-size:18px;display:block;}
-.stat.g b{color:#22c55e;} .stat.r b{color:#ef4444;} .stat.y b{color:#f59e0b;}
-.filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
-input[type=text]{background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:8px 12px;font-size:13px;width:250px;}
-select{background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:8px 12px;font-size:13px;}
-button{padding:8px 16px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;font-size:13px;cursor:pointer;}
-button:hover{background:#252525;}
-.btn-g{background:#16a34a;border-color:#15803d;color:#fff;}
-.btn-r{background:#dc2626;border-color:#b91c1c;color:#fff;}
-.btn-b{background:#2563eb;border-color:#1d4ed8;color:#fff;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
-.card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;position:relative;}
-.card.approved{border-color:#22c55e44;}
-.card.rejected{border-color:#ef444444;}
-.card.pending{border-color:#f59e0b44;}
-.img-wrap{width:100%;height:140px;background:#111;position:relative;overflow:hidden;}
-.img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
-.img-wrap .no-img{display:flex;align-items:center;justify-content:center;height:100%;color:#444;font-size:32px;}
-.badge{position:absolute;top:6px;right:6px;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600;}
-.badge.ok{background:#22c55e;color:#000;}
-.badge.bad{background:#ef4444;color:#fff;}
-.badge.new{background:#f59e0b;color:#000;}
-.info{padding:8px 10px;}
-.name{font-size:12px;font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.cat{font-size:10px;color:#666;margin-bottom:8px;}
-.actions{display:flex;gap:4px;}
-.actions button{flex:1;padding:5px;font-size:11px;border-radius:6px;}
-.edit-row{padding:8px 10px;border-top:1px solid #2a2a2a;display:none;}
-.edit-row input{width:100%;margin-bottom:6px;font-size:11px;}
-.edit-row button{width:100%;font-size:11px;}
-.loader{text-align:center;padding:40px;color:#666;}
-.pagination{display:flex;gap:8px;justify-content:center;margin-top:20px;flex-wrap:wrap;}
+body{font-family:-apple-system,sans-serif;background:#0a0612;color:#fff;}
+.topbar{background:#160a1e;border-bottom:1px solid #2a2a2a;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+h1{font-size:17px;color:#e8547a;flex-shrink:0;}
+.stats{display:flex;gap:8px;flex-wrap:wrap;}
+.stat{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:4px 12px;font-size:12px;color:#888;}
+.stat b{color:#fff;}
+.stat.g b{color:#22c55e;}.stat.r b{color:#ef4444;}.stat.y b{color:#f59e0b;}
+.filters{padding:12px 20px;background:#0f0a1a;border-bottom:1px solid #2a2a2a;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+input[type=text]{background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:7px 12px;font-size:13px;outline:none;}
+input[type=text]:focus{border-color:#e8547a;}
+select{background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:7px 12px;font-size:13px;outline:none;}
+.btn{padding:7px 14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;font-size:12px;cursor:pointer;white-space:nowrap;}
+.btn:hover{background:#252525;}
+.btn-g{background:#16a34a;border-color:#15803d;}
+.btn-r{background:#dc2626;border-color:#b91c1c;}
+.btn-b{background:#2563eb;border-color:#1d4ed8;}
+.btn-o{background:#ea580c;border-color:#c2410c;}
+
+/* ANA GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;padding:16px 20px;}
+.card{background:#1a1a1a;border:1.5px solid #2a2a2a;border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .15s;}
+.card:hover{border-color:#555;}
+.card.approved{border-color:#22c55e;}
+.card.rejected{border-color:#ef4444;}
+.img-box{width:100%;height:130px;background:#111;overflow:hidden;position:relative;}
+.img-box img{width:100%;height:100%;object-fit:cover;display:block;}
+.img-box .noimg{display:flex;align-items:center;justify-content:center;height:100%;font-size:36px;color:#333;}
+.status-dot{position:absolute;top:6px;left:6px;width:10px;height:10px;border-radius:50%;}
+.dot-ok{background:#22c55e;} .dot-bad{background:#ef4444;} .dot-wait{background:#f59e0b;}
+.card-info{padding:8px 10px;}
+.card-name{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px;}
+.card-btns{display:flex;gap:4px;}
+.card-btns button{flex:1;padding:4px 0;border-radius:6px;border:none;font-size:11px;cursor:pointer;font-weight:600;}
+.b-ok{background:#16a34a;color:#fff;}
+.b-bad{background:#dc2626;color:#fff;}
+.b-pick{background:#2563eb;color:#fff;}
+
+/* MODAl - resim seçici */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
+.overlay.show{display:flex;}
+.modal{background:#160a1e;border:1px solid #333;border-radius:16px;width:100%;max-width:900px;max-height:90vh;display:flex;flex-direction:column;}
+.modal-head{padding:16px 20px;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;justify-content:space-between;}
+.modal-head h2{font-size:15px;}
+.modal-body{flex:1;overflow-y:auto;padding:16px;}
+.search-bar{display:flex;gap:8px;margin-bottom:14px;}
+.search-bar input{flex:1;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:9px 14px;font-size:14px;outline:none;}
+.search-bar input:focus{border-color:#e8547a;}
+.sources{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.src-btn{padding:5px 12px;border-radius:20px;border:1px solid #333;background:#1a1a1a;color:#888;font-size:12px;cursor:pointer;}
+.src-btn.active{background:#e8547a;border-color:#e8547a;color:#fff;}
+.img-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
+.result-item{border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid transparent;position:relative;aspect-ratio:1;}
+.result-item:hover{border-color:#e8547a;}
+.result-item.selected{border-color:#22c55e;}
+.result-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.result-item .src-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.7);font-size:9px;color:#aaa;padding:3px 5px;text-align:center;}
+.modal-foot{padding:14px 20px;border-top:1px solid #2a2a2a;display:flex;gap:8px;justify-content:flex-end;}
+.loading-msg{text-align:center;padding:30px;color:#666;font-size:14px;}
+.pagination{display:flex;gap:8px;justify-content:center;margin-top:14px;}
+.custom-url-row{margin-top:10px;display:flex;gap:8px;}
+.custom-url-row input{flex:1;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:8px 12px;font-size:13px;outline:none;}
 </style>
 </head>
 <body>
-<h1>🛠️ FitFlow Admin Panel</h1>
-<p class="sub">Yemek fotoğraflarını onayla veya düzelt</p>
 
-<div class="stats">
-  <div class="stat g"><b id="s-ok">0</b>Onaylı</div>
-  <div class="stat r"><b id="s-bad">0</b>Reddedilen</div>
-  <div class="stat y"><b id="s-pending">0</b>Bekleyen</div>
-  <div class="stat"><b id="s-total">0</b>Toplam</div>
+<div class="topbar">
+  <h1>🛠️ FitFlow Admin</h1>
+  <div class="stats">
+    <div class="stat g"><b id="s-ok">0</b> Onaylı</div>
+    <div class="stat r"><b id="s-bad">0</b> Reddedilen</div>
+    <div class="stat y"><b id="s-pend">0</b> Bekleyen</div>
+    <div class="stat"><b id="s-total">0</b> Toplam</div>
+  </div>
 </div>
 
 <div class="filters">
-  <input type="text" id="search" placeholder="Yemek ara..." oninput="filterCards()">
-  <select id="filter-status" onchange="filterCards()">
+  <input type="text" id="q" placeholder="🔍 Yemek ara..." oninput="applyFilter()" style="width:200px">
+  <select id="f-status" onchange="applyFilter()">
     <option value="all">Tümü</option>
     <option value="pending" selected>Bekleyenler</option>
     <option value="approved">Onaylılar</option>
     <option value="rejected">Reddedilenler</option>
   </select>
-  <select id="filter-cat" onchange="filterCards()">
+  <select id="f-cat" onchange="applyFilter()">
     <option value="all">Tüm Kategoriler</option>
   </select>
-  <button onclick="approveAll()" class="btn-g">✓ Görünenleri Onayla</button>
-  <button onclick="loadFoods()" class="btn-b">↻ Yenile</button>
-  <button onclick="exportBad()">⬇ Reddedilenleri İndir</button>
+  <button class="btn btn-g" onclick="approveAll()">✓ Sayfayı Onayla</button>
+  <button class="btn" onclick="load()">↻ Yenile</button>
+  <span style="color:#666;font-size:12px" id="pinfo"></span>
 </div>
 
-<div id="grid" class="grid"><div class="loader">Yükleniyor...</div></div>
-<div class="pagination" id="pagination"></div>
+<div id="grid" class="grid"></div>
+<div class="pagination" id="pag"></div>
+
+<!-- RESİM SEÇİCİ MODAL -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modal-title">Resim Seç</h2>
+      <button class="btn btn-r" onclick="closeModal()">✕ Kapat</button>
+    </div>
+    <div class="modal-body">
+      <div class="search-bar">
+        <input type="text" id="img-q" placeholder="Arama..." onkeydown="if(event.key==='Enter')searchImages()">
+        <button class="btn btn-b" onclick="searchImages()">🔍 Ara</button>
+      </div>
+      <div class="sources">
+        <button class="src-btn active" onclick="setSource('pexels',this)">Pexels</button>
+        <button class="src-btn" onclick="setSource('unsplash',this)">Unsplash</button>
+        <button class="src-btn" onclick="setSource('pixabay',this)">Pixabay</button>
+        <button class="src-btn" onclick="setSource('supabase',this)">Supabase Storage</button>
+      </div>
+      <div id="img-results" class="img-results">
+        <div class="loading-msg">Yukarıdan arama yap veya kaynak seç</div>
+      </div>
+      <div class="custom-url-row">
+        <input type="text" id="custom-url" placeholder="Veya direkt URL yapıştır...">
+        <button class="btn btn-o" onclick="useCustomUrl()">Kullan</button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <span id="selected-info" style="color:#666;font-size:12px;align-self:center"></span>
+      <button class="btn" onclick="closeModal()">İptal</button>
+      <button class="btn btn-g" id="save-btn" onclick="saveSelected()" disabled>✓ Kaydet</button>
+    </div>
+  </div>
+</div>
 
 <script>
-const SB_URL = 'https://cmsvgmvymlrfdhhvpuwt.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtc3ZnbXZ5bWxyZmRoaHZwdXd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MDI2NzIsImV4cCI6MjA5NTQ3ODY3Mn0.yAhOYz2-z0VL3bSfc5YL7nS3Dh1_eOVlxzD-HYjN9sw';
-const sb = supabase.createClient(SB_URL, SB_KEY);
+const SB_URL='https://cmsvgmvymlrfdhhvpuwt.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtc3ZnbXZ5bWxyZmRoaHZwdXd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MDI2NzIsImV4cCI6MjA5NTQ3ODY3Mn0.yAhOYz2-z0VL3bSfc5YL7nS3Dh1_eOVlxzD-HYjN9sw';
+const PEXELS_KEY='q80iZBRqts5DwaM1EmkDMTph6DGlkEwY6Pggsqrc18o6j6bt4gkiuX4y';
+const STORAGE_URL='https://cmsvgmvymlrfdhhvpuwt.supabase.co/storage/v1/object/public/food-images/';
+const sb=supabase.createClient(SB_URL,SB_KEY);
 
-// Admin şifresi - basit koruma
-const ADMIN_PASS = 'fitflow2024';
-if(localStorage.getItem('admin_auth') !== ADMIN_PASS) {
-  const pass = prompt('Admin şifresi:');
-  if(pass !== ADMIN_PASS) { document.body.innerHTML = '<h2 style="color:red;padding:40px">Yetkisiz erişim</h2>'; throw new Error('Unauthorized'); }
-  localStorage.setItem('admin_auth', pass);
+// Şifre
+if(localStorage.getItem('ff_admin')!=='aykan2024'){
+  const p=prompt('Admin şifresi:');
+  if(p!=='aykan2024'){document.body.innerHTML='<h2 style="color:red;padding:40px">Yetkisiz</h2>';throw 0;}
+  localStorage.setItem('ff_admin','aykan2024');
 }
 
-let allFoods = [];
-let filtered = [];
-const PAGE_SIZE = 60;
-let currentPage = 0;
+let foods=[],filtered=[],page=0;
+const PER=60;
+let currentFood=null,selectedUrl=null,currentSource='pexels';
 
-// photo_status: null=bekleyen, 'approved'=onaylı, 'rejected'=reddedildi
-// Admin bu alanı set edecek
-
-async function loadFoods() {
-  document.getElementById('grid').innerHTML = '<div class="loader">Yükleniyor...</div>';
-  
-  const { data, error } = await sb.from('foods')
-    .select('id, name, category, photo_url, photo_status')
-    .order('name')
-    .limit(5000);
-  
-  if(error) { alert('Hata: ' + error.message); return; }
-  
-  allFoods = data || [];
-  
-  // Kategori filtresi doldur
-  const cats = [...new Set(allFoods.map(f=>f.category).filter(Boolean))].sort();
-  const catSel = document.getElementById('filter-cat');
-  catSel.innerHTML = '<option value="all">Tüm Kategoriler</option>';
-  cats.forEach(c => catSel.innerHTML += `<option value="${c}">${c}</option>`);
-  
-  updateStats();
-  filterCards();
-}
-
-function updateStats() {
-  const ok = allFoods.filter(f=>f.photo_status==='approved').length;
-  const bad = allFoods.filter(f=>f.photo_status==='rejected').length;
-  const pending = allFoods.filter(f=>!f.photo_status).length;
-  document.getElementById('s-ok').textContent = ok;
-  document.getElementById('s-bad').textContent = bad;
-  document.getElementById('s-pending').textContent = pending;
-  document.getElementById('s-total').textContent = allFoods.length;
-}
-
-function filterCards() {
-  const search = document.getElementById('search').value.toLowerCase();
-  const status = document.getElementById('filter-status').value;
-  const cat = document.getElementById('filter-cat').value;
-  
-  filtered = allFoods.filter(f => {
-    if(search && !(f.name||'').toLowerCase().includes(search)) return false;
-    if(cat !== 'all' && f.category !== cat) return false;
-    if(status === 'approved' && f.photo_status !== 'approved') return false;
-    if(status === 'rejected' && f.photo_status !== 'rejected') return false;
-    if(status === 'pending' && f.photo_status) return false;
-    return true;
-  });
-  
-  currentPage = 0;
-  renderPage();
-}
-
-function renderPage() {
-  const start = currentPage * PAGE_SIZE;
-  const page = filtered.slice(start, start + PAGE_SIZE);
-  
-  const grid = document.getElementById('grid');
-  if(!page.length) { grid.innerHTML = '<div class="loader">Sonuç bulunamadı</div>'; renderPagination(); return; }
-  
-  grid.innerHTML = page.map(f => {
-    const status = f.photo_status || 'pending';
-    const imgSrc = f.photo_url || '';
-    const supaUrl = `https://cmsvgmvymlrfdhhvpuwt.supabase.co/storage/v1/object/public/food-images/${toSlug(f.name)}.jpg`;
-    const displayUrl = imgSrc || supaUrl;
-    
-    return `<div class="card ${status}" id="card-${f.id}">
-      <div class="img-wrap">
-        ${displayUrl 
-          ? `<img src="${displayUrl}" alt="${f.name}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=no-img>🍽️</div>'">`
-          : '<div class="no-img">🍽️</div>'
-        }
-        <span class="badge ${status==='approved'?'ok':status==='rejected'?'bad':'new'}">
-          ${status==='approved'?'✓ OK':status==='rejected'?'✗ Yanlış':'? Bekliyor'}
-        </span>
-      </div>
-      <div class="info">
-        <div class="name" title="${f.name}">${f.name}</div>
-        <div class="cat">${f.category||'—'}</div>
-        <div class="actions">
-          <button class="btn-g" onclick="approve('${f.id}')">✓</button>
-          <button class="btn-r" onclick="reject('${f.id}')">✗</button>
-          <button onclick="toggleEdit('${f.id}')">✎ Düzelt</button>
-        </div>
-      </div>
-      <div class="edit-row" id="edit-${f.id}">
-        <input type="text" id="url-${f.id}" placeholder="Yeni resim URL..." value="${imgSrc}">
-        <button class="btn-b" onclick="saveUrl('${f.id}')">Kaydet</button>
-      </div>
-    </div>`;
-  }).join('');
-  
-  renderPagination();
-}
-
-function renderPagination() {
-  const total = Math.ceil(filtered.length / PAGE_SIZE);
-  const pag = document.getElementById('pagination');
-  if(total <= 1) { pag.innerHTML=''; return; }
-  
-  let html = '';
-  if(currentPage > 0) html += `<button onclick="goPage(${currentPage-1})">← Önceki</button>`;
-  html += `<span style="color:#666;font-size:13px;padding:8px">${currentPage+1}/${total} (${filtered.length} sonuç)</span>`;
-  if(currentPage < total-1) html += `<button onclick="goPage(${currentPage+1})">Sonraki →</button>`;
-  pag.innerHTML = html;
-}
-
-function goPage(p) { currentPage = p; renderPage(); window.scrollTo(0,0); }
-
-function toSlug(name) {
-  return (name||'').toLowerCase()
+function toSlug(n){
+  return(n||'').toLowerCase()
     .replace(/ş/g,'s').replace(/ğ/g,'g').replace(/ü/g,'u')
     .replace(/ö/g,'o').replace(/ç/g,'c').replace(/ı/g,'i')
     .replace(/İ/g,'i').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 }
 
-async function approve(id) {
-  const { error } = await sb.from('foods').update({ photo_status: 'approved' }).eq('id', id);
-  if(error) { alert(error.message); return; }
-  const food = allFoods.find(f=>f.id==id);
-  if(food) food.photo_status = 'approved';
-  const card = document.getElementById('card-'+id);
-  if(card) {
-    card.className = 'card approved';
-    card.querySelector('.badge').className = 'badge ok';
-    card.querySelector('.badge').textContent = '✓ OK';
-  }
+async function load(){
+  document.getElementById('grid').innerHTML='<div class="loading-msg">Yükleniyor...</div>';
+  const{data}=await sb.from('foods').select('id,name,category,photo_url,photo_status').order('name').limit(5000);
+  foods=data||[];
+  // Kategori filtresi
+  const cats=[...new Set(foods.map(f=>f.category).filter(Boolean))].sort();
+  const sel=document.getElementById('f-cat');
+  sel.innerHTML='<option value="all">Tüm Kategoriler</option>';
+  cats.forEach(c=>sel.innerHTML+=`<option value="${c}">${c}</option>`);
   updateStats();
+  applyFilter();
 }
 
-async function reject(id) {
-  const { error } = await sb.from('foods').update({ photo_status: 'rejected' }).eq('id', id);
-  if(error) { alert(error.message); return; }
-  const food = allFoods.find(f=>f.id==id);
-  if(food) food.photo_status = 'rejected';
-  const card = document.getElementById('card-'+id);
-  if(card) {
-    card.className = 'card rejected';
-    card.querySelector('.badge').className = 'badge bad';
-    card.querySelector('.badge').textContent = '✗ Yanlış';
-  }
-  updateStats();
+function updateStats(){
+  document.getElementById('s-ok').textContent=foods.filter(f=>f.photo_status==='approved').length;
+  document.getElementById('s-bad').textContent=foods.filter(f=>f.photo_status==='rejected').length;
+  document.getElementById('s-pend').textContent=foods.filter(f=>!f.photo_status).length;
+  document.getElementById('s-total').textContent=foods.length;
 }
 
-function toggleEdit(id) {
-  const row = document.getElementById('edit-'+id);
-  row.style.display = row.style.display === 'block' ? 'none' : 'block';
+function applyFilter(){
+  const q=document.getElementById('q').value.toLowerCase();
+  const st=document.getElementById('f-status').value;
+  const cat=document.getElementById('f-cat').value;
+  filtered=foods.filter(f=>{
+    if(q&&!(f.name||'').toLowerCase().includes(q))return false;
+    if(cat!=='all'&&f.category!==cat)return false;
+    if(st==='approved'&&f.photo_status!=='approved')return false;
+    if(st==='rejected'&&f.photo_status!=='rejected')return false;
+    if(st==='pending'&&f.photo_status)return false;
+    return true;
+  });
+  page=0;render();
 }
 
-async function saveUrl(id) {
-  const url = document.getElementById('url-'+id).value.trim();
-  if(!url) return;
-  const { error } = await sb.from('foods')
-    .update({ photo_url: url, photo_status: 'approved' })
-    .eq('id', id);
-  if(error) { alert(error.message); return; }
-  const food = allFoods.find(f=>f.id==id);
-  if(food) { food.photo_url = url; food.photo_status = 'approved'; }
-  // Resmi güncelle
-  const card = document.getElementById('card-'+id);
-  if(card) {
-    const img = card.querySelector('img');
-    if(img) img.src = url;
-    card.className = 'card approved';
-    card.querySelector('.badge').className = 'badge ok';
-    card.querySelector('.badge').textContent = '✓ OK';
-    document.getElementById('edit-'+id).style.display = 'none';
-  }
-  updateStats();
-  alert('✅ Kaydedildi!');
-}
-
-async function approveAll() {
-  const page = filtered.slice(currentPage*PAGE_SIZE, (currentPage+1)*PAGE_SIZE);
-  const ids = page.map(f=>f.id);
-  if(!confirm(`${ids.length} yemeği onayla?`)) return;
+function render(){
+  const items=filtered.slice(page*PER,(page+1)*PER);
+  document.getElementById('pinfo').textContent=`${filtered.length} sonuç`;
+  if(!items.length){document.getElementById('grid').innerHTML='<div class="loading-msg">Sonuç yok</div>';renderPag();return;}
   
-  // Batch update
-  for(const id of ids) {
-    await sb.from('foods').update({ photo_status: 'approved' }).eq('id', id);
-    const food = allFoods.find(f=>f.id==id);
-    if(food) food.photo_status = 'approved';
+  document.getElementById('grid').innerHTML=items.map(f=>{
+    const slug=toSlug(f.name);
+    const imgUrl=f.photo_url||(STORAGE_URL+slug+'.jpg');
+    const st=f.photo_status||'pending';
+    return`<div class="card ${st==='approved'?'approved':st==='rejected'?'rejected':''}" id="c${f.id}">
+      <div class="img-box">
+        <img src="${imgUrl}" alt="${f.name}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=noimg>🍽️</div>'">
+        <div class="status-dot ${st==='approved'?'dot-ok':st==='rejected'?'dot-bad':'dot-wait'}"></div>
+      </div>
+      <div class="card-info">
+        <div class="card-name" title="${f.name}">${f.name}</div>
+        <div class="card-btns">
+          <button class="b-ok" onclick="approve('${f.id}',event)">✓</button>
+          <button class="b-bad" onclick="reject('${f.id}',event)">✗</button>
+          <button class="b-pick" onclick="openPicker('${f.id}','${f.name.replace(/'/g,"\\'")}',event)">🔍</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  renderPag();
+}
+
+function renderPag(){
+  const tot=Math.ceil(filtered.length/PER);
+  const el=document.getElementById('pag');
+  if(tot<=1){el.innerHTML='';return;}
+  el.innerHTML=(page>0?`<button class="btn" onclick="goPage(${page-1})">← Önceki</button>`:'')
+    +`<span style="color:#666;font-size:13px;padding:8px">${page+1}/${tot}</span>`
+    +(page<tot-1?`<button class="btn" onclick="goPage(${page+1})">Sonraki →</button>`:'');
+}
+function goPage(p){page=p;render();window.scrollTo(0,0);}
+
+async function approve(id,e){
+  e&&e.stopPropagation();
+  await sb.from('foods').update({photo_status:'approved'}).eq('id',id);
+  const f=foods.find(x=>x.id==id);if(f)f.photo_status='approved';
+  const c=document.getElementById('c'+id);
+  if(c){c.className='card approved';c.querySelector('.status-dot').className='status-dot dot-ok';}
+  updateStats();
+}
+
+async function reject(id,e){
+  e&&e.stopPropagation();
+  await sb.from('foods').update({photo_status:'rejected'}).eq('id',id);
+  const f=foods.find(x=>x.id==id);if(f)f.photo_status='rejected';
+  const c=document.getElementById('c'+id);
+  if(c){c.className='card rejected';c.querySelector('.status-dot').className='status-dot dot-bad';}
+  updateStats();
+}
+
+async function approveAll(){
+  const items=filtered.slice(page*PER,(page+1)*PER);
+  if(!confirm(`${items.length} yemeği onayla?`))return;
+  for(const f of items){
+    await sb.from('foods').update({photo_status:'approved'}).eq('id',f.id);
+    f.photo_status='approved';
+  }
+  updateStats();render();
+}
+
+// ── RESİM SEÇİCİ ──
+function openPicker(id,name,e){
+  e&&e.stopPropagation();
+  currentFood={id,name};
+  selectedUrl=null;
+  document.getElementById('modal-title').textContent='📸 Resim Seç: '+name;
+  document.getElementById('img-q').value=name;
+  document.getElementById('save-btn').disabled=true;
+  document.getElementById('selected-info').textContent='';
+  document.getElementById('custom-url').value='';
+  document.getElementById('overlay').classList.add('show');
+  searchImages();
+}
+
+function closeModal(){document.getElementById('overlay').classList.remove('show');}
+
+function setSource(src,btn){
+  currentSource=src;
+  document.querySelectorAll('.src-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  searchImages();
+}
+
+async function searchImages(){
+  const q=document.getElementById('img-q').value.trim();
+  if(!q)return;
+  const res=document.getElementById('img-results');
+  res.innerHTML='<div class="loading-msg">🔍 Aranıyor...</div>';
+  selectedUrl=null;
+  document.getElementById('save-btn').disabled=true;
+
+  if(currentSource==='pexels') await searchPexels(q);
+  else if(currentSource==='unsplash') await searchUnsplash(q);
+  else if(currentSource==='pixabay') await searchPixabay(q);
+  else if(currentSource==='supabase') searchStorage(q);
+}
+
+async function searchPexels(q){
+  try{
+    const r=await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(q+' food turkish')}&per_page=24&orientation=square`,
+      {headers:{Authorization:PEXELS_KEY}});
+    const d=await r.json();
+    showResults((d.photos||[]).map(p=>({url:p.src.medium,src:'Pexels',thumb:p.src.small})));
+  }catch(e){document.getElementById('img-results').innerHTML='<div class="loading-msg">Hata: '+e.message+'</div>';}
+}
+
+async function searchUnsplash(q){
+  // Unsplash public demo - sınırlı
+  try{
+    const r=await fetch(`https://source.unsplash.com/featured/?${encodeURIComponent(q)},food`);
+    // source.unsplash redirect verir, birkaç farklı sorgu göster
+    const queries=['turkish food','meal plate','cuisine dish','healthy food'];
+    const urls=queries.map((_,i)=>`https://source.unsplash.com/300x300/?${encodeURIComponent(q)},food,${i}`);
+    showResults(urls.map(url=>({url,src:'Unsplash',thumb:url})));
+  }catch(e){
+    document.getElementById('img-results').innerHTML='<div class="loading-msg">Unsplash erişim kısıtlı, Pexels dene</div>';
+  }
+}
+
+async function searchPixabay(q){
+  // Pixabay public API
+  try{
+    const r=await fetch(`https://pixabay.com/api/?key=44971209-3e91d4aa0c3fb21a9e18e6c31&q=${encodeURIComponent(q+' food')}&image_type=photo&per_page=24&safesearch=true`);
+    const d=await r.json();
+    showResults((d.hits||[]).map(p=>({url:p.webformatURL,src:'Pixabay',thumb:p.previewURL})));
+  }catch(e){
+    document.getElementById('img-results').innerHTML='<div class="loading-msg">Pixabay hata: '+e.message+'</div>';
+  }
+}
+
+function searchStorage(q){
+  // Supabase Storage'da slug ara
+  const slug=toSlug(q);
+  const variants=[
+    slug,
+    slug+'-kac-kalori',
+    slug+'tarifi',
+  ];
+  const urls=variants.map(v=>({
+    url:STORAGE_URL+v+'.jpg',
+    src:'Storage',
+    thumb:STORAGE_URL+v+'.jpg'
+  }));
+  // Ayrıca benzer isimler
+  showResults(urls);
+}
+
+function showResults(items){
+  const res=document.getElementById('img-results');
+  if(!items.length){res.innerHTML='<div class="loading-msg">Sonuç bulunamadı</div>';return;}
+  res.innerHTML=items.map((item,i)=>`
+    <div class="result-item" id="ri${i}" onclick="selectImg('${item.url.replace(/'/g,"\\'")}',${i})">
+      <img src="${item.thumb||item.url}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'">
+      <div class="src-label">${item.src}</div>
+    </div>
+  `).join('');
+}
+
+function selectImg(url,idx){
+  document.querySelectorAll('.result-item').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('ri'+idx)?.classList.add('selected');
+  selectedUrl=url;
+  document.getElementById('save-btn').disabled=false;
+  document.getElementById('selected-info').textContent='Seçildi ✓';
+}
+
+function useCustomUrl(){
+  const url=document.getElementById('custom-url').value.trim();
+  if(!url){alert('URL gir');return;}
+  selectedUrl=url;
+  document.getElementById('save-btn').disabled=false;
+  document.getElementById('selected-info').textContent='URL seçildi ✓';
+}
+
+async function saveSelected(){
+  if(!selectedUrl||!currentFood)return;
+  const{error}=await sb.from('foods')
+    .update({photo_url:selectedUrl,photo_status:'approved'})
+    .eq('id',currentFood.id);
+  if(error){alert('Hata: '+error.message);return;}
+  // Local güncelle
+  const f=foods.find(x=>x.id==currentFood.id);
+  if(f){f.photo_url=selectedUrl;f.photo_status='approved';}
+  const c=document.getElementById('c'+currentFood.id);
+  if(c){
+    const img=c.querySelector('img');
+    if(img)img.src=selectedUrl;
+    c.className='card approved';
+    c.querySelector('.status-dot').className='status-dot dot-ok';
   }
   updateStats();
-  filterCards();
-  alert(`✅ ${ids.length} yemek onaylandı!`);
+  closeModal();
 }
 
-function exportBad() {
-  const bad = allFoods.filter(f=>f.photo_status==='rejected');
-  const json = JSON.stringify(bad.map(f=>({id:f.id,name:f.name,photo_url:f.photo_url})), null, 2);
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([json],{type:'application/json'}));
-  a.download = 'rejected_foods.json';
-  a.click();
-}
-
-// Supabase'de photo_status kolonu yoksa ekle
-async function ensureColumn() {
-  // Basit test
-  const { error } = await sb.from('foods').select('photo_status').limit(1);
-  if(error && error.message.includes('photo_status')) {
-    alert('⚠️ Supabase SQL Editor\'de şunu çalıştır:\nALTER TABLE foods ADD COLUMN photo_status text;');
-  }
-}
-
-ensureColumn().then(() => loadFoods());
+// Supabase'de photo_status kolonu yoksa ekle uyarısı
+sb.from('foods').select('photo_status').limit(1).then(({error})=>{
+  if(error&&error.message.includes('photo_status')){
+    alert('Supabase SQL Editor\'de çalıştır:\nALTER TABLE foods ADD COLUMN IF NOT EXISTS photo_status text;');
+  }else{load();}
+});
 </script>
 </body>
 </html>
