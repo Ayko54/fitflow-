@@ -847,10 +847,11 @@ let chPeriod='daily',progPeriod='weekly';
 let btnLocks={};
 
 // ============ UTILS ============
-function toast(msg,type='',dur=2800){
+function toast(msg,type='',dur=0){
   const t=document.getElementById('toast');
   t.textContent=msg;t.className=type?`show ${type}`:'show';
-  clearTimeout(t._t);t._t=setTimeout(()=>t.className='',dur);
+  const d=dur||Math.max(2800,Math.min((msg||'').length*60,6000));
+  clearTimeout(t._t);t._t=setTimeout(()=>t.className='',d);
 }
 const err=(m)=>toast(m,'error',3500);
 const ok=(m)=>toast(m,'success',2500);
@@ -9149,8 +9150,9 @@ const PEXELS_PHOTO_DB_KEYS = Object.keys(PEXELS_PHOTO_DB);
 const ALL_PHOTO_DB = Object.assign({}, DIYETKOLIK_DB, PEXELS_PHOTO_DB);
 
 const SUPABASE_FOOD_IMG = 'https://cmsvgmvymlrfdhhvpuwt.supabase.co/storage/v1/object/public/food-images/';
-const PEXELS_KEY_PHOTO = 'q80iZBRqts5DwaM1EmkDMTph6DGlkEwY6Pggsqrc18o6j6bt4gkiuX4y';
+const PEXELS_KEY_PHOTO = ''; // Key backend'de - /api/chat.js proxy kullanılıyor
 const _photoCache = {};
+let _sortedPhotoKeys = null;
 
 function toFoodSlug(name){
   return (name||'').toLowerCase()
@@ -9203,8 +9205,11 @@ async function getFoodPhotoAsync(name, imgEl){
       this.onerror = null;
       try{
         const q = encodeURIComponent((name||'')+ ' turkish food');
-        const r = await fetch('https://api.pexels.com/v1/search?query='+q+'&per_page=1&orientation=square',
-          {headers:{Authorization:PEXELS_KEY_PHOTO}});
+        const r = await fetch('/api/chat', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({pexels_query: (name||'') + ' turkish food'})
+        });
         if(r.ok){
           const d = await r.json();
           if(d.photos?.[0]){
@@ -9590,8 +9595,8 @@ async function loadFood(){
           </div>
           <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
             <button onclick="showPortionMenu('${item.id}',${item.calories||0},${item.protein_g||0},${item.carbs_g||0},${item.fat_g||0})" 
-              style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text2);height:26px;border-radius:8px;font-size:11px;cursor:pointer;padding:0 7px;" title="Ne kadar yedin?">
-              🍽️ Düzenle
+              style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text2);width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer;padding:0;flex-shrink:0;" title="Ne kadar yedin?">
+              🍽️
             </button>
             <button onclick="deleteFoodLog('${item.id}')" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;width:26px;height:26px;border-radius:50%;font-size:16px;cursor:pointer;line-height:1;" title="Sil">×</button>
           </div>
@@ -9769,6 +9774,7 @@ async function applyPortion(id, pct, kcal, prot, carb, fat){
   }
   if(pct === 1.0){
     ok('Tamamı kaydedildi ✓');
+    loadFood();
     return;
   }
   const newKcal = Math.round(kcal * pct);
@@ -10067,6 +10073,14 @@ async function selSwMeal(btn){
   document.getElementById('sw-container').style.display='block';
   document.getElementById('sw-done').style.display='none';
   document.getElementById('sw-count').textContent='...';
+  // Yükleniyor state göster
+  const swCard=document.getElementById('sw-card');
+  if(swCard){
+    document.getElementById('sw-img').style.display='none';
+    document.getElementById('sw-name').textContent='Yükleniyor...';
+    document.getElementById('sw-sub').textContent='';
+    document.getElementById('sw-macros').innerHTML='';
+  }
   // Gösterilen yemekleri sıfırla (bugünkü bu öğün için)
   const{data:shown}=await sb.from('swipe_history').select('item_id')
     .eq('user_id',CU.id).eq('log_date',today()).eq('item_type','food');
@@ -10572,8 +10586,16 @@ Bilgileri: ${UP?.age||'-'} yaş, ${UP?.height_cm||'-'}cm, ${UP?.current_weight||
 Kalori hedefi: ${UP?.daily_calorie_goal||1800} kcal. Beslenme: ${UP?.diet_type||'normal'}. Alerjiler: ${UP?.allergies||'yok'}.
 KURALLAR: Türkçe yaz. Markdown kullanma (**, ##). Kısa ve samimi ol (max 4 cümle). Kullanıcı verilerini kullan.`;
     const resp=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      model:'claude-haiku-4-5-20251001',max_tokens:500,system:sys,messages:chatHist.slice(-12)
+      model:'claude-haiku-4-5-20251001',max_tokens:500,system:sys,messages:chatHist.slice(-12),
+      user_id:CU?.id
     })});
+    if(resp.status===429){
+      const e=await resp.json();
+      loadEl.classList.remove('typing-dots');
+      loadEl.textContent=e.message||'Günlük mesaj limitin doldu!';
+      err(e.message||'Günlük mesaj limitin doldu!');
+      return;
+    }
     if(!resp.ok){loadEl.classList.remove('typing-dots');loadEl.textContent='Şu an yanıt veremiyorum. Tekrar dene.';return;}
     const d=await resp.json();
     if(!d.content||!d.content[0]){loadEl.classList.remove('typing-dots');loadEl.textContent='Yanıt alınamadı.';return;}
