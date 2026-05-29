@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FitFlow Admin</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,sans-serif;background:#0a0612;color:#fff;padding:20px;}
+h1{font-size:20px;margin-bottom:6px;color:#e8547a;}
+.sub{color:#666;font-size:13px;margin-bottom:20px;}
+.stats{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.stat{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:8px 16px;font-size:12px;color:#888;}
+.stat b{color:#fff;font-size:18px;display:block;}
+.stat.g b{color:#22c55e;} .stat.r b{color:#ef4444;} .stat.y b{color:#f59e0b;}
+.filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+input[type=text]{background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:8px 12px;font-size:13px;width:250px;}
+select{background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:8px 12px;font-size:13px;}
+button{padding:8px 16px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;font-size:13px;cursor:pointer;}
+button:hover{background:#252525;}
+.btn-g{background:#16a34a;border-color:#15803d;color:#fff;}
+.btn-r{background:#dc2626;border-color:#b91c1c;color:#fff;}
+.btn-b{background:#2563eb;border-color:#1d4ed8;color:#fff;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;position:relative;}
+.card.approved{border-color:#22c55e44;}
+.card.rejected{border-color:#ef444444;}
+.card.pending{border-color:#f59e0b44;}
+.img-wrap{width:100%;height:140px;background:#111;position:relative;overflow:hidden;}
+.img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
+.img-wrap .no-img{display:flex;align-items:center;justify-content:center;height:100%;color:#444;font-size:32px;}
+.badge{position:absolute;top:6px;right:6px;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600;}
+.badge.ok{background:#22c55e;color:#000;}
+.badge.bad{background:#ef4444;color:#fff;}
+.badge.new{background:#f59e0b;color:#000;}
+.info{padding:8px 10px;}
+.name{font-size:12px;font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cat{font-size:10px;color:#666;margin-bottom:8px;}
+.actions{display:flex;gap:4px;}
+.actions button{flex:1;padding:5px;font-size:11px;border-radius:6px;}
+.edit-row{padding:8px 10px;border-top:1px solid #2a2a2a;display:none;}
+.edit-row input{width:100%;margin-bottom:6px;font-size:11px;}
+.edit-row button{width:100%;font-size:11px;}
+.loader{text-align:center;padding:40px;color:#666;}
+.pagination{display:flex;gap:8px;justify-content:center;margin-top:20px;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+<h1>🛠️ FitFlow Admin Panel</h1>
+<p class="sub">Yemek fotoğraflarını onayla veya düzelt</p>
+
+<div class="stats">
+  <div class="stat g"><b id="s-ok">0</b>Onaylı</div>
+  <div class="stat r"><b id="s-bad">0</b>Reddedilen</div>
+  <div class="stat y"><b id="s-pending">0</b>Bekleyen</div>
+  <div class="stat"><b id="s-total">0</b>Toplam</div>
+</div>
+
+<div class="filters">
+  <input type="text" id="search" placeholder="Yemek ara..." oninput="filterCards()">
+  <select id="filter-status" onchange="filterCards()">
+    <option value="all">Tümü</option>
+    <option value="pending" selected>Bekleyenler</option>
+    <option value="approved">Onaylılar</option>
+    <option value="rejected">Reddedilenler</option>
+  </select>
+  <select id="filter-cat" onchange="filterCards()">
+    <option value="all">Tüm Kategoriler</option>
+  </select>
+  <button onclick="approveAll()" class="btn-g">✓ Görünenleri Onayla</button>
+  <button onclick="loadFoods()" class="btn-b">↻ Yenile</button>
+  <button onclick="exportBad()">⬇ Reddedilenleri İndir</button>
+</div>
+
+<div id="grid" class="grid"><div class="loader">Yükleniyor...</div></div>
+<div class="pagination" id="pagination"></div>
+
+<script>
+const SB_URL = 'https://cmsvgmvymlrfdhhvpuwt.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtc3ZnbXZ5bWxyZmRoaHZwdXd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MDI2NzIsImV4cCI6MjA5NTQ3ODY3Mn0.yAhOYz2-z0VL3bSfc5YL7nS3Dh1_eOVlxzD-HYjN9sw';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+// Admin şifresi - basit koruma
+const ADMIN_PASS = 'fitflow2024';
+if(localStorage.getItem('admin_auth') !== ADMIN_PASS) {
+  const pass = prompt('Admin şifresi:');
+  if(pass !== ADMIN_PASS) { document.body.innerHTML = '<h2 style="color:red;padding:40px">Yetkisiz erişim</h2>'; throw new Error('Unauthorized'); }
+  localStorage.setItem('admin_auth', pass);
+}
+
+let allFoods = [];
+let filtered = [];
+const PAGE_SIZE = 60;
+let currentPage = 0;
+
+// photo_status: null=bekleyen, 'approved'=onaylı, 'rejected'=reddedildi
+// Admin bu alanı set edecek
+
+async function loadFoods() {
+  document.getElementById('grid').innerHTML = '<div class="loader">Yükleniyor...</div>';
+  
+  const { data, error } = await sb.from('foods')
+    .select('id, name, category, photo_url, photo_status')
+    .order('name')
+    .limit(5000);
+  
+  if(error) { alert('Hata: ' + error.message); return; }
+  
+  allFoods = data || [];
+  
+  // Kategori filtresi doldur
+  const cats = [...new Set(allFoods.map(f=>f.category).filter(Boolean))].sort();
+  const catSel = document.getElementById('filter-cat');
+  catSel.innerHTML = '<option value="all">Tüm Kategoriler</option>';
+  cats.forEach(c => catSel.innerHTML += `<option value="${c}">${c}</option>`);
+  
+  updateStats();
+  filterCards();
+}
+
+function updateStats() {
+  const ok = allFoods.filter(f=>f.photo_status==='approved').length;
+  const bad = allFoods.filter(f=>f.photo_status==='rejected').length;
+  const pending = allFoods.filter(f=>!f.photo_status).length;
+  document.getElementById('s-ok').textContent = ok;
+  document.getElementById('s-bad').textContent = bad;
+  document.getElementById('s-pending').textContent = pending;
+  document.getElementById('s-total').textContent = allFoods.length;
+}
+
+function filterCards() {
+  const search = document.getElementById('search').value.toLowerCase();
+  const status = document.getElementById('filter-status').value;
+  const cat = document.getElementById('filter-cat').value;
+  
+  filtered = allFoods.filter(f => {
+    if(search && !(f.name||'').toLowerCase().includes(search)) return false;
+    if(cat !== 'all' && f.category !== cat) return false;
+    if(status === 'approved' && f.photo_status !== 'approved') return false;
+    if(status === 'rejected' && f.photo_status !== 'rejected') return false;
+    if(status === 'pending' && f.photo_status) return false;
+    return true;
+  });
+  
+  currentPage = 0;
+  renderPage();
+}
+
+function renderPage() {
+  const start = currentPage * PAGE_SIZE;
+  const page = filtered.slice(start, start + PAGE_SIZE);
+  
+  const grid = document.getElementById('grid');
+  if(!page.length) { grid.innerHTML = '<div class="loader">Sonuç bulunamadı</div>'; renderPagination(); return; }
+  
+  grid.innerHTML = page.map(f => {
+    const status = f.photo_status || 'pending';
+    const imgSrc = f.photo_url || '';
+    const supaUrl = `https://cmsvgmvymlrfdhhvpuwt.supabase.co/storage/v1/object/public/food-images/${toSlug(f.name)}.jpg`;
+    const displayUrl = imgSrc || supaUrl;
+    
+    return `<div class="card ${status}" id="card-${f.id}">
+      <div class="img-wrap">
+        ${displayUrl 
+          ? `<img src="${displayUrl}" alt="${f.name}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=no-img>🍽️</div>'">`
+          : '<div class="no-img">🍽️</div>'
+        }
+        <span class="badge ${status==='approved'?'ok':status==='rejected'?'bad':'new'}">
+          ${status==='approved'?'✓ OK':status==='rejected'?'✗ Yanlış':'? Bekliyor'}
+        </span>
+      </div>
+      <div class="info">
+        <div class="name" title="${f.name}">${f.name}</div>
+        <div class="cat">${f.category||'—'}</div>
+        <div class="actions">
+          <button class="btn-g" onclick="approve('${f.id}')">✓</button>
+          <button class="btn-r" onclick="reject('${f.id}')">✗</button>
+          <button onclick="toggleEdit('${f.id}')">✎ Düzelt</button>
+        </div>
+      </div>
+      <div class="edit-row" id="edit-${f.id}">
+        <input type="text" id="url-${f.id}" placeholder="Yeni resim URL..." value="${imgSrc}">
+        <button class="btn-b" onclick="saveUrl('${f.id}')">Kaydet</button>
+      </div>
+    </div>`;
+  }).join('');
+  
+  renderPagination();
+}
+
+function renderPagination() {
+  const total = Math.ceil(filtered.length / PAGE_SIZE);
+  const pag = document.getElementById('pagination');
+  if(total <= 1) { pag.innerHTML=''; return; }
+  
+  let html = '';
+  if(currentPage > 0) html += `<button onclick="goPage(${currentPage-1})">← Önceki</button>`;
+  html += `<span style="color:#666;font-size:13px;padding:8px">${currentPage+1}/${total} (${filtered.length} sonuç)</span>`;
+  if(currentPage < total-1) html += `<button onclick="goPage(${currentPage+1})">Sonraki →</button>`;
+  pag.innerHTML = html;
+}
+
+function goPage(p) { currentPage = p; renderPage(); window.scrollTo(0,0); }
+
+function toSlug(name) {
+  return (name||'').toLowerCase()
+    .replace(/ş/g,'s').replace(/ğ/g,'g').replace(/ü/g,'u')
+    .replace(/ö/g,'o').replace(/ç/g,'c').replace(/ı/g,'i')
+    .replace(/İ/g,'i').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+
+async function approve(id) {
+  const { error } = await sb.from('foods').update({ photo_status: 'approved' }).eq('id', id);
+  if(error) { alert(error.message); return; }
+  const food = allFoods.find(f=>f.id==id);
+  if(food) food.photo_status = 'approved';
+  const card = document.getElementById('card-'+id);
+  if(card) {
+    card.className = 'card approved';
+    card.querySelector('.badge').className = 'badge ok';
+    card.querySelector('.badge').textContent = '✓ OK';
+  }
+  updateStats();
+}
+
+async function reject(id) {
+  const { error } = await sb.from('foods').update({ photo_status: 'rejected' }).eq('id', id);
+  if(error) { alert(error.message); return; }
+  const food = allFoods.find(f=>f.id==id);
+  if(food) food.photo_status = 'rejected';
+  const card = document.getElementById('card-'+id);
+  if(card) {
+    card.className = 'card rejected';
+    card.querySelector('.badge').className = 'badge bad';
+    card.querySelector('.badge').textContent = '✗ Yanlış';
+  }
+  updateStats();
+}
+
+function toggleEdit(id) {
+  const row = document.getElementById('edit-'+id);
+  row.style.display = row.style.display === 'block' ? 'none' : 'block';
+}
+
+async function saveUrl(id) {
+  const url = document.getElementById('url-'+id).value.trim();
+  if(!url) return;
+  const { error } = await sb.from('foods')
+    .update({ photo_url: url, photo_status: 'approved' })
+    .eq('id', id);
+  if(error) { alert(error.message); return; }
+  const food = allFoods.find(f=>f.id==id);
+  if(food) { food.photo_url = url; food.photo_status = 'approved'; }
+  // Resmi güncelle
+  const card = document.getElementById('card-'+id);
+  if(card) {
+    const img = card.querySelector('img');
+    if(img) img.src = url;
+    card.className = 'card approved';
+    card.querySelector('.badge').className = 'badge ok';
+    card.querySelector('.badge').textContent = '✓ OK';
+    document.getElementById('edit-'+id).style.display = 'none';
+  }
+  updateStats();
+  alert('✅ Kaydedildi!');
+}
+
+async function approveAll() {
+  const page = filtered.slice(currentPage*PAGE_SIZE, (currentPage+1)*PAGE_SIZE);
+  const ids = page.map(f=>f.id);
+  if(!confirm(`${ids.length} yemeği onayla?`)) return;
+  
+  // Batch update
+  for(const id of ids) {
+    await sb.from('foods').update({ photo_status: 'approved' }).eq('id', id);
+    const food = allFoods.find(f=>f.id==id);
+    if(food) food.photo_status = 'approved';
+  }
+  updateStats();
+  filterCards();
+  alert(`✅ ${ids.length} yemek onaylandı!`);
+}
+
+function exportBad() {
+  const bad = allFoods.filter(f=>f.photo_status==='rejected');
+  const json = JSON.stringify(bad.map(f=>({id:f.id,name:f.name,photo_url:f.photo_url})), null, 2);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([json],{type:'application/json'}));
+  a.download = 'rejected_foods.json';
+  a.click();
+}
+
+// Supabase'de photo_status kolonu yoksa ekle
+async function ensureColumn() {
+  // Basit test
+  const { error } = await sb.from('foods').select('photo_status').limit(1);
+  if(error && error.message.includes('photo_status')) {
+    alert('⚠️ Supabase SQL Editor\'de şunu çalıştır:\nALTER TABLE foods ADD COLUMN photo_status text;');
+  }
+}
+
+ensureColumn().then(() => loadFoods());
+</script>
+</body>
+</html>
