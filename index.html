@@ -116,7 +116,7 @@ select.form-input option{background:#1a0a2e;color:#fff;}
 .search-input{flex:1;background:transparent;border:none;outline:none;font-size:14px;color:#fff;font-family:'Outfit',sans-serif;}
 .search-input::placeholder{color:var(--text3);}
 /* SWIPE */
-.swipe-container{position:relative;height:460px;margin-bottom:14px;}
+.swipe-container{position:relative;height:510px;margin-bottom:14px;}
 .swipe-card-shadow{position:absolute;top:10px;left:4px;right:4px;bottom:0;border-radius:20px;background:rgba(255,255,255,0.03);border:1px solid var(--border);}
 .swipe-card{position:absolute;top:0;left:0;right:0;bottom:10px;border-radius:20px;overflow:hidden;border:1px solid var(--border-accent);background:var(--bg2);cursor:grab;user-select:none;}
 .swipe-card.animate{transition:transform .3s ease,opacity .3s ease;}
@@ -579,7 +579,7 @@ select.form-input option{background:#1a0a2e;color:#fff;}
       <div class="swipe-card" id="sw-card">
         <div class="swipe-label swipe-label-left" id="sw-label-no">✗ İstemiyorum</div>
         <div class="swipe-label swipe-label-right" id="sw-label-yes">✓ Plana Ekle</div>
-        <img id="sw-img" src="" alt="" style="width:100%;height:290px;object-fit:cover;display:none;border-radius:0;" onerror="this.style.display='none'"/>
+        <img id="sw-img" src="" alt="" style="width:100%;height:330px;object-fit:cover;display:none;border-radius:0;" onerror="this.style.display='none'"/>
         <div style="padding:14px 16px;">
           <div style="font-size:18px;font-weight:700;margin-bottom:3px;" id="sw-name">-</div>
           <div style="font-size:12px;color:var(--text3);margin-bottom:10px;" id="sw-sub">-</div>
@@ -1928,10 +1928,55 @@ async function saveSteps(){
 
 // ============ SWIPE ============
 let swMeal = 'breakfast';
-function selSwMeal(btn){
+async function selSwMeal(btn){
   document.querySelectorAll('.sw-meal-btn').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel');
   swMeal = btn.dataset.meal;
+  // Öğün değişince listeyi yeniden yükle
+  swHist=[];swIdx=0;
+  document.getElementById('sw-container').style.display='block';
+  document.getElementById('sw-done').style.display='none';
+  document.getElementById('sw-count').textContent='...';
+  // Gösterilen yemekleri sıfırla (bugünkü bu öğün için)
+  const{data:shown}=await sb.from('swipe_history').select('item_id')
+    .eq('user_id',CU.id).eq('log_date',today()).eq('item_type','food');
+  const shownIds=(shown||[]).map(s=>s.item_id);
+  const mealFoods = {
+    breakfast:[
+      'menemen','yumurta','omlet','sahanda','çılbır','simit','poğaça','açma','ekmek',
+      'peynir','zeytin','domates','salatalık','bal','reçel','tereyağ','kaymak',
+      'yulaf','granola','müsli','mısır gevreği','kahve','çay','süt','ayran',
+      'smoothie','portakal suyu','avokado','fıstık ezmesi'
+    ],
+    lunch:[
+      'çorba','mercimek','ezogelin','tarhana',
+      'pilav','bulgur','makarna','köfte','tavuk','izgara','sote','şiş',
+      'kebap','döner','lahmacun','pide','salata','humus',
+      'fasulye','nohut','sebze','türlü','dolma','sarma'
+    ],
+    dinner:[
+      'çorba','mercimek','tarhana',
+      'et','biftek','pirzola','kuzu','tandır','güveç','rosto',
+      'tavuk','fırın','haşlama','sote',
+      'balık','somon','levrek','çipura','hamsi',
+      'pilav','bulgur','makarna','sebze','dolma','musakka','karnıyarık','patlıcan','imam'
+    ],
+    snack:[
+      'meyve','elma','muz','portakal','üzüm','çilek','karpuz','kiraz',
+      'yoğurt','kefir','ayran','süt',
+      'badem','ceviz','fıstık','kaju','leblebi','kuruyemiş',
+      'protein','bar','smoothie','granola'
+    ]
+  };
+  const{data:allFoods}=await sb.from('foods').select('*').limit(150);
+  const keywords=mealFoods[swMeal]||[];
+  const allNotShown=(allFoods||[]).filter(f=>!shownIds.includes(f.id));
+  const matched=allNotShown.filter(f=>keywords.some(k=>(f.name||'').toLowerCase().includes(k)));
+  const unmatched=allNotShown.filter(f=>!keywords.some(k=>(f.name||'').toLowerCase().includes(k)));
+  const shuffle=arr=>arr.sort(()=>Math.random()-0.5);
+  swQueue=[...shuffle(matched),...shuffle(unmatched)].slice(0,25);
+  document.getElementById('sw-count').textContent=swQueue.length+' kaldı';
+  showSwCard();
 }
 
 async function openSwipe(type, mealHint){
