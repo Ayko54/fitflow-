@@ -1643,26 +1643,31 @@ async function applyPortion(id, pct, kcal, prot, carb, fat){
     return;
   }
   if(pct === 1.0){
-    // Değişiklik yok, sadece kapat
+    ok('Tamamı kaydedildi ✓');
     return;
   }
-  // Kalorisi güncelle
   const newKcal = Math.round(kcal * pct);
   const newProt = +((prot||0)*pct).toFixed(1);
   const newCarb = +((carb||0)*pct).toFixed(1);
   const newFat  = +((fat||0)*pct).toFixed(1);
   const pctLabel = pct===0.25?'¼':pct===0.33?'⅓':pct===0.5?'½':pct===0.67?'⅔':'¾';
   try{
-    await sb.from('food_logs').update({
-      calories: newKcal,
-      protein_g: newProt,
-      carbs_g: newCarb,
-      fat_g: newFat,
-      portion_desc: pctLabel + ' porsiyon',
-    }).eq('id', id).eq('user_id', CU.id);
-    ok(`${pctLabel} porsiyon kaydedildi · ${newKcal} kcal`);
-    loadFoodScreen();
-  } catch(e){ toast('Hata oluştu'); }
+    const{error} = await sb.from('food_logs')
+      .update({
+        calories: newKcal,
+        protein_g: newProt,
+        carbs_g: newCarb,
+        fat_g: newFat,
+        portion_desc: pctLabel + ' porsiyon',
+      })
+      .eq('id', id)
+      .eq('user_id', CU.id);
+    if(error){ err('Güncellenemedi: ' + error.message); return; }
+    ok(pctLabel + ' porsiyon · ' + newKcal + ' kcal ✓');
+    loadFood();
+  } catch(e){
+    err('Hata: ' + (e.message||e));
+  }
 }
 
 async function deleteFoodLog(id){
