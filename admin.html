@@ -118,6 +118,21 @@ select{background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;pad
         <button class="src-btn" onclick="setSource('unsplash',this)">Unsplash</button>
         <button class="src-btn" onclick="setSource('pixabay',this)">Pixabay</button>
         <button class="src-btn" onclick="setSource('supabase',this)">Supabase Storage</button>
+        <button class="src-btn" onclick="setSource('upload',this)">📁 PC'den Yükle</button>
+      </div>
+      <div id="upload-area" style="display:none;border:2px dashed #333;border-radius:12px;padding:40px;text-align:center;cursor:pointer;margin-bottom:12px;" 
+        onclick="document.getElementById('file-inp').click()"
+        ondragover="event.preventDefault();this.style.borderColor='#e8547a'"
+        ondragleave="this.style.borderColor='#333'"
+        ondrop="handleDrop(event)">
+        <div style="font-size:40px;margin-bottom:10px">📁</div>
+        <div style="color:#888;font-size:14px">Tıkla veya dosyayı sürükle bırak</div>
+        <div style="color:#555;font-size:12px;margin-top:6px">JPG, PNG, WEBP desteklenir</div>
+        <input type="file" id="file-inp" accept="image/*" style="display:none" onchange="handleFileSelect(event)">
+      </div>
+      <div id="upload-preview" style="display:none;margin-bottom:12px;">
+        <img id="upload-thumb" style="max-width:200px;max-height:200px;border-radius:10px;object-fit:cover;display:block;margin:0 auto;">
+        <div id="upload-status" style="text-align:center;margin-top:8px;font-size:13px;color:#888"></div>
       </div>
       <div id="img-results" class="img-results">
         <div class="loading-msg">Yukarıdan arama yap veya kaynak seç</div>
@@ -280,7 +295,81 @@ function setSource(src,btn){
   currentSource=src;
   document.querySelectorAll('.src-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  searchImages();
+  // Upload modunda arama gösterme
+  const uploadArea=document.getElementById('upload-area');
+  const searchBar=document.querySelector('.search-bar');
+  if(src==='upload'){
+    uploadArea.style.display='block';
+    searchBar.style.display='none';
+    document.getElementById('img-results').innerHTML='';
+  } else {
+    uploadArea.style.display='none';
+    searchBar.style.display='flex';
+    searchImages();
+  }
+}
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('upload-area').style.borderColor='#333';
+  const file=e.dataTransfer.files[0];
+  if(file) processFile(file);
+}
+
+function handleFileSelect(e){
+  const file=e.target.files[0];
+  if(file) processFile(file);
+}
+
+async function processFile(file){
+  if(!file.type.startsWith('image/')){alert('Sadece resim dosyası');return;}
+  
+  // Preview göster
+  const reader=new FileReader();
+  reader.onload=e=>{
+    document.getElementById('upload-thumb').src=e.target.result;
+    document.getElementById('upload-preview').style.display='block';
+  };
+  reader.readAsDataURL(file);
+  
+  document.getElementById('upload-status').textContent='⏳ Yükleniyor...';
+  
+  try{
+    // Supabase Storage'a yükle
+    const slug=toSlug(currentFood.name);
+    const ext=file.name.split('.').pop().toLowerCase()||'jpg';
+    const filename=slug+'.'+ext;
+    
+    const arrayBuffer=await file.arrayBuffer();
+    const blob=new Blob([arrayBuffer],{type:file.type});
+    
+    // Supabase REST API ile yükle
+    const uploadUrl=`${SB_URL}/storage/v1/object/food-images/${filename}`;
+    const r=await fetch(uploadUrl,{
+      method:'POST',
+      headers:{
+        'Authorization':'Bearer '+SB_KEY,
+        'apikey':SB_KEY,
+        'Content-Type':file.type,
+        'x-upsert':'true'
+      },
+      body:blob
+    });
+    
+    if(r.ok){
+      const publicUrl=`${STORAGE_URL}${filename}`;
+      selectedUrl=publicUrl;
+      document.getElementById('upload-status').textContent='✅ Yüklendi! Kaydet butonuna bas.';
+      document.getElementById('save-btn').disabled=false;
+      document.getElementById('selected-info').textContent='Dosya yüklendi ✓';
+      document.getElementById('upload-thumb').src=publicUrl;
+    } else {
+      const err=await r.text();
+      document.getElementById('upload-status').textContent='❌ Hata: '+err.slice(0,100);
+    }
+  }catch(e){
+    document.getElementById('upload-status').textContent='❌ Hata: '+e.message;
+  }
 }
 
 async function searchImages(){
