@@ -262,7 +262,9 @@ function goPage(p){page=p;render();window.scrollTo(0,0);}
 
 async function approve(id,e){
   e&&e.stopPropagation();
-  await sb.from('foods').update({photo_status:'approved'}).eq('id',id);
+  const{data,error}=await sb.from('foods').update({photo_status:'approved'}).eq('id',id).select();
+  if(error){alert('Hata: '+error.message);return;}
+  if(!data||!data.length){alert('⚠️ Güncellenemedi - RLS sorunu\nSQL Editor'de:\nALTER TABLE foods DISABLE ROW LEVEL SECURITY;\nveya admin policy ekle');return;}
   const f=foods.find(x=>x.id==id);if(f)f.photo_status='approved';
   const c=document.getElementById('c'+id);
   if(c){c.className='card approved';c.querySelector('.status-dot').className='status-dot dot-ok';}
@@ -478,23 +480,52 @@ function useCustomUrl(){
 }
 
 async function saveSelected(){
-  if(!selectedUrl||!currentFood)return;
-  const{error}=await sb.from('foods')
-    .update({photo_url:selectedUrl,photo_status:'approved'})
-    .eq('id',currentFood.id);
-  if(error){alert('Hata: '+error.message);return;}
+  if(!selectedUrl||!currentFood){alert('Resim seçilmedi!');return;}
+  
+  document.getElementById('save-btn').textContent='Kaydediliyor...';
+  document.getElementById('save-btn').disabled=true;
+  
+  // Önce mevcut kaydı kontrol et
+  const{data:existing}=await sb.from('foods').select('id,name').eq('id',currentFood.id).limit(1);
+  console.log('Kayıt bulundu:', existing);
+  
+  const{data,error}=await sb.from('foods')
+    .update({photo_url:selectedUrl, photo_status:'approved'})
+    .eq('id',currentFood.id)
+    .select();
+  
+  console.log('Update result:', data, error);
+  
+  if(error){
+    alert('DB Hata: '+error.message+'\n\nKod: '+error.code);
+    document.getElementById('save-btn').textContent='✓ Kaydet';
+    document.getElementById('save-btn').disabled=false;
+    return;
+  }
+  
+  if(!data||data.length===0){
+    alert('⚠️ Kayıt güncellenemedi - RLS engeli olabilir\nID: '+currentFood.id);
+    document.getElementById('save-btn').textContent='✓ Kaydet';
+    document.getElementById('save-btn').disabled=false;
+    return;
+  }
+  
   // Local güncelle
   const f=foods.find(x=>x.id==currentFood.id);
   if(f){f.photo_url=selectedUrl;f.photo_status='approved';}
+  
   const c=document.getElementById('c'+currentFood.id);
   if(c){
     const img=c.querySelector('img');
-    if(img)img.src=selectedUrl;
+    if(img){img.src=selectedUrl+'?t='+Date.now();} // cache bust
     c.className='card approved';
     c.querySelector('.status-dot').className='status-dot dot-ok';
   }
+  
   updateStats();
   closeModal();
+  document.getElementById('save-btn').textContent='✓ Kaydet';
+  document.getElementById('save-btn').disabled=false;
 }
 
 // Supabase'de photo_status kolonu yoksa ekle uyarısı
