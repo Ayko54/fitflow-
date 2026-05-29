@@ -109,8 +109,6 @@ select.form-input option{background:#1a0a2e;color:#fff;}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 /* FOOD */
 .food-img{width:44px;height:44px;border-radius:10px;object-fit:cover;background:rgba(255,255,255,0.06);flex-shrink:0;transition:opacity .2s;}
-.food-img[src]{opacity:1;}
-.food-img:not([src]),.food-img[src=""]{opacity:0;}
 .food-list-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;}
 .food-list-item:last-child{border-bottom:none;}
 .food-list-item:active{opacity:.7;}
@@ -840,88 +838,262 @@ function toast(msg,type='',dur=2800){
 const err=(m)=>toast(m,'error',3500);
 const ok=(m)=>toast(m,'success',2500);
 
-function getFoodPhoto(name){
-  const n=(name||'').toLowerCase();
-  // Direct Unsplash photo IDs - stable, fast, no redirect
-  const photos={
-    'menemen':'photo-1565299624946-b28f40a0ae38',
-    'yumurta':'photo-1482049016688-2d3e1b311543',
-    'omlet':'photo-1525351484163-7529414344d8',
-    'peynir':'photo-1486297678162-eb2a19b0a32d',
-    'simit':'photo-1509042239860-f550ce710b93',
-    'bal':'photo-1587049352846-4a222e784d38',
-    'yulaf':'photo-1494597564530-871f2b93ac55',
-    'granola':'photo-1484723091739-30a097e8f929',
-    'kahve':'photo-1509042239860-f550ce710b93',
-    'çay':'photo-1544787219-7f47ccb76574',
-    'tavuk göğsü':'photo-1532550907401-a500c9a57435',
-    'tavuk çorbası':'photo-1547592166-23ac45744acd',
-    'tavuk':'photo-1598515214211-89d3c73ae83b',
-    'köfte':'photo-1529042410759-befb1204b468',
-    'şiş kebap':'photo-1544025162-d76538a0a1d5',
-    'kebap':'photo-1544025162-d76538a0a1d5',
-    'döner':'photo-1561626423-a51b45aef0a1',
-    'lahmacun':'photo-1565958011703-44f9829ba187',
-    'pide':'photo-1565958011703-44f9829ba187',
-    'biftek':'photo-1546039907-7fa05f864c02',
-    'et':'photo-1546039907-7fa05f864c02',
-    'sucuk':'photo-1555939594-58d7cb561ad1',
-    'somon':'photo-1519708227418-c8fd9a32b7a2',
-    'balık':'photo-1467003909585-2f8a72700288',
-    'ton':'photo-1490645935967-10de6ba17061',
-    'pilav':'photo-1536304929831-ee1ca9d44906',
-    'bulgur':'photo-1609951651556-5334e2706168',
-    'makarna':'photo-1555949258-eb67b1ef0ceb',
-    'spagetti':'photo-1587740908075-9e245070dfaa',
-    'mercimek çorbası':'photo-1547592166-23ac45744acd',
-    'mercimek':'photo-1567647753830-de3fe7ce9f28',
-    'nohut':'photo-1515543237350-b3eea1ec8082',
-    'fasulye':'photo-1536183922588-166604504d5e',
-    'çorba':'photo-1547592166-23ac45744acd',
-    'domates çorbası':'photo-1476718406336-bb5a9690ee2a',
-    'çoban salatası':'photo-1540189549336-e6e99c3679fe',
-    'salata':'photo-1512621776951-a57141f2eefd',
-    'humus':'photo-1577805947697-89e18249d767',
-    'patlıcan':'photo-1630374415729-9e7f1bb95d35',
-    'patates':'photo-1518977676601-b53f82aba655',
-    'ıspanak':'photo-1576045057995-568f588f82fb',
-    'sebze':'photo-1540420773420-3366772f4999',
-    'baklava':'photo-1571877227200-a0d98ea607e9',
-    'sütlaç':'photo-1488477181946-6428a0291777',
-    'dondurma':'photo-1497034825429-c343d7c6a68f',
-    'kek':'photo-1578985545062-69928b1d9587',
-    'kurabiye':'photo-1499636136210-6f4ee915583e',
-    'helva':'photo-1571877227200-a0d98ea607e9',
-    'lokum':'photo-1571877227200-a0d98ea607e9',
-    'elma':'photo-1570913149827-d2ac84ab3f9a',
-    'muz':'photo-1571771894821-ce9b6c11b08e',
-    'portakal':'photo-1547514701-42782101795e',
-    'çilek':'photo-1464965911861-746a04b4bca6',
-    'karpuz':'photo-1563114773-84221bd62daa',
-    'üzüm':'photo-1537640538966-79f369143f8f',
-    'kiraz':'photo-1528821128474-27f963b062bf',
-    'kivi':'photo-1548567750-d5f7e7fd0e61',
-    'avokado':'photo-1508061253366-f7da158b6d46',
-    'nar':'photo-1514756331096-242fdeb70d4a',
-    'ayran':'photo-1563805042-7684c019e1cb',
-    'smoothie':'photo-1502741224143-90386d7f8c82',
-    'süt':'photo-1550583724-b2692b85b150',
-    'yoğurt':'photo-1488477181946-6428a0291777',
-    'protein shake':'photo-1593095948071-474c5cc2989d',
-    'kinoa':'photo-1586201375761-83865001e31c',
-    'tofu':'photo-1546069901-ba9599a7e63c',
-  };
-  for(const[k,id] of Object.entries(photos)){
-    if(n.includes(k)) return`https://images.unsplash.com/${id}?w=80&h=80&fit=crop&auto=format&q=80`;
-  }
-  // Generic fallback via source API
-  const first=n.split(' ')[0]||'food';
-  return`https://source.unsplash.com/80x80/?${encodeURIComponent(first)},food`;
-}
 function getExEmoji(cat){
   const map={ev:'🏠',yuruyus:'🚶',yoga:'🧘',pilates:'🩰',gym:'🏋️',kardio:'🔥',esneme:'🤸'};
   return map[cat]||'💪';
 }
+
+// ============================================================
+// FITFLOW PEXELS PHOTO DATABASE - 205 kayıt
+// Gerçek profesyonel fotoğraflar - Pexels API
+// ============================================================
+const PEXELS_PHOTO_DB = {
+  "Sahanda Yumurta": "https://images.pexels.com/photos/5591657/pexels-photo-5591657.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Menemen": "https://images.pexels.com/photos/8996223/pexels-photo-8996223.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Haşlanmış Yumurta": "https://images.pexels.com/photos/14827255/pexels-photo-14827255.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Peynirli Omlet": "https://images.pexels.com/photos/14122654/pexels-photo-14122654.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Çılbır": "https://images.pexels.com/photos/29385747/pexels-photo-29385747.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Omlet": "https://images.pexels.com/photos/1346381/pexels-photo-1346381.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Beyaz Peynir": "https://images.pexels.com/photos/29285459/pexels-photo-29285459.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Simit": "https://images.pexels.com/photos/8404980/pexels-photo-8404980.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kaşar Peyniri": "https://images.pexels.com/photos/772508/pexels-photo-772508.png?auto=compress&cs=tinysrgb&h=350",
+  "Tam Buğday Ekmek": "https://images.pexels.com/photos/31744871/pexels-photo-31744871.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Ekmek": "https://images.pexels.com/photos/4444068/pexels-photo-4444068.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Poğaça": "https://images.pexels.com/photos/7170952/pexels-photo-7170952.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Bal": "https://images.pexels.com/photos/9228574/pexels-photo-9228574.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Reçel": "https://images.pexels.com/photos/14122627/pexels-photo-14122627.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tereyağı": "https://images.pexels.com/photos/30660275/pexels-photo-30660275.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Yulaf Ezmesi": "https://images.pexels.com/photos/101669/pexels-photo-101669.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Mısır Gevreği": "https://images.pexels.com/photos/6948044/pexels-photo-6948044.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Granola": "https://images.pexels.com/photos/32214637/pexels-photo-32214637.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Fıstık Ezmesi": "https://images.pexels.com/photos/5567076/pexels-photo-5567076.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Avokadolu Tost": "https://images.pexels.com/photos/27590337/pexels-photo-27590337.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Müsli": "https://images.pexels.com/photos/31596348/pexels-photo-31596348.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kahve": "https://images.pexels.com/photos/18281420/pexels-photo-18281420.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Türk Kahvesi": "https://images.pexels.com/photos/29764355/pexels-photo-29764355.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Çay": "https://images.pexels.com/photos/7574063/pexels-photo-7574063.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Süt": "https://images.pexels.com/photos/5967316/pexels-photo-5967316.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Yeşil Çay": "https://images.pexels.com/photos/667229/pexels-photo-667229.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Portakal Suyu": "https://images.pexels.com/photos/33434017/pexels-photo-33434017.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Smoothie": "https://images.pexels.com/photos/6671856/pexels-photo-6671856.png?auto=compress&cs=tinysrgb&h=350",
+  "Meyve Salatası": "https://images.pexels.com/photos/32654673/pexels-photo-32654673.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Ayran": "https://images.pexels.com/photos/32986486/pexels-photo-32986486.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Mercimek Çorbası": "https://images.pexels.com/photos/28241683/pexels-photo-28241683.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk Çorbası": "https://images.pexels.com/photos/8992932/pexels-photo-8992932.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Domates Çorbası": "https://images.pexels.com/photos/4062272/pexels-photo-4062272.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tarhana Çorbası": "https://images.pexels.com/photos/8321980/pexels-photo-8321980.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Ezogelin Çorbası": "https://images.pexels.com/photos/14164523/pexels-photo-14164523.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Yayla Çorbası": "https://images.pexels.com/photos/17696679/pexels-photo-17696679.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kremalı Mantar Çorbası": "https://images.pexels.com/photos/8580433/pexels-photo-8580433.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Sebze Çorbası": "https://images.pexels.com/photos/772518/pexels-photo-772518.png?auto=compress&cs=tinysrgb&h=350",
+  "Balık Çorbası": "https://images.pexels.com/photos/5966249/pexels-photo-5966249.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Soğan Çorbası": "https://images.pexels.com/photos/8992932/pexels-photo-8992932.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Çorba": "https://images.pexels.com/photos/343871/pexels-photo-343871.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Mercimek Ezme": "https://images.pexels.com/photos/32986464/pexels-photo-32986464.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk Izgara": "https://images.pexels.com/photos/9219086/pexels-photo-9219086.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk Göğsü": "https://images.pexels.com/photos/9219093/pexels-photo-9219093.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk But": "https://images.pexels.com/photos/15597771/pexels-photo-15597771.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk Kanat": "https://images.pexels.com/photos/29631422/pexels-photo-29631422.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk Baget": "https://images.pexels.com/photos/29631422/pexels-photo-29631422.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Fırın Tavuk": "https://images.pexels.com/photos/17650171/pexels-photo-17650171.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk Döner": "https://images.pexels.com/photos/29306497/pexels-photo-29306497.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk Sote": "https://images.pexels.com/photos/105588/pexels-photo-105588.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk Şiş": "https://images.pexels.com/photos/16423838/pexels-photo-16423838.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk Haşlama": "https://images.pexels.com/photos/15735751/pexels-photo-15735751.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Sebzeli Tavuk": "https://images.pexels.com/photos/32986493/pexels-photo-32986493.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Çıtır Tavuk": "https://images.pexels.com/photos/14686443/pexels-photo-14686443.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk Kavurma": "https://images.pexels.com/photos/9715157/pexels-photo-9715157.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk Wrap": "https://images.pexels.com/photos/10361459/pexels-photo-10361459.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk Burger": "https://images.pexels.com/photos/20722043/pexels-photo-20722043.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk Pirzola": "https://images.pexels.com/photos/18405156/pexels-photo-18405156.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Çerkez Tavuğu": "https://images.pexels.com/photos/15597768/pexels-photo-15597768.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Fajita Tavuk": "https://images.pexels.com/photos/105588/pexels-photo-105588.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Şiş Köfte": "https://images.pexels.com/photos/37198642/pexels-photo-37198642.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Izgarada Köfte": "https://images.pexels.com/photos/26341210/pexels-photo-26341210.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Köfte": "https://images.pexels.com/photos/26341210/pexels-photo-26341210.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Dana Bonfile": "https://images.pexels.com/photos/8696466/pexels-photo-8696466.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Dana Biftek": "https://images.pexels.com/photos/36829374/pexels-photo-36829374.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Fırın Köfte": "https://images.pexels.com/photos/15735751/pexels-photo-15735751.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kuzu Pirzola": "https://images.pexels.com/photos/13304044/pexels-photo-13304044.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Dana Antrikot": "https://images.pexels.com/photos/36850022/pexels-photo-36850022.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kuzu Tandır": "https://images.pexels.com/photos/13304044/pexels-photo-13304044.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kuzu Şiş": "https://images.pexels.com/photos/32986492/pexels-photo-32986492.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Pastırma": "https://images.pexels.com/photos/24206909/pexels-photo-24206909.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Sucuk": "https://images.pexels.com/photos/8404980/pexels-photo-8404980.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Hindi Göğsü": "https://images.pexels.com/photos/9219093/pexels-photo-9219093.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Urfa Kebap": "https://images.pexels.com/photos/32986491/pexels-photo-32986491.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Adana Kebap": "https://images.pexels.com/photos/32986491/pexels-photo-32986491.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Patlıcan Kebabı": "https://images.pexels.com/photos/32986488/pexels-photo-32986488.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Döner": "https://images.pexels.com/photos/29306495/pexels-photo-29306495.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Şiş Kebap": "https://images.pexels.com/photos/2739250/pexels-photo-2739250.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "İskender Kebap": "https://images.pexels.com/photos/32986454/pexels-photo-32986454.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Lahmacun": "https://images.pexels.com/photos/16014994/pexels-photo-16014994.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Pide": "https://images.pexels.com/photos/29306495/pexels-photo-29306495.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Cağ Kebabı": "https://images.pexels.com/photos/8697545/pexels-photo-8697545.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kıymalı Pide": "https://images.pexels.com/photos/7170952/pexels-photo-7170952.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Çöp Şiş": "https://images.pexels.com/photos/16423838/pexels-photo-16423838.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Somon": "https://images.pexels.com/photos/7627407/pexels-photo-7627407.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Somon Izgara": "https://images.pexels.com/photos/29748127/pexels-photo-29748127.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Sucuklu Yumurta": "https://images.pexels.com/photos/8404980/pexels-photo-8404980.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Levrek": "https://images.pexels.com/photos/8696562/pexels-photo-8696562.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Çipura": "https://images.pexels.com/photos/19239122/pexels-photo-19239122.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Levrek Izgara": "https://images.pexels.com/photos/19239119/pexels-photo-19239119.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Hamsi Tava": "https://images.pexels.com/photos/23106705/pexels-photo-23106705.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Hamsi": "https://images.pexels.com/photos/18435519/pexels-photo-18435519.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Uskumru": "https://images.pexels.com/photos/37198642/pexels-photo-37198642.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Karides": "https://images.pexels.com/photos/33939170/pexels-photo-33939170.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Karides Sote": "https://images.pexels.com/photos/8697543/pexels-photo-8697543.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Ton Balığı": "https://images.pexels.com/photos/5713732/pexels-photo-5713732.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Balık Izgara": "https://images.pexels.com/photos/19239122/pexels-photo-19239122.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Ahtapot": "https://images.pexels.com/photos/27402124/pexels-photo-27402124.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Midye": "https://images.pexels.com/photos/5713733/pexels-photo-5713733.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Balık Tava": "https://images.pexels.com/photos/105588/pexels-photo-105588.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Deniz Mahsülleri": "https://images.pexels.com/photos/13783969/pexels-photo-13783969.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Pilav": "https://images.pexels.com/photos/32986470/pexels-photo-32986470.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Pirinç Pilavı": "https://images.pexels.com/photos/343871/pexels-photo-343871.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Nohutlu Pilav": "https://images.pexels.com/photos/32986479/pexels-photo-32986479.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Bulgur Pilavı": "https://images.pexels.com/photos/14164523/pexels-photo-14164523.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Makarna": "https://images.pexels.com/photos/23106701/pexels-photo-23106701.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Spagetti": "https://images.pexels.com/photos/11101711/pexels-photo-11101711.png?auto=compress&cs=tinysrgb&h=350",
+  "Fettuccine": "https://images.pexels.com/photos/30705635/pexels-photo-30705635.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Penne": "https://images.pexels.com/photos/12667658/pexels-photo-12667658.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Lazanya": "https://images.pexels.com/photos/10839494/pexels-photo-10839494.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Makarna Bolonez": "https://images.pexels.com/photos/11101711/pexels-photo-11101711.png?auto=compress&cs=tinysrgb&h=350",
+  "Nohut": "https://images.pexels.com/photos/20556455/pexels-photo-20556455.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Yeşil Mercimek": "https://images.pexels.com/photos/17486836/pexels-photo-17486836.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Mercimek": "https://images.pexels.com/photos/30203314/pexels-photo-30203314.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kuru Fasulye": "https://images.pexels.com/photos/17486836/pexels-photo-17486836.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kinoa": "https://images.pexels.com/photos/6895775/pexels-photo-6895775.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Barbunya": "https://images.pexels.com/photos/8992843/pexels-photo-8992843.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kuskus": "https://images.pexels.com/photos/19824910/pexels-photo-19824910.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Arpa Şehriye": "https://images.pexels.com/photos/16620746/pexels-photo-16620746.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "İmam Bayıldı": "https://images.pexels.com/photos/772513/pexels-photo-772513.png?auto=compress&cs=tinysrgb&h=350",
+  "Türlü": "https://images.pexels.com/photos/8697513/pexels-photo-8697513.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Patlıcan Musakka": "https://images.pexels.com/photos/772513/pexels-photo-772513.png?auto=compress&cs=tinysrgb&h=350",
+  "Karnıyarık": "https://images.pexels.com/photos/772513/pexels-photo-772513.png?auto=compress&cs=tinysrgb&h=350",
+  "Ispanak Yemeği": "https://images.pexels.com/photos/8696472/pexels-photo-8696472.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Zeytinyağlı Taze Fasulye": "https://images.pexels.com/photos/32986469/pexels-photo-32986469.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kabak Dolması": "https://images.pexels.com/photos/17290750/pexels-photo-17290750.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Domates Dolması": "https://images.pexels.com/photos/23106717/pexels-photo-23106717.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Biber Dolması": "https://images.pexels.com/photos/15820587/pexels-photo-15820587.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Patates Yemeği": "https://images.pexels.com/photos/31236419/pexels-photo-31236419.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Patates Püresi": "https://images.pexels.com/photos/2739250/pexels-photo-2739250.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kızarmış Patates": "https://images.pexels.com/photos/27758755/pexels-photo-27758755.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Fırın Patates": "https://images.pexels.com/photos/8839625/pexels-photo-8839625.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Karnabahar": "https://images.pexels.com/photos/28674543/pexels-photo-28674543.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Havuç": "https://images.pexels.com/photos/19362399/pexels-photo-19362399.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Brokoli": "https://images.pexels.com/photos/90893/pexels-photo-90893.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Zeytinyağlı Enginar": "https://images.pexels.com/photos/28704676/pexels-photo-28704676.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Fırın Sebze": "https://images.pexels.com/photos/4929720/pexels-photo-4929720.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Çoban Salatası": "https://images.pexels.com/photos/32986457/pexels-photo-32986457.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Sezar Salatası": "https://images.pexels.com/photos/19087691/pexels-photo-19087691.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Roka Salatası": "https://images.pexels.com/photos/6428279/pexels-photo-6428279.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Mevsim Salatası": "https://images.pexels.com/photos/14774995/pexels-photo-14774995.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Ton Balıklı Salata": "https://images.pexels.com/photos/5713732/pexels-photo-5713732.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tavuk Salatası": "https://images.pexels.com/photos/26341207/pexels-photo-26341207.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Bulgur Salatası": "https://images.pexels.com/photos/32986468/pexels-photo-32986468.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Yeşil Salata": "https://images.pexels.com/photos/11287048/pexels-photo-11287048.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Nohut Salatası": "https://images.pexels.com/photos/5514818/pexels-photo-5514818.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Humus": "https://images.pexels.com/photos/14774984/pexels-photo-14774984.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Nar Ekşili Semizotu": "https://images.pexels.com/photos/17245317/pexels-photo-17245317.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tabule": "https://images.pexels.com/photos/32986468/pexels-photo-32986468.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Guacamole": "https://images.pexels.com/photos/28791739/pexels-photo-28791739.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Sütlaç": "https://images.pexels.com/photos/34477395/pexels-photo-34477395.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Gavurdağı Salatası": "https://images.pexels.com/photos/36850033/pexels-photo-36850033.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Baklava": "https://images.pexels.com/photos/6664421/pexels-photo-6664421.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Dondurma": "https://images.pexels.com/photos/5535554/pexels-photo-5535554.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kazandibi": "https://images.pexels.com/photos/9884561/pexels-photo-9884561.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Muhallebi": "https://images.pexels.com/photos/9884561/pexels-photo-9884561.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kek": "https://images.pexels.com/photos/37418888/pexels-photo-37418888.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Cheesecake": "https://images.pexels.com/photos/10455820/pexels-photo-10455820.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Çikolatalı Kek": "https://images.pexels.com/photos/37418888/pexels-photo-37418888.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Helva": "https://images.pexels.com/photos/32986450/pexels-photo-32986450.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Lokum": "https://images.pexels.com/photos/10899594/pexels-photo-10899594.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kurabiye": "https://images.pexels.com/photos/23948793/pexels-photo-23948793.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Revani": "https://images.pexels.com/photos/26341195/pexels-photo-26341195.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Şekerpare": "https://images.pexels.com/photos/32637653/pexels-photo-32637653.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kadayıf": "https://images.pexels.com/photos/36850033/pexels-photo-36850033.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Tiramisu": "https://images.pexels.com/photos/17558644/pexels-photo-17558644.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Profiterol": "https://images.pexels.com/photos/19963525/pexels-photo-19963525.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Güllaç": "https://images.pexels.com/photos/31064587/pexels-photo-31064587.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Elma": "https://images.pexels.com/photos/102104/pexels-photo-102104.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Muz": "https://images.pexels.com/photos/16829201/pexels-photo-16829201.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Portakal": "https://images.pexels.com/photos/17975562/pexels-photo-17975562.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Mandalina": "https://images.pexels.com/photos/17840025/pexels-photo-17840025.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Çilek": "https://images.pexels.com/photos/37240848/pexels-photo-37240848.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Karpuz": "https://images.pexels.com/photos/8743922/pexels-photo-8743922.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Üzüm": "https://images.pexels.com/photos/31399032/pexels-photo-31399032.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kiraz": "https://images.pexels.com/photos/2747421/pexels-photo-2747421.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kavun": "https://images.pexels.com/photos/18281447/pexels-photo-18281447.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Nar": "https://images.pexels.com/photos/17245317/pexels-photo-17245317.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Şeftali": "https://images.pexels.com/photos/31956599/pexels-photo-31956599.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kivi": "https://images.pexels.com/photos/6123032/pexels-photo-6123032.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Erik": "https://images.pexels.com/photos/12889634/pexels-photo-12889634.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Armut": "https://images.pexels.com/photos/5945911/pexels-photo-5945911.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kayısı": "https://images.pexels.com/photos/772512/pexels-photo-772512.png?auto=compress&cs=tinysrgb&h=350",
+  "Böğürtlen": "https://images.pexels.com/photos/28882152/pexels-photo-28882152.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Hurma": "https://images.pexels.com/photos/28445701/pexels-photo-28445701.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Ananas": "https://images.pexels.com/photos/4412925/pexels-photo-4412925.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Yaban Mersini": "https://images.pexels.com/photos/12755895/pexels-photo-12755895.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Mango": "https://images.pexels.com/photos/34122323/pexels-photo-34122323.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kuru Kayısı": "https://images.pexels.com/photos/772512/pexels-photo-772512.png?auto=compress&cs=tinysrgb&h=350",
+  "Yoğurt": "https://images.pexels.com/photos/32986486/pexels-photo-32986486.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kuru Üzüm": "https://images.pexels.com/photos/7368028/pexels-photo-7368028.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Yoğurt Parfait": "https://images.pexels.com/photos/4929713/pexels-photo-4929713.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Protein Shake": "https://images.pexels.com/photos/16411620/pexels-photo-16411620.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kefir": "https://images.pexels.com/photos/5967316/pexels-photo-5967316.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Badem": "https://images.pexels.com/photos/57042/pexels-photo-57042.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Protein Bar": "https://images.pexels.com/photos/18435586/pexels-photo-18435586.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Whey Protein": "https://images.pexels.com/photos/13779116/pexels-photo-13779116.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kaju": "https://images.pexels.com/photos/37180553/pexels-photo-37180553.png?auto=compress&cs=tinysrgb&h=350",
+  "Antep Fıstığı": "https://images.pexels.com/photos/6664421/pexels-photo-6664421.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Ceviz": "https://images.pexels.com/photos/5869852/pexels-photo-5869852.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Kinoa Kasesi": "https://images.pexels.com/photos/9124025/pexels-photo-9124025.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Leblebi": "https://images.pexels.com/photos/20556455/pexels-photo-20556455.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Chia Tohumu": "https://images.pexels.com/photos/7439731/pexels-photo-7439731.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Chin-up": "https://images.pexels.com/photos/7293400/pexels-photo-7293400.jpeg?auto=compress&cs=tinysrgb&h=350",
+  "Treadmill": "https://images.pexels.com/photos/24913608/pexels-photo-24913608.jpeg?auto=compress&cs=tinysrgb&h=350"
+};
+
+function getFoodPhoto(name, size) {
+  const n = (name || '').trim();
+  // 1. Tam eşleşme
+  if (PEXELS_PHOTO_DB[n]) return PEXELS_PHOTO_DB[n];
+  // 2. Büyük/küçük harf
+  const nLow = n.toLowerCase();
+  for (const [k, v] of Object.entries(PEXELS_PHOTO_DB)) {
+    if (k.toLowerCase() === nLow) return v;
+  }
+  // 3. Kelime bazlı - en uzun eşleşme önce
+  const sorted = Object.keys(PEXELS_PHOTO_DB).sort((a, b) => b.length - a.length);
+  for (const k of sorted) {
+    if (nLow.includes(k.toLowerCase())) return PEXELS_PHOTO_DB[k];
+  }
+  // 4. Ters eşleşme
+  for (const k of sorted) {
+    if (k.toLowerCase().includes(nLow.split(' ')[0])) return PEXELS_PHOTO_DB[k];
+  }
+  // 5. Fallback - genel yemek
+  return 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&h=350';
+}
+
+function getExercisePhoto(name, size) {
+  const n = (name || '').trim();
+  if (PEXELS_PHOTO_DB[n]) return PEXELS_PHOTO_DB[n];
+  const nLow = n.toLowerCase();
+  for (const [k, v] of Object.entries(PEXELS_PHOTO_DB)) {
+    if (k.toLowerCase() === nLow) return v;
+  }
+  const sorted = Object.keys(PEXELS_PHOTO_DB).sort((a, b) => b.length - a.length);
+  for (const k of sorted) {
+    if (nLow.includes(k.toLowerCase())) return PEXELS_PHOTO_DB[k];
+  }
+  for (const k of sorted) {
+    if (k.toLowerCase().includes(nLow.split(' ')[0])) return PEXELS_PHOTO_DB[k];
+  }
+  return 'https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&h=350';
+}
+// ============================================================
 function getFoodEmoji(name){
   const n=(name||'').toLowerCase();
   const map=[
@@ -1269,7 +1441,7 @@ async function loadFood(){
     }else{
       (items||[]).forEach(item=>{
         html+=`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);">
-          <img class="food-img" src="${getFoodPhoto(item.food_name||'')}" alt="${item.food_name||''}" loading="lazy" style="object-fit:cover;border-radius:10px;flex-shrink:0;" onerror="this.style.display='none'"/>
+          <img class="food-img" src="${getFoodPhoto(item.food_name||'')}" alt="${item.food_name||''}" loading="lazy" onerror="this.style.display='none'"/>
           <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.food_name}</div>${item.portion_desc?`<div style="font-size:11px;color:var(--text3);">${item.portion_desc}</div>`:''}</div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
             <span class="badge badge-accent">${item.calories||0}</span>
@@ -1325,9 +1497,8 @@ async function searchFoods(q){
         // Safely stringify for onclick
         const safe={id:f.id,name:f.name,calories_per_100g:f.calories_per_100g||0,protein_per_100g:f.protein_per_100g||0,carbs_per_100g:f.carbs_per_100g||0,fat_per_100g:f.fat_per_100g||0,default_portion_g:pG,default_portion_name:f.default_portion_name||pG+'g',photo_url:f.photo_url||''};
         const key='_food_'+f.id.replace(/-/g,'');window[key]=safe;
-        const imgUrl=getFoodPhoto(f.name||'');
         return`<div class="food-list-item" onclick="selectFood(window['${key}'])">
-          <img class="food-img" src="${imgUrl}" alt="${f.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.style.display='flex')" style="object-fit:cover;"/>
+          <img class="food-img" src="${getFoodPhoto(f.name||'')}" alt="${f.name||''}" loading="lazy" onerror="this.style.display='none'"/>
           <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name}</div><div style="font-size:11px;color:var(--text3);">${f.default_portion_name||pG+'g'} · ${kcal} kcal</div></div>
           <span style="font-size:12px;color:var(--accent);">Ekle ›</span>
         </div>`;
@@ -1527,7 +1698,11 @@ async function renderExPlan(exLogs){
     const k='_ex_'+ex.id.replace(/-/g,'');
     window[k]={name:ex.name,id:ex.id,dur:ex.duration_min};
     html+=`<div style="background:${done?'rgba(74,222,128,0.06)':'rgba(255,255,255,0.04)'};border:1px solid ${done?'rgba(74,222,128,0.2)':'var(--border-accent)'};border-radius:14px;padding:12px;margin-bottom:8px;">
-      <div style="font-size:48px;text-align:center;padding:14px 0;">${getExEmoji(ex.category||'')}</div>
+      <div style="width:100%;height:130px;border-radius:10px;overflow:hidden;margin-bottom:8px;">
+        <img src="${getExercisePhoto(ex.name||'')}" alt="${ex.name||''}" loading="lazy"
+          style="width:100%;height:100%;object-fit:cover;display:block;"
+          onerror="this.parentElement.innerHTML='<div style=\'height:130px;display:flex;align-items:center;justify-content:center;font-size:42px;background:rgba(255,255,255,0.04);border-radius:10px;\'>'+getExEmoji(ex.category||'')+'</div>'"/>
+      </div>
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
         <div style="flex:1;">
           ${done?'<div style="font-size:10px;color:#86efac;font-weight:600;margin-bottom:3px;">✓ TAMAMLANDI</div>':''}
@@ -1694,20 +1869,10 @@ function showSwCard(){
   document.getElementById('sw-label-no').style.opacity='0';
   document.getElementById('sw-label-yes').style.opacity='0';
   const img=document.getElementById('sw-img');
-  // Use photo_url if valid, otherwise generate from name
-  // For swipe cards use larger size
-  let photoSrc='';
-  if(swType==='food'){
-    const n=(item.name||'').toLowerCase();
-    const photos={'menemen':'photo-1565299624946-b28f40a0ae38','yumurta':'photo-1482049016688-2d3e1b311543','tavuk göğsü':'photo-1532550907401-a500c9a57435','tavuk çorbası':'photo-1547592166-23ac45744acd','tavuk':'photo-1598515214211-89d3c73ae83b','köfte':'photo-1529042410759-befb1204b468','kebap':'photo-1544025162-d76538a0a1d5','döner':'photo-1561626423-a51b45aef0a1','et':'photo-1546039907-7fa05f864c02','somon':'photo-1519708227418-c8fd9a32b7a2','balık':'photo-1467003909585-2f8a72700288','pilav':'photo-1536304929831-ee1ca9d44906','bulgur':'photo-1609951651556-5334e2706168','makarna':'photo-1555949258-eb67b1ef0ceb','mercimek':'photo-1567647753830-de3fe7ce9f28','nohut':'photo-1515543237350-b3eea1ec8082','çorba':'photo-1547592166-23ac45744acd','salata':'photo-1512621776951-a57141f2eefd','humus':'photo-1577805947697-89e18249d767','baklava':'photo-1571877227200-a0d98ea607e9','dondurma':'photo-1497034825429-c343d7c6a68f','kek':'photo-1578985545062-69928b1d9587','elma':'photo-1570913149827-d2ac84ab3f9a','muz':'photo-1571771894821-ce9b6c11b08e','portakal':'photo-1547514701-42782101795e','çilek':'photo-1464965911861-746a04b4bca6','avokado':'photo-1508061253366-f7da158b6d46','yoğurt':'photo-1488477181946-6428a0291777','smoothie':'photo-1502741224143-90386d7f8c82','pilav':'photo-1536304929831-ee1ca9d44906'};
-    let photoId='';
-    for(const[k,id] of Object.entries(photos)){if(n.includes(k)){photoId=id;break;}}
-    photoSrc=photoId?`https://images.unsplash.com/${photoId}?w=400&h=300&fit=crop&auto=format&q=85`:`https://source.unsplash.com/400x300/?${encodeURIComponent(item.name||'food')},food`;
-  } else {
-    photoSrc=item.photo_url||'';
-  }
-  if(photoSrc){
-    img.src=photoSrc;
+  // Pexels DB'den fotoğraf al
+  const _pSrc = (swType==='food') ? getFoodPhoto(item.name||'') : getExercisePhoto(item.name||'');
+  if(_pSrc){
+    img.src=_pSrc;
     img.style.display='block';
     img.onerror=()=>{img.style.display='none';};
   }else{img.src='';img.style.display='none';}
