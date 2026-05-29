@@ -9148,29 +9148,80 @@ const DIYETKOLIK_DB = {
 const PEXELS_PHOTO_DB_KEYS = Object.keys(PEXELS_PHOTO_DB);
 const ALL_PHOTO_DB = Object.assign({}, DIYETKOLIK_DB, PEXELS_PHOTO_DB);
 
+const SUPABASE_FOOD_IMG = 'https://cmsvgmvymlrfdhhvpuwt.supabase.co/storage/v1/object/public/food-images/';
+const PEXELS_KEY_PHOTO = 'q80iZBRqts5DwaM1EmkDMTph6DGlkEwY6Pggsqrc18o6j6bt4gkiuX4y';
+const _photoCache = {};
+
+function toFoodSlug(name){
+  return (name||'').toLowerCase()
+    .replace(/ş/g,'s').replace(/ğ/g,'g').replace(/ü/g,'u')
+    .replace(/ö/g,'o').replace(/ç/g,'c').replace(/ı/g,'i')
+    .replace(/İ/g,'i').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+
 function getFoodPhoto(name, size) {
   const n = (name || '').trim();
-  // 1. Tam eşleşme - Diyetkolik
-  if (DIYETKOLIK_DB[n]) return DIYETKOLIK_DB[n];
-  // 2. Tam eşleşme - Pexels
-  if (PEXELS_PHOTO_DB[n]) return PEXELS_PHOTO_DB[n];
-  // 3. Büyük/küçük harf
+  if(!n) return 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&h=350';
+  
+  // 1. Cache
+  if(_photoCache[n]) return _photoCache[n];
+  
+  // 2. Diyetkolik DB - tam eşleşme (ama bu URL'ler hotlink korumalı, Supabase'e yüklenmişse oradan gelir)
+  const slug = toFoodSlug(n);
+  const supaUrl = SUPABASE_FOOD_IMG + slug + '.jpg';
+  
+  // 3. Pexels DB tam eşleşme
+  if(PEXELS_PHOTO_DB[n]){ _photoCache[n]=PEXELS_PHOTO_DB[n]; return PEXELS_PHOTO_DB[n]; }
+  
+  // 4. Büyük/küçük harf
   const nLow = n.toLowerCase();
-  for (const [k, v] of Object.entries(ALL_PHOTO_DB)) {
-    if (k.toLowerCase() === nLow) return v;
+  for(const[k,v] of Object.entries(PEXELS_PHOTO_DB)){
+    if(k.toLowerCase()===nLow){ _photoCache[n]=v; return v; }
   }
-  // 4. Kelime bazlı - en uzun eşleşme
-  const sorted = Object.keys(ALL_PHOTO_DB).sort((a, b) => b.length - a.length);
-  for (const k of sorted) {
-    if (nLow.includes(k.toLowerCase()) || k.toLowerCase().includes(nLow)) return ALL_PHOTO_DB[k];
+  
+  // 5. Kelime bazlı
+  const sorted = Object.keys(PEXELS_PHOTO_DB).sort((a,b)=>b.length-a.length);
+  for(const k of sorted){
+    if(nLow.includes(k.toLowerCase())||k.toLowerCase().includes(nLow)){
+      _photoCache[n]=PEXELS_PHOTO_DB[k]; return PEXELS_PHOTO_DB[k];
+    }
   }
-  // 5. İlk kelime
-  const first = nLow.split(' ')[0];
-  for (const k of sorted) {
-    if (k.toLowerCase().startsWith(first)) return ALL_PHOTO_DB[k];
+  
+  // 6. Supabase Storage URL dön - yüklenmişse çalışır
+  _photoCache[n] = supaUrl;
+  return supaUrl;
+}
+
+// Async versiyon - bulamazsa Pexels'tan çek ve DB'ye kaydet
+async function getFoodPhotoAsync(name, imgEl){
+  const url = getFoodPhoto(name);
+  if(imgEl) imgEl.src = url;
+  
+  // Resim yüklenmezse Pexels'tan çek ve kaydet
+  if(imgEl){
+    imgEl.onerror = async function(){
+      this.onerror = null;
+      try{
+        const q = encodeURIComponent((name||'')+ ' turkish food');
+        const r = await fetch('https://api.pexels.com/v1/search?query='+q+'&per_page=1&orientation=square',
+          {headers:{Authorization:PEXELS_KEY_PHOTO}});
+        if(r.ok){
+          const d = await r.json();
+          if(d.photos?.[0]){
+            const newUrl = d.photos[0].src.medium;
+            this.src = newUrl;
+            _photoCache[name] = newUrl;
+            // foods tablosuna kaydet - bir daha çekilmez
+            try{
+              await sb.from('foods').update({photo_url:newUrl}).ilike('name',name);
+            }catch(e){}
+          }
+        }
+      }catch(e){
+        this.style.display='none';
+      }
+    };
   }
-  // 6. Fallback
-  return 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&h=350';
 }
 
 function getExercisePhoto(name, size) {
@@ -9532,7 +9583,7 @@ async function loadFood(){
     }else{
       (items||[]).forEach(item=>{
         html+=`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);">
-          <img class="food-img" src="${getFoodPhoto(item.food_name||'')}" alt="${item.food_name||''}" loading="lazy" onerror="this.style.display='none'"/>
+          <img class="food-img" src="${getFoodPhoto(item.food_name||'')}" alt="${item.food_name||''}" loading="lazy" onerror="getFoodPhotoAsync('${(item.food_name||'').replace(/'/g,\'\'')}',this)"/>
           <div style="flex:1;min-width:0;">
             <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.food_name}</div>
             <div style="font-size:11px;color:var(--text3);">${item.portion_desc||''} · ${item.calories||0} kcal</div>
@@ -9595,7 +9646,7 @@ async function searchFoods(q){
         const safe={id:f.id,name:f.name,calories_per_100g:f.calories_per_100g||0,protein_per_100g:f.protein_per_100g||0,carbs_per_100g:f.carbs_per_100g||0,fat_per_100g:f.fat_per_100g||0,default_portion_g:pG,default_portion_name:f.default_portion_name||pG+'g',photo_url:f.photo_url||''};
         const key='_food_'+f.id.replace(/-/g,'');window[key]=safe;
         return`<div class="food-list-item" onclick="selectFood(window['${key}'])">
-          <img class="food-img" src="${getFoodPhoto(f.name||'')}" alt="${f.name||''}" loading="lazy" onerror="this.style.display='none'"/>
+          <img class="food-img" src="${getFoodPhoto(f.name||'')}" alt="${f.name||''}" loading="lazy" onerror="getFoodPhotoAsync('${(f.name||'').replace(/'/g,\'\'')}',this)"/>
           <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name}</div><div style="font-size:11px;color:var(--text3);">${f.default_portion_name||pG+'g'} · ${kcal} kcal</div></div>
           <span style="font-size:12px;color:var(--accent);">Ekle ›</span>
         </div>`;
