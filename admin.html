@@ -242,7 +242,7 @@ function render(){
         <div class="card-btns">
           <button class="b-ok" onclick="approve('${f.id}',event)">✓</button>
           <button class="b-bad" onclick="reject('${f.id}',event)">✗</button>
-          <button class="b-pick" onclick="openPicker('${f.id}','${f.name.replace(/'/g,"\\'")}',event)">🔍</button>
+          <button class="b-pick" onclick="openPickerById('${f.id}',event)">🔍</button>
         </div>
       </div>
     </div>`;
@@ -264,7 +264,7 @@ async function approve(id,e){
   e&&e.stopPropagation();
   const{data,error}=await sb.from('foods').update({photo_status:'approved'}).eq('id',id).select();
   if(error){alert('Hata: '+error.message);return;}
-  if(!data||!data.length){alert('⚠️ Güncellenemedi - RLS sorunu\nSQL Editor'de:\nALTER TABLE foods DISABLE ROW LEVEL SECURITY;\nveya admin policy ekle');return;}
+  if(!data||!data.length){alert('Kayit guncellenemedi. RLS policy eksik olabilir.');return;}
   const f=foods.find(x=>x.id==id);if(f)f.photo_status='approved';
   const c=document.getElementById('c'+id);
   if(c){c.className='card approved';c.querySelector('.status-dot').className='status-dot dot-ok';}
@@ -291,6 +291,11 @@ async function approveAll(){
 }
 
 // ── RESİM SEÇİCİ ──
+function openPickerById(id,e){
+  const food = foods.find(f=>f.id==id);
+  if(food) openPicker(id, food.name, e);
+}
+
 function openPicker(id,name,e){
   e&&e.stopPropagation();
   currentFood={id,name};
@@ -504,7 +509,7 @@ async function saveSelected(){
   }
   
   if(!data||data.length===0){
-    alert('⚠️ Kayıt güncellenemedi - RLS engeli olabilir\nID: '+currentFood.id);
+    alert('Kayit guncellenemedi. RLS policy eksik olabilir.');
     document.getElementById('save-btn').textContent='✓ Kaydet';
     document.getElementById('save-btn').disabled=false;
     return;
