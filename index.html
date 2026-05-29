@@ -129,6 +129,8 @@ select.form-input option{background:#1a0a2e;color:#fff;}
 .swipe-btn-no{border-color:rgba(239,68,68,0.5);color:#fca5a5;}
 .swipe-btn-undo{border-color:rgba(255,255,255,0.15);color:var(--text2);font-size:16px;}
 .swipe-btn-yes{border-color:rgba(34,197,94,0.5);color:#86efac;}
+.sw-meal-btn{padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s;}
+.sw-meal-btn.sel{background:var(--accent);color:#fff;border-color:var(--accent);}
 /* LEADERBOARD */
 .lb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;margin-bottom:6px;}
 .lb-item.me{background:var(--card-accent);border:1px solid var(--border-accent);}
@@ -557,28 +559,43 @@ select.form-input option{background:#1a0a2e;color:#fff;}
     <span class="topbar-title" id="sw-title">Öneri</span>
     <span class="badge badge-accent" id="sw-count">0</span>
   </div>
-  <div class="page-content" style="display:flex;flex-direction:column;">
-    <p style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:12px;">Sağa kaydır: Plana ekle &nbsp;·&nbsp; Sola: Bugün istemiyorum</p>
-    <div class="swipe-container" id="sw-container">
+  <div class="page-content" style="display:flex;flex-direction:column;gap:0;padding-top:8px;">
+
+    <!-- Öğün seçici - sadece food modda görünür -->
+    <div id="sw-meal-picker" style="display:none;margin-bottom:10px;">
+      <div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:7px;">Hangi öğün için?</div>
+      <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+        <button class="sw-meal-btn sel" data-meal="breakfast" onclick="selSwMeal(this)">🌅 Kahvaltı</button>
+        <button class="sw-meal-btn" data-meal="lunch" onclick="selSwMeal(this)">☀️ Öğle</button>
+        <button class="sw-meal-btn" data-meal="dinner" onclick="selSwMeal(this)">🌙 Akşam</button>
+        <button class="sw-meal-btn" data-meal="snack" onclick="selSwMeal(this)">🍎 Ara Öğün</button>
+      </div>
+    </div>
+
+    <p style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:10px;">Sağa kaydır: Plana ekle &nbsp;·&nbsp; Sola: İstemiyorum</p>
+
+    <div class="swipe-container" id="sw-container" style="height:400px;">
       <div class="swipe-card-shadow"></div>
       <div class="swipe-card" id="sw-card">
         <div class="swipe-label swipe-label-left" id="sw-label-no">✗ İstemiyorum</div>
         <div class="swipe-label swipe-label-right" id="sw-label-yes">✓ Plana Ekle</div>
-        <img id="sw-img" src="" alt="" style="width:100%;height:155px;object-fit:cover;display:none;" onerror="this.style.display='none'"/>
-        <div style="padding:14px;">
-          <div style="font-size:17px;font-weight:600;margin-bottom:4px;" id="sw-name">-</div>
-          <div style="font-size:12px;color:var(--text3);margin-bottom:8px;" id="sw-sub">-</div>
+        <img id="sw-img" src="" alt="" style="width:100%;height:240px;object-fit:cover;display:none;border-radius:0;" onerror="this.style.display='none'"/>
+        <div style="padding:14px 16px;">
+          <div style="font-size:18px;font-weight:700;margin-bottom:3px;" id="sw-name">-</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:10px;" id="sw-sub">-</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;" id="sw-macros"></div>
           <div id="sw-yt" style="display:none;margin-top:10px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:12px;cursor:pointer;color:var(--accent);"></div>
         </div>
       </div>
     </div>
-    <div class="swipe-actions">
+
+    <div class="swipe-actions" style="margin-top:14px;">
       <button class="swipe-btn swipe-btn-no" onclick="doSwipe('no')">✕</button>
       <button class="swipe-btn swipe-btn-undo" onclick="undoSwipe()">↩</button>
       <button class="swipe-btn swipe-btn-yes" onclick="doSwipe('yes')">✓</button>
     </div>
-    <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:10px;">Atladıkların bugün bir daha çıkmaz</p>
+    <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:8px;">Atladıkların bugün bir daha çıkmaz</p>
+
     <div id="sw-done" style="display:none;text-align:center;padding:32px;">
       <div style="font-size:48px;margin-bottom:12px;">🎉</div>
       <div style="font-size:16px;font-weight:600;margin-bottom:8px;">Tüm öneriler bitti!</div>
@@ -1442,9 +1459,15 @@ async function loadFood(){
       (items||[]).forEach(item=>{
         html+=`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);">
           <img class="food-img" src="${getFoodPhoto(item.food_name||'')}" alt="${item.food_name||''}" loading="lazy" onerror="this.style.display='none'"/>
-          <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.food_name}</div>${item.portion_desc?`<div style="font-size:11px;color:var(--text3);">${item.portion_desc}</div>`:''}</div>
-          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-            <span class="badge badge-accent">${item.calories||0}</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.food_name}</div>
+            <div style="font-size:11px;color:var(--text3);">${item.portion_desc||''} · ${item.calories||0} kcal</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+            <button onclick="showPortionMenu('${item.id}',${item.calories||0},${item.protein_g||0},${item.carbs_g||0},${item.fat_g||0})" 
+              style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text2);height:26px;border-radius:8px;font-size:11px;cursor:pointer;padding:0 7px;" title="Ne kadar yedin?">
+              🍽️ Düzenle
+            </button>
             <button onclick="deleteFoodLog('${item.id}')" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;width:26px;height:26px;border-radius:50%;font-size:16px;cursor:pointer;line-height:1;" title="Sil">×</button>
           </div>
         </div>`;
@@ -1569,6 +1592,78 @@ async function saveFoodEntry(){
 }
 
 let weeklyPlanDays=[];let activePlanDay=0;
+
+function showPortionMenu(id, kcal, prot, carb, fat){
+  // Modal oluştur
+  const existing = document.getElementById('portion-modal');
+  if(existing) existing.remove();
+
+  const opts = [
+    {label:'¼ Yedim', pct:0.25},
+    {label:'⅓ Yedim', pct:0.33},
+    {label:'½ Yedim', pct:0.5},
+    {label:'⅔ Yedim', pct:0.67},
+    {label:'¾ Yedim', pct:0.75},
+    {label:'Tamamını Yedim', pct:1.0},
+    {label:'Sil', pct:0, del:true},
+  ];
+
+  let btns = opts.map(o => {
+    const col = o.del ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.06)';
+    const bdr = o.del ? 'rgba(239,68,68,0.4)' : 'var(--border)';
+    const txt = o.del ? '#fca5a5' : 'var(--text1)';
+    const kcalShow = o.del ? '' : `<span style="font-size:10px;color:var(--text3);margin-left:4px;">${Math.round(kcal*o.pct)} kcal</span>`;
+    return `<button onclick="applyPortion('${id}',${o.pct},${kcal},${prot},${carb},${fat})" 
+      style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid ${bdr};background:${col};color:${txt};font-size:14px;cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center;">
+      <span>${o.label}</span>${kcalShow}
+    </button>`;
+  }).join('');
+
+  const modal = document.createElement('div');
+  modal.id = 'portion-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;border:1px solid var(--border);">
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px;text-align:center;">Ne kadar yedin?</div>
+      <div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:16px;">Toplam: ${kcal} kcal</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">${btns}</div>
+      <button onclick="document.getElementById('portion-modal').remove()" 
+        style="width:100%;margin-top:12px;padding:11px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:14px;cursor:pointer;">
+        İptal
+      </button>
+    </div>`;
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+async function applyPortion(id, pct, kcal, prot, carb, fat){
+  document.getElementById('portion-modal')?.remove();
+  if(pct === 0){
+    await deleteFoodLog(id);
+    return;
+  }
+  if(pct === 1.0){
+    // Değişiklik yok, sadece kapat
+    return;
+  }
+  // Kalorisi güncelle
+  const newKcal = Math.round(kcal * pct);
+  const newProt = +((prot||0)*pct).toFixed(1);
+  const newCarb = +((carb||0)*pct).toFixed(1);
+  const newFat  = +((fat||0)*pct).toFixed(1);
+  const pctLabel = pct===0.25?'¼':pct===0.33?'⅓':pct===0.5?'½':pct===0.67?'⅔':'¾';
+  try{
+    await sb.from('food_logs').update({
+      calories: newKcal,
+      protein_g: newProt,
+      carbs_g: newCarb,
+      fat_g: newFat,
+      portion_desc: pctLabel + ' porsiyon',
+    }).eq('id', id).eq('user_id', CU.id);
+    ok(`${pctLabel} porsiyon kaydedildi · ${newKcal} kcal`);
+    loadFoodScreen();
+  } catch(e){ toast('Hata oluştu'); }
+}
 
 async function deleteFoodLog(id){
   if(!id)return;
@@ -1832,17 +1927,61 @@ async function saveSteps(){
 }
 
 // ============ SWIPE ============
-async function openSwipe(type){
+let swMeal = 'breakfast';
+function selSwMeal(btn){
+  document.querySelectorAll('.sw-meal-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  swMeal = btn.dataset.meal;
+}
+
+async function openSwipe(type, mealHint){
   swType=type;
   prevScreen=document.querySelector('.screen.active')?.id?.replace('screen-','');
   swHist=[];swIdx=0;
   document.getElementById('sw-title').textContent=type==='food'?'Bugün ne yesem?':'Bugün ne yapalım?';
-  // Get already shown today
+
+  // Öğün seçiciyi göster/gizle
+  const picker = document.getElementById('sw-meal-picker');
+  if(type==='food'){
+    picker.style.display='block';
+    // Saate göre veya hint'e göre başlangıç öğünü
+    const autoMeal = mealHint || mealByTime();
+    swMeal = autoMeal;
+    document.querySelectorAll('.sw-meal-btn').forEach(b=>{
+      b.classList.toggle('sel', b.dataset.meal === autoMeal);
+    });
+  } else {
+    picker.style.display='none';
+  }
+
   const{data:shown}=await sb.from('swipe_history').select('item_id').eq('user_id',CU.id).eq('log_date',today()).eq('item_type',type);
   const shownIds=(shown||[]).map(s=>s.item_id);
+
   if(type==='food'){
-    const{data}=await sb.from('foods').select('*').limit(20);
-    swQueue=(data||[]).filter(f=>!shownIds.includes(f.id));
+    // Öğüne göre akıllı kategori filtresi
+    const mealCategories = {
+      breakfast: ['kahvalti','kahvaltı','sabah','egg','yumurta','ekmek','simit','peynir','bal','yulaf','granola','smoothie','meyve'],
+      lunch: ['ana yemek','et','tavuk','balik','balık','salata','çorba','corba','pilav','makarna','sebze','baklagil','kebap'],
+      dinner: ['ana yemek','et','tavuk','balik','balık','çorba','corba','pilav','makarna','sebze','sebze yemeği','kebap','izgara'],
+      snack: ['meyve','kuruyemiş','protein','yoğurt','bar','atıştırma','atistirma']
+    };
+    // Önce tüm yemekleri çek
+    const{data: allFoods}=await sb.from('foods').select('*').limit(60);
+    const cats = mealCategories[swMeal] || [];
+    let filtered = (allFoods||[]).filter(f=>{
+      if(shownIds.includes(f.id)) return false;
+      const nm = (f.name||'').toLowerCase();
+      const cat = (f.category||'').toLowerCase();
+      // Eğer öğüne uygun kategori varsa önce onlar
+      return cats.some(c=>nm.includes(c)||cat.includes(c)) || true;
+    });
+    // Öğüne uygun olanları öne al
+    filtered.sort((a,b)=>{
+      const aMatch = cats.some(c=>(a.name||'').toLowerCase().includes(c)||(a.category||'').toLowerCase().includes(c));
+      const bMatch = cats.some(c=>(b.name||'').toLowerCase().includes(c)||(b.category||'').toLowerCase().includes(c));
+      return (bMatch?1:0)-(aMatch?1:0);
+    });
+    swQueue = filtered.slice(0,20);
   }else{
     const prefs=(UP?.sport_preferences||[]).filter(p=>p);
     let data=[];
@@ -1931,7 +2070,7 @@ async function doSwipe(dir){
   try{await sb.from('swipe_history').insert({user_id:CU.id,item_id:item.id,item_type:swType,action:dir==='yes'?'add':'skip',log_date:today()});}catch(e){}
   if(dir==='yes'){
     if(swType==='food'){
-      const meal=mealByTime();
+      const meal = swMeal || mealByTime();
       const pG=item.default_portion_g||100,r=pG/100;
       try{await sb.from('food_logs').insert({
         user_id:CU.id,log_date:today(),meal_type:meal,food_name:item.name,
@@ -1940,10 +2079,9 @@ async function doSwipe(dir){
         carbs_g:+((item.carbs_per_100g||0)*r).toFixed(1),
         fat_g:+((item.fat_per_100g||0)*r).toFixed(1),
         portion_desc:item.default_portion_name||pG+'g',});
-        if(swErr)console.error("swipe err:",swErr);
       }catch(e){console.error("swipe catch",e);}
       const mealNames={breakfast:'Kahvaltı',lunch:'Öğle',dinner:'Akşam',snack:'Ara Öğün'};
-      ok(item.name+' '+mealNames[meal]+' öğününe eklendi ✓');
+      ok(item.name+' → '+mealNames[meal]+' ✓');
     }else ok(item.name+' bugünkü plana eklendi ✓');
   }
   swHist.push({idx:swIdx,item,dir});swIdx++;
