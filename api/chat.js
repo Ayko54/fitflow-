@@ -11,11 +11,11 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST' });
 
   try {
-    const { model, max_tokens, system, messages, user_id, check_limit } = req.body;
+    const body = req.body;
 
-    // Pexels proxy isteği
-    if (req.body.pexels_query) {
-      const q = encodeURIComponent(req.body.pexels_query);
+    // Pexels proxy
+    if (body.pexels_query) {
+      const q = encodeURIComponent(body.pexels_query);
       const r = await fetch(
         `https://api.pexels.com/v1/search?query=${q}&per_page=1&orientation=square`,
         { headers: { Authorization: process.env.PEXELS_API_KEY } }
@@ -24,7 +24,9 @@ export default async function handler(req, res) {
       return res.status(200).json(d);
     }
 
-    // Chat limit kontrolü — backend'de yap, client bypass edemez
+    const { model, max_tokens, system, messages, user_id, check_limit } = body;
+
+    // Chat limit kontrolü — backend'de yap
     if (user_id) {
       const today = new Date().toISOString().split('T')[0];
       const countResp = await fetch(
@@ -33,14 +35,12 @@ export default async function handler(req, res) {
           headers: {
             apikey: process.env.SUPABASE_SERVICE_KEY,
             Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`,
-            'Content-Type': 'application/json',
           }
         }
       );
       const logs = await countResp.json();
       const msgCount = Array.isArray(logs) ? logs.length : 0;
 
-      // Extra mesaj hakkını da kontrol et
       const profResp = await fetch(
         `${SUPABASE_URL}/rest/v1/profiles?id=eq.${user_id}&select=extra_messages`,
         {
@@ -63,13 +63,12 @@ export default async function handler(req, res) {
         });
       }
 
-      // Sadece limit kontrolü yapıyorsak burada dön
       if (check_limit) {
         return res.status(200).json({ count: msgCount, limit: total, ok: true });
       }
     }
 
-    // Anthropic API çağrısı
+    // Anthropic API
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
