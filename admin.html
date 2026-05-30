@@ -65,6 +65,7 @@ input,select{background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#f
   <div class="stat y"><b id="spend">0</b> Bekleyen</div>
   <div class="stat"><b id="stot">0</b> Toplam</div>
   <button class="btn" onclick="resetKeys()">🔑 Key</button>
+  <button class="btn" id="maint-btn" onclick="toggleMaintenance()" style="background:#dc2626;border-color:#b91c1c;">🔧 Bakım Modu</button>
 </div>
 <div class="filters">
   <input id="fq" placeholder="🔍 Ara..." oninput="applyFilter()" style="width:180px">
@@ -419,10 +420,36 @@ async function doSave(){
   closeM();
 }
 
+
+async function toggleMaintenance(){
+  const btn=document.getElementById('maint-btn');
+  const{data}=await sb.from('app_config').select('value').eq('key','maintenance').limit(1);
+  const cur=data&&data[0]&&data[0].value==='true';
+  const next=cur?'false':'true';
+  await sb.from('app_config').upsert({key:'maintenance',value:next});
+  btn.style.background=next==='true'?'#16a34a':'#dc2626';
+  btn.style.borderColor=next==='true'?'#15803d':'#b91c1c';
+  btn.textContent=next==='true'?'✅ Bakım Aktif':'🔧 Bakım Modu';
+  alert(next==='true'?'Bakım modu AÇIK - kullanıcılar güncelleme ekranı görür':'Bakım modu KAPALI - uygulama normal çalışıyor');
+}
+
+async function checkMaintenanceStatus(){
+  try{
+    const{data}=await sb.from('app_config').select('value').eq('key','maintenance').limit(1);
+    const active=data&&data[0]&&data[0].value==='true';
+    const btn=document.getElementById('maint-btn');
+    if(btn&&active){
+      btn.style.background='#16a34a';
+      btn.style.borderColor='#15803d';
+      btn.textContent='✅ Bakım Aktif';
+    }
+  }catch(e){}
+}
+
 sb.from('foods').select('photo_status').limit(1).then(function(r){
   if(r.error&&r.error.message.indexOf('photo_status')>=0){
     alert('SQL Editor da su komutu calistir:\nALTER TABLE foods ADD COLUMN IF NOT EXISTS photo_status text;');
-  }else{loadFoods();}
+  }else{loadFoods();checkMaintenanceStatus();}
 });
 </script>
 </body>
