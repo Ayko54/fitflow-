@@ -887,71 +887,67 @@ function toFoodSlug(name){
 }
 
 function getFoodPhoto(name, size) {
+  // Önce foods tablosundaki onaylı photo_url'ye bak (async cache)
+  // Sync olarak çalışırken slug bazlı Storage URL dön
   const n = (name || '').trim();
-  if(!n) return 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&h=350';
-  
-  // 1. Cache
+  if(!n) return '';
   if(_photoCache[n]) return _photoCache[n];
-  
-  // 2. Diyetkolik DB - tam eşleşme (ama bu URL'ler hotlink korumalı, Supabase'e yüklenmişse oradan gelir)
-  const slug = toFoodSlug(n);
-  const supaUrl = SUPABASE_FOOD_IMG + slug + '.jpg';
-  
-  // 3. Pexels DB tam eşleşme
-  if(PEXELS_PHOTO_DB[n]){ _photoCache[n]=PEXELS_PHOTO_DB[n]; return PEXELS_PHOTO_DB[n]; }
-  
-  // 4. Büyük/küçük harf
-  const nLow = n.toLowerCase();
-  for(const[k,v] of Object.entries(PEXELS_PHOTO_DB)){
-    if(k.toLowerCase()===nLow){ _photoCache[n]=v; return v; }
-  }
-  
-  // 5. Kelime bazlı
-  const sorted = Object.keys(PEXELS_PHOTO_DB).sort((a,b)=>b.length-a.length);
-  for(const k of sorted){
-    if(nLow.includes(k.toLowerCase())||k.toLowerCase().includes(nLow)){
-      _photoCache[n]=PEXELS_PHOTO_DB[k]; return PEXELS_PHOTO_DB[k];
-    }
-  }
-  
-  // 6. Supabase Storage URL dön - yüklenmişse çalışır
-  _photoCache[n] = supaUrl;
-  return supaUrl;
+  const sl = toFoodSlug(n);
+  const url = SUPABASE_FOOD_IMG + sl + '.jpg';
+  _photoCache[n] = url;
+  return url;
 }
 
 // Async versiyon - bulamazsa Pexels'tan çek ve DB'ye kaydet
 async function getFoodPhotoAsync(name, imgEl){
-  const url = getFoodPhoto(name);
-  if(imgEl) imgEl.src = url;
+  if(!name || !imgEl) return;
+  imgEl.onerror = null; // prevent loop
   
-  // Resim yüklenmezse Pexels'tan çek ve kaydet
-  if(imgEl){
-    imgEl.onerror = async function(){
-      this.onerror = null;
-      try{
-        const q = encodeURIComponent((name||'')+ ' turkish food');
-        const r = await fetch('/api/chat', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({pexels_query: (name||'') + ' turkish food'})
-        });
-        if(r.ok){
-          const d = await r.json();
-          if(d.photos?.[0]){
-            const newUrl = d.photos[0].src.medium;
-            this.src = newUrl;
-            _photoCache[name] = newUrl;
-            // foods tablosuna kaydet - bir daha çekilmez
-            try{
-              await sb.from('foods').update({photo_url:newUrl}).ilike('name',name);
-            }catch(e){}
+  try {
+    // 1. foods tablosunda onaylı resim var mı?
+    const {data} = await sb.from('foods')
+      .select('photo_url, photo_status')
+      .ilike('name', name)
+      .limit(1);
+    
+    const food = data && data[0];
+    
+    // Onaylı resim varsa kullan
+    if(food && food.photo_url && food.photo_status === 'approved'){
+      imgEl.src = food.photo_url;
+      _photoCache[name] = food.photo_url;
+      return;
+    }
+    
+    // Reddedilmişse veya beklemedeyse Pexels'tan çek
+    if(!food || food.photo_status !== 'approved'){
+      const r = await fetch('/api/chat', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({pexels_query: name + ' turkish food'})
+      });
+      if(r.ok){
+        const d = await r.json();
+        if(d.photos && d.photos[0]){
+          const newUrl = d.photos[0].src.medium;
+          imgEl.src = newUrl;
+          _photoCache[name] = newUrl;
+          // Sadece beklemedeyse kaydet (reddedilmişi kaydetme)
+          if(!food || !food.photo_status){
+            try {
+              await sb.from('foods')
+                .update({photo_url: newUrl})
+                .ilike('name', name)
+                .is('photo_status', null);
+            } catch(e){}
           }
+          return;
         }
-      }catch(e){
-        this.style.display='none';
       }
-    };
-  }
+    }
+  } catch(e){}
+  
+  imgEl.style.display = 'none';
 }
 
 function getExercisePhoto(name, size) {
