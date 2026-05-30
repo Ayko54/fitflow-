@@ -423,14 +423,48 @@ async function doSave(){
 
 async function toggleMaintenance(){
   const btn=document.getElementById('maint-btn');
-  const{data}=await sb.from('app_config').select('value').eq('key','maintenance').limit(1);
-  const cur=data&&data[0]&&data[0].value==='true';
-  const next=cur?'false':'true';
-  await sb.from('app_config').upsert({key:'maintenance',value:next});
-  btn.style.background=next==='true'?'#16a34a':'#dc2626';
-  btn.style.borderColor=next==='true'?'#15803d':'#b91c1c';
-  btn.textContent=next==='true'?'✅ Bakım Aktif':'🔧 Bakım Modu';
-  alert(next==='true'?'Bakım modu AÇIK - kullanıcılar güncelleme ekranı görür':'Bakım modu KAPALI - uygulama normal çalışıyor');
+  btn.textContent='...';
+  btn.disabled=true;
+
+  try {
+    // Mevcut durumu oku
+    const r1=await fetch(SB_URL+'/rest/v1/app_config?key=eq.maintenance&select=value',{
+      headers:{apikey:SVCKEY||SB_KEY,'Authorization':'Bearer '+(SVCKEY||SB_KEY)}
+    });
+    const d1=await r1.json();
+    const cur=d1&&d1[0]&&d1[0].value==='true';
+    const next=cur?'false':'true';
+
+    // Service key ile upsert
+    const r2=await fetch(SB_URL+'/rest/v1/app_config',{
+      method:'POST',
+      headers:{
+        apikey:SVCKEY||SB_KEY,
+        'Authorization':'Bearer '+(SVCKEY||SB_KEY),
+        'Content-Type':'application/json',
+        'Prefer':'resolution=merge-duplicates'
+      },
+      body:JSON.stringify({key:'maintenance',value:next})
+    });
+
+    if(!r2.ok){
+      const err=await r2.text();
+      alert('Hata: '+err);
+      btn.disabled=false;
+      checkMaintenanceStatus();
+      return;
+    }
+
+    btn.style.background=next==='true'?'#16a34a':'#dc2626';
+    btn.style.borderColor=next==='true'?'#15803d':'#b91c1c';
+    btn.textContent=next==='true'?'✅ Bakım Aktif':'🔧 Bakım Modu';
+    btn.disabled=false;
+    alert(next==='true'?'✅ Bakım modu AÇIK\nKullanıcılar güncelleme ekranı görür':'✅ Bakım modu KAPALI\nUygulama normal çalışıyor');
+  } catch(e) {
+    alert('Hata: '+e.message);
+    btn.disabled=false;
+    checkMaintenanceStatus();
+  }
 }
 
 async function checkMaintenanceStatus(){
