@@ -3306,11 +3306,21 @@ async function generateShoppingList(){
   box.innerHTML='<div style="font-size:17px;font-weight:800;margin-bottom:16px;">Alisveris Listesi</div><div style="text-align:center;padding:20px;color:var(--text3);">Olusturuluyor...</div>';
   overlay.appendChild(box);
   document.body.appendChild(overlay);
+  // Cache kontrol - aynı plan için tekrar AI çağrısı yapma
+  var shopCacheKey='shopList_'+new Date().toISOString().split('T')[0];
+  var cachedShop=sessionStorage.getItem(shopCacheKey);
+  if(cachedShop){
+    try{
+      var list=JSON.parse(cachedShop);
+      renderShopList(box,list);
+      return;
+    }catch(e){}
+  }
   try{
     var r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,
         system:'Return only JSON.',
-        messages:[{role:'user',content:'Shopping list for these meals as JSON: {"sebze":[],"et":[],"tahil":[],"sut":[],"diger":[]}\nMeals: '+meals.slice(0,14).join(', ')}]})});
+        messages:[{role:'user',content:'Bu 7 gunluk yemek planina gore 1 kisi icin alisveris listesi hazirla. Her malzemenin yanina miktar yaz (kg, g, adet, litre). SADECE JSON: {"sebze":[],"et":[],"tahil":[],"sut":[],"diger":[]}\nOrnek format: ["Tavuk but 1.5 kg","Domates 500g","Yumurta 1 duzine"]\n\n7 Gunluk Plan:\n'+meals.slice(0,21).join('\n')+'.'}]})});
     var d=await r.json();
     var raw=(d.content&&d.content[0]&&d.content[0].text||'').replace(/`/g,'').replace('json','').trim();
     var list=null;
@@ -3318,34 +3328,8 @@ async function generateShoppingList(){
       var s=raw.indexOf('{');var e2=raw.lastIndexOf('}');
       if(s>=0&&e2>s)try{list=JSON.parse(raw.slice(s,e2+1));}catch(e3){}
     }
-    var cats=[{k:'sebze',l:'Sebze'},{k:'et',l:'Et'},{k:'tahil',l:'Tahil'},{k:'sut',l:'Sut'},{k:'diger',l:'Diger'}];
-    _shopText='Alisveris Listesi\n\n';
-    var html='';
-    if(list){
-      cats.forEach(function(c){
-        if(list[c.k]&&list[c.k].length){
-          html+='<div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px;">'+c.l+'</div>';
-          list[c.k].forEach(function(item){
-            html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">'
-              +'<div class="shop-check" onclick="toggleCheck(this)" style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);cursor:pointer;flex-shrink:0;"></div>'
-              +'<div style="font-size:13px;">'+item+'</div></div>';
-            _shopText+='- '+item+'\n';
-          });
-          html+='</div>';
-          _shopText+='\n';
-        }
-      });
-    }else{
-      html='<div style="color:var(--text3);">Liste olusturulamadi.</div>';
-    }
-    box.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
-      +'<div style="font-size:17px;font-weight:800;">Alisveris Listesi</div>'
-      +'<button style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;" onclick="closeShopModal(this)">x</button>'
-      +'</div>'+html
-      +'<div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">'
-      +'<button class="btn btn-secondary" style="flex:1;" onclick="copyShopList()">Kopyala</button>'
-      +'<button class="btn btn-primary" style="flex:1;" onclick="shareShopList()">Paylas</button>'
-      +'</div>';
+    if(list)sessionStorage.setItem(shopCacheKey,JSON.stringify(list));
+    renderShopList(box,list);
   }catch(e){
     box.innerHTML='<div style="padding:20px;color:var(--text3);">Hata: '+e.message+'</div>';
   }
@@ -3370,6 +3354,36 @@ function closeShopModal(btn){
   var p=btn;
   while(p&&p.style&&p.style.cssText&&p.style.cssText.indexOf('fixed')<0){p=p.parentElement;}
   if(p)p.remove();
+}
+
+function renderShopList(box,list){
+  var cats=[{k:'sebze',l:'🥦 Sebze & Meyve'},{k:'et',l:'🥩 Et & Protein'},{k:'tahil',l:'🍞 Tahil & Ekmek'},{k:'sut',l:'🥛 Sut Urunleri'},{k:'diger',l:'🧂 Diger'}];
+  _shopText='Alisveris Listesi - 7 Gunluk\n\n';
+  var html='';
+  if(list){
+    cats.forEach(function(c){
+      if(list[c.k]&&list[c.k].length){
+        html+='<div style="margin-bottom:14px;"><div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;letter-spacing:.5px;">'+c.l+'</div>';
+        list[c.k].forEach(function(item){
+          html+='<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">'
+            +'<div style="width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px;"></div>'
+            +'<div style="font-size:13px;line-height:1.4;">'+item+'</div></div>';
+          _shopText+='- '+item+'\n';
+        });
+        html+='</div>';_shopText+='\n';
+      }
+    });
+  }else{
+    html='<div style="color:var(--text3);padding:10px 0;">Liste olusturulamadi, tekrar dene.</div>';
+  }
+  box.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'
+    +'<div style="font-size:17px;font-weight:800;">🛒 Alisveris Listesi</div>'
+    +'<button style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;" onclick="closeShopModal(this)">x</button>'
+    +'</div>'+html
+    +'<div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">'
+    +'<button class="btn btn-secondary" style="flex:1;" onclick="copyShopList()">📋 Kopyala</button>'
+    +'<button class="btn btn-primary" style="flex:1;" onclick="shareShopList()">📤 Paylas</button>'
+    +'</div>';
 }
 </script>
 </body>
