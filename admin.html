@@ -216,9 +216,11 @@ function slug(n){
 
 async function loadFoods(){
   document.getElementById('grid').innerHTML='<div class="lm">Yukleniyor...</div>';
-  // Service key ile ayrı client oluştur - RLS bypass
-  var adminSb=SVCKEY?window.supabase.createClient(SB_URL,SVCKEY):sb;
-  var r=await adminSb.from('foods').select('id,name,category,photo_url,photo_status').order('name').limit(5000);
+  // Service key ile direkt REST API çağrısı - RLS bypass
+  var key=SVCKEY||SB_KEY;
+  var url=SB_URL+'/rest/v1/foods?select=id,name,category,photo_url,photo_status&order=name.asc&limit=5000';
+  var resp=await fetch(url,{headers:{apikey:key,Authorization:'Bearer '+key}});
+  var r={data:await resp.json(),error:resp.ok?null:{message:'HTTP '+resp.status}};
   foods=r.data||[];
   var cats=[...new Set(foods.map(function(f){return f.category;}).filter(Boolean))].sort();
   var s=document.getElementById('fcat');
@@ -289,7 +291,9 @@ function renderPag(){
 function goPage(p){pg=p;render();window.scrollTo(0,0);}
 
 async function doApprove(id){
-  var r=await sb.from('foods').update({photo_status:'approved'}).eq('id',id).select();
+  var key=SVCKEY||SB_KEY;
+  var resp=await fetch(SB_URL+'/rest/v1/foods?id=eq.'+id,{method:'PATCH',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({photo_status:'approved'})});
+  var r={data:resp.ok?await resp.json():null,error:resp.ok?null:{message:'HTTP '+resp.status}};
   if(r.error){alert('Hata: '+r.error.message);return;}
   var f=foods.find(function(x){return x.id==id;});
   if(f)f.photo_status='approved';
@@ -299,7 +303,9 @@ async function doApprove(id){
 }
 
 async function doReject(id){
-  var r=await sb.from('foods').update({photo_status:'rejected'}).eq('id',id).select();
+  var key=SVCKEY||SB_KEY;
+  var resp=await fetch(SB_URL+'/rest/v1/foods?id=eq.'+id,{method:'PATCH',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({photo_status:'rejected'})});
+  var r={data:resp.ok?await resp.json():null,error:resp.ok?null:{message:'HTTP '+resp.status}};
   if(r.error){alert('Hata: '+r.error.message);return;}
   var f=foods.find(function(x){return x.id==id;});
   if(f)f.photo_status='rejected';
@@ -311,8 +317,9 @@ async function doReject(id){
 async function approveAll(){
   var items=filtered.slice(pg*PER,(pg+1)*PER);
   if(!confirm(items.length+' yemegi onayla?'))return;
+  var key=SVCKEY||SB_KEY;
   for(var i=0;i<items.length;i++){
-    await sb.from('foods').update({photo_status:'approved'}).eq('id',items[i].id);
+    await fetch(SB_URL+'/rest/v1/foods?id=eq.'+items[i].id,{method:'PATCH',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({photo_status:'approved'})});
     items[i].photo_status='approved';
   }
   updateStats();render();
@@ -460,7 +467,9 @@ async function doSave(){
   if(!selUrl||!curFood){alert('Resim secilmedi');return;}
   document.getElementById('savebtn').disabled=true;
   document.getElementById('savebtn').textContent='Kaydediliyor...';
-  var r=await sb.from('foods').update({photo_url:selUrl,photo_status:'approved'}).eq('id',curFood.id).select();
+  var key=SVCKEY||SB_KEY;
+  var sresp=await fetch(SB_URL+'/rest/v1/foods?id=eq.'+curFood.id,{method:'PATCH',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({photo_url:selUrl,photo_status:'approved'})});
+  var r={data:sresp.ok?await sresp.json():null,error:sresp.ok?null:{message:'HTTP '+sresp.status}};
   document.getElementById('savebtn').textContent='Kaydet';
   if(r.error){alert('DB Hata: '+r.error.message);document.getElementById('savebtn').disabled=false;return;}
   var f=foods.find(function(x){return x.id==curFood.id;});
@@ -616,13 +625,15 @@ async function addNewFood(){
   var photo=document.getElementById('add-photo').value.trim()||null;
   var trMap={'ş':'s','ğ':'g','ü':'u','ö':'o','ç':'c','ı':'i','Ş':'s','Ğ':'g','Ü':'u','Ö':'o','Ç':'c','İ':'i'};
   var slug=name.toLowerCase().replace(/[şğüöçıŞĞÜÖÇİ]/g,function(c){return trMap[c]||c;}).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-  var r=await sb.from('foods').insert({
+  var key=SVCKEY||SB_KEY;
+  var addResp=await fetch(SB_URL+'/rest/v1/foods',{method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({
     name:name,slug:slug,category:cat,
     calories_per_100g:cal,protein_per_100g:prot,carbs_per_100g:carbs,fat_per_100g:fat,
     photo_url:photo,photo_status:photo?'approved':null,
     default_portion_g:100,default_portion_name:'1 porsiyon',
     calorie_verified:cal?true:null
-  }).select();
+  })});
+  var r={data:addResp.ok?await addResp.json():null,error:addResp.ok?null:{message:'HTTP '+addResp.status}};
   var res=document.getElementById('add-result');
   if(r.error){res.style.color='#ef4444';res.textContent='Hata: '+r.error.message;}
   else{res.style.color='#22c55e';res.textContent='"'+name+'" eklendi!';
@@ -663,7 +674,8 @@ async function dismissReport(id){
 }
 
 async function changeCategory(id,newCat){
-  await sb.from('foods').update({category:newCat}).eq('id',id);
+  var key=SVCKEY||SB_KEY;
+  await fetch(SB_URL+'/rest/v1/foods?id=eq.'+id,{method:'PATCH',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({category:newCat})});
   var f=foods.find(function(x){return x.id==id;});
   if(f)f.category=newCat;
   var m=document.getElementById('cat-menu');if(m)m.remove();
