@@ -27,168 +27,203 @@ window.addEventListener('error', function(e){
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow:hidden;background:#08060e;}
+html,body{height:100%;overflow:hidden;background:#08060f;}
 body{font-family:'Outfit',sans-serif;color:#fff;font-size:15px;}
 :root{
-  --accent:#e8547a;--accent2:#c93d61;--accent3:#f5c842;
-  --bg1:#08060e;--bg2:#130a1e;--bg3:#1c1030;
-  --card:rgba(255,255,255,0.05);--card-accent:rgba(232,84,122,0.10);
-  --border:rgba(255,255,255,0.07);--border-accent:rgba(232,84,122,0.25);
-  --text:#fff;--text2:rgba(255,255,255,0.6);--text3:rgba(255,255,255,0.32);
-  --glow:0 0 40px rgba(232,84,122,0.15);
+  --accent:#7c3aed;--accent2:#a855f7;--accent3:#ec4899;
+  --bg1:#08060f;--bg2:#110d1e;--bg3:#1a1428;
+  --card:#1e1830;--card-accent:rgba(124,58,237,0.12);
+  --border:rgba(255,255,255,0.07);--border-accent:rgba(168,85,247,0.3);
+  --text:#fff;--text2:#a09cb8;--text3:#5e5877;
+  --green:#22c55e;--orange:#f97316;--pink:#ec4899;--blue:#38bdf8;
+  --grad:linear-gradient(135deg,#7c3aed,#a855f7);
+  --glow:0 0 60px rgba(124,58,237,0.25);
 }
 body.male{
-  --accent:#f97316;--accent2:#ea580c;--accent3:#fbbf24;
-  --bg1:#06080f;--bg2:#0a1220;--bg3:#0f1a2e;
-  --card-accent:rgba(249,115,22,0.10);--border-accent:rgba(249,115,22,0.25);
-  --glow:0 0 40px rgba(249,115,22,0.12);
+  --accent:#f97316;--accent2:#fb923c;--accent3:#fbbf24;
+  --bg1:#060a0f;--bg2:#0c1420;--bg3:#101e30;
+  --card:#141f32;--card-accent:rgba(249,115,22,0.12);
+  --border-accent:rgba(249,115,22,0.3);
+  --grad:linear-gradient(135deg,#f97316,#fb923c);
+  --glow:0 0 60px rgba(249,115,22,0.2);
 }
+
 #app{height:100vh;display:flex;flex-direction:column;max-width:430px;margin:0 auto;background:var(--bg1);position:relative;overflow:hidden;}
-#app::before{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(232,84,122,0.06) 0%,transparent 70%);pointer-events:none;z-index:0;}
-body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.06) 0%,transparent 70%);}
+#app::before{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(124,58,237,0.08) 0%,transparent 70%);pointer-events:none;z-index:0;}
+body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 0%,transparent 70%);}
+
 .screen{display:none;flex-direction:column;height:100%;overflow:hidden;}
 .screen.active{display:flex;}
 .page-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px 80px;}
 .page-content::-webkit-scrollbar{display:none;}
-.topbar{background:rgba(8,6,14,0.8);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;z-index:10;}
-.topbar-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;}
-.bottomnav{background:rgba(8,6,14,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);display:flex;padding:6px 0 env(safe-area-inset-bottom,8px);flex-shrink:0;z-index:10;}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:6px 0;border:none;background:none;}
-.nav-item svg{width:22px;height:22px;stroke:var(--text3);fill:none;stroke-width:1.8;transition:stroke .2s;}
-.nav-item span{font-size:10px;color:var(--text3);font-weight:500;transition:color .2s;}
-.nav-item.active svg{stroke:var(--accent);}
-.nav-item.active span{color:var(--accent);}
-.plus-btn-wrap{flex:1;display:flex;justify-content:center;align-items:center;}
-.plus-btn{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;margin-top:-20px;box-shadow:0 4px 24px rgba(232,84,122,0.45),0 0 0 1px rgba(232,84,122,0.2);}
-body.male .plus-btn{box-shadow:0 4px 24px rgba(249,115,22,0.45),0 0 0 1px rgba(249,115,22,0.2);}
-.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:10px;transition:border-color .2s;}
-.card-accent{background:var(--card-accent);border:1px solid var(--border-accent);border-radius:18px;padding:14px;margin-bottom:10px;}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;border:none;width:100%;font-family:'Outfit',sans-serif;transition:opacity .15s,transform .1s;}
+
+/* TOPBAR */
+.topbar{background:rgba(8,6,15,0.85);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;z-index:10;}
+.topbar-title{font-size:18px;font-weight:800;}
+
+/* BOTTOM NAV */
+.bottomnav{background:rgba(8,6,15,0.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);display:flex;padding:6px 0 env(safe-area-inset-bottom,8px);flex-shrink:0;z-index:10;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;border:none;background:none;cursor:pointer;color:var(--text3);}
+.nav-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;}
+.nav-item span{font-size:10px;font-family:'Outfit',sans-serif;}
+.nav-item.active{color:var(--accent2);}
+.plus-btn-wrap{flex:1;display:flex;align-items:center;justify-content:center;}
+.plus-btn{width:52px;height:52px;border-radius:50%;background:var(--grad);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;margin-top:-20px;box-shadow:0 4px 24px rgba(124,58,237,0.5),0 0 0 1px rgba(168,85,247,0.2);}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:14px;margin-bottom:10px;transition:all .2s;}
+.card-accent{background:var(--card-accent);border:1px solid var(--border-accent);border-radius:20px;padding:14px;margin-bottom:10px;}
+
+/* BUTTONS */
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:13px;border-radius:14px;border:1.5px solid var(--border);background:transparent;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s;}
 .btn:active{transform:scale(0.97);}
-.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
-.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
-.btn-secondary{background:var(--card-accent);color:var(--accent);border:1px solid var(--border-accent);}
-.btn-outline{background:transparent;color:var(--accent);border:1.5px solid var(--accent);}
-.btn-ghost{background:transparent;color:var(--text2);border:none;font-weight:500;}
-.btn-green{background:rgba(74,222,128,0.12);color:#86efac;border:1px solid rgba(74,222,128,0.3);}
-.btn-sm{padding:8px 14px;font-size:13px;width:auto;}
-.form-group{margin-bottom:14px;}
-.form-label{font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;}
-.form-input{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:'Outfit',sans-serif;color:#fff;background:rgba(255,255,255,0.06);outline:none;transition:border .15s;}
-.form-input:focus{border-color:var(--accent);}
-.form-input::placeholder{color:var(--text3);}
-select.form-input option{background:#1a0a2e;color:#fff;}
-.opt-pill-wide{padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.04);font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .15s;display:flex;align-items:center;gap:10px;margin-bottom:8px;user-select:none;}
-.opt-pill-wide.sel{background:var(--card-accent);border-color:var(--accent);color:#fff;}
-.opt-pill-wide strong{display:block;font-size:14px;color:#fff;}
-.opt-pill-wide small{font-size:12px;color:var(--text3);}
-.opt-pill-wide.sel small{color:var(--accent);}
-.option-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.opt-pill{padding:11px 8px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.04);font-size:13px;font-weight:500;text-align:center;cursor:pointer;color:var(--text2);transition:all .15s;user-select:none;}
-.opt-pill.sel{background:var(--card-accent);border-color:var(--accent);color:#fff;}
-.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;}
-.badge-accent{background:var(--card-accent);color:var(--accent);border:1px solid var(--border-accent);}
-.badge-green{background:rgba(74,222,128,0.12);color:#86efac;}
-.badge-amber{background:rgba(251,191,36,0.12);color:#fcd34d;}
-.badge-red{background:rgba(239,68,68,0.12);color:#fca5a5;}
+.btn-primary{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 20px rgba(124,58,237,0.45);}
+.btn-secondary{background:var(--card);color:var(--text2);border-color:var(--border);}
+.btn-sm{padding:8px 14px;font-size:12px;border-radius:10px;width:auto;}
+.btn-outline{border-color:var(--accent);color:var(--accent);background:transparent;}
+.btn-ghost{border-color:transparent;color:var(--text3);}
+.btn-danger{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);color:#fca5a5;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;}
+.badge-accent{background:rgba(168,85,247,0.15);color:var(--accent2);border:1px solid rgba(168,85,247,0.25);}
+.badge-amber{background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.2);}
 .badge-gray{background:rgba(255,255,255,0.08);color:var(--text2);}
-.progress-track{height:5px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;}
-.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent3));transition:width .5s ease;}
-.sec-title{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.7px;text-transform:uppercase;margin:12px 0 8px;}
-.divider{height:1px;background:var(--border);margin:12px 0;}
-/* TOAST */
-#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(10px);background:rgba(20,20,30,0.97);color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:all .25s;pointer-events:none;border:1px solid var(--border);max-width:90vw;text-align:center;white-space:nowrap;}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-#toast.success{border-color:rgba(74,222,128,0.4);color:#86efac;}
-#toast.error{border-color:rgba(239,68,68,0.4);color:#fca5a5;}
+.badge-green{background:rgba(34,197,94,0.15);color:#22c55e;}
+
+/* FORM */
+.form-input{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:12px;color:#fff;padding:12px 14px;font-size:14px;font-family:'Outfit',sans-serif;outline:none;transition:border-color .15s;}
+.form-input:focus{border-color:var(--accent);}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:12px;color:var(--text3);font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.form-select{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:12px;color:#fff;padding:12px 14px;font-size:14px;font-family:'Outfit',sans-serif;outline:none;}
+
+/* SEARCH BAR */
+.search-bar{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px 16px;display:flex;gap:10px;align-items:center;margin-bottom:12px;}
+.search-input{flex:1;background:none;border:none;color:#fff;font-size:14px;font-family:'Outfit',sans-serif;outline:none;}
+.search-input::placeholder{color:var(--text3);}
+
+/* PROGRESS */
+.progress-track{width:100%;height:6px;background:rgba(255,255,255,0.07);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--grad);border-radius:99px;transition:width .5s ease;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);}
+.modal-overlay.show{display:flex;}
+.modal-sheet{background:var(--bg2);border-radius:28px 28px 0 0;padding:16px;max-height:92vh;overflow-y:auto;width:100%;}
+.modal-box{background:var(--bg2);border-radius:24px;padding:20px;margin:auto;width:90%;max-width:380px;}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:99px;margin:0 auto 16px;}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:14px;}
+.modal-close{background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;padding:0;line-height:1;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+
+/* SECTIONS */
+.sec-title{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.7px;text-transform:uppercase;margin:16px 0 8px;}
+
+/* WATER */
+.water-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:8px;}
+.water-drop{width:100%;aspect-ratio:1;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;background:var(--card);}
+.water-drop.filled{background:rgba(56,189,248,0.2);border-color:var(--blue);}
+
+/* STAT */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px;text-align:center;}
+.stat-val{font-size:22px;font-weight:800;color:var(--accent2);}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* FOOD ITEM */
+.food-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.food-img{width:44px;height:44px;border-radius:12px;object-fit:cover;background:var(--bg3);flex-shrink:0;}
+.food-info{flex:1;}
+.food-name{font-size:13px;font-weight:600;}
+.food-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.food-kcal{font-size:13px;font-weight:700;color:var(--accent2);}
+
+/* SWIPE */
+.swipe-container{position:relative;width:100%;height:100%;}
+.swipe-card-shadow{position:absolute;top:8px;left:6px;right:6px;bottom:-6px;border-radius:28px;background:var(--card);border:1px solid var(--border);}
+.swipe-card{position:absolute;top:0;left:0;right:0;bottom:6px;border-radius:28px;overflow:hidden;border:1.5px solid var(--border-accent);background:var(--card);cursor:grab;user-select:none;}
+.swipe-label{position:absolute;top:16px;padding:8px 18px;border-radius:12px;font-size:14px;font-weight:800;opacity:0;transition:opacity .15s;z-index:2;backdrop-filter:blur(8px);}
+.swipe-label-left{left:14px;background:rgba(239,68,68,0.9);color:#fff;box-shadow:0 4px 16px rgba(239,68,68,0.4);}
+.swipe-label-right{right:14px;background:rgba(34,197,94,0.9);color:#fff;box-shadow:0 4px 16px rgba(34,197,94,0.4);}
+.swipe-actions{display:flex;gap:20px;justify-content:center;align-items:center;}
+.swipe-btn{border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s;}
+.swipe-btn:active{transform:scale(0.88);}
+.swipe-btn-no{width:60px;height:60px;font-size:24px;background:rgba(239,68,68,0.1);color:#fca5a5;border:2px solid rgba(239,68,68,0.35);box-shadow:0 4px 16px rgba(239,68,68,0.15);}
+.swipe-btn-undo{width:48px;height:48px;font-size:20px;background:var(--card);color:var(--text2);border:1.5px solid var(--border);}
+.swipe-btn-yes{width:60px;height:60px;font-size:24px;background:rgba(34,197,94,0.1);color:#86efac;border:2px solid rgba(34,197,94,0.35);box-shadow:0 4px 16px rgba(34,197,94,0.15);}
+.sw-meal-btn{padding:7px 16px;border-radius:99px;border:1.5px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;transition:all .15s;}
+.sw-meal-btn.sel{background:var(--card-accent);border-color:var(--accent);color:var(--accent2);}
+
+/* ONBOARDING */
+.ob-step{display:none;flex:1;overflow-y:auto;padding:16px;}
+.ob-step.active{display:block;}
+.onboard-bar{height:4px;background:rgba(255,255,255,0.07);margin:0 16px;border-radius:99px;overflow:hidden;}
+.onboard-fill{height:100%;background:var(--grad);transition:width .5s ease;border-radius:99px;}
+.opt-pill{padding:10px 18px;border-radius:99px;border:1.5px solid var(--border);background:var(--card);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;margin:6px;display:inline-flex;align-items:center;gap:6px;transition:all .15s;}
+.opt-pill.sel{background:var(--card-accent);border-color:var(--accent2);color:var(--accent2);}
+.opt-pill-wide{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;border:1.5px solid var(--border);background:var(--card);cursor:pointer;margin-bottom:10px;transition:all .15s;}
+.opt-pill-wide.sel{border-color:var(--accent2);background:var(--card-accent);}
+.ob-input-row{display:flex;gap:10px;margin-bottom:12px;}
+
+/* EXERCISE */
+.ex-card{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .2s;}
+.ex-card:active{border-color:var(--accent);}
+.ex-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.ex-name{font-size:13px;font-weight:600;}
+.ex-info{font-size:11px;color:var(--text3);margin-top:2px;}
+.ex-done{background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.3);}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:14px 0;}
+
+/* CHAT */
+.chat-bubble{max-width:85%;padding:10px 14px;border-radius:18px;font-size:13px;line-height:1.5;margin-bottom:10px;}
+.chat-user{background:var(--grad);color:#fff;align-self:flex-end;border-radius:18px 18px 4px 18px;margin-left:auto;}
+.chat-ai{background:var(--card);color:var(--text);border-radius:18px 18px 18px 4px;border:1px solid var(--border);}
+
+/* MACRO BAR */
+.macro-bar-wrap{display:flex;gap:8px;margin:6px 0;}
+.macro-bar{flex:1;background:rgba(255,255,255,0.06);border-radius:8px;padding:8px;text-align:center;}
+.macro-bar .mb-val{font-size:14px;font-weight:700;}
+.macro-bar .mb-lbl{font-size:10px;color:var(--text3);margin-top:2px;}
+
 /* LOADER */
 #loader{position:fixed;inset:0;background:var(--bg1);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-.spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,0.1);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin-top:20px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:none;align-items:flex-end;backdrop-filter:blur(4px);}
-.modal-overlay.show{display:flex;}
-.modal-sheet{background:var(--bg2);border-radius:20px 20px 0 0;padding:20px 16px max(32px,env(safe-area-inset-bottom));width:100%;max-height:88vh;overflow-y:auto;border-top:1px solid var(--border);animation:slideUp .2s ease;}
-.modal-sheet::-webkit-scrollbar{display:none;}
-.modal-handle{width:36px;height:4px;background:rgba(255,255,255,0.2);border-radius:99px;margin:0 auto 16px;}
-.modal-title{font-size:17px;font-weight:600;margin-bottom:14px;}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-/* FOOD */
-.food-img{width:44px;height:44px;border-radius:10px;object-fit:cover;background:rgba(255,255,255,0.06);flex-shrink:0;transition:opacity .2s;}
-.food-list-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;}
-.food-list-item:last-child{border-bottom:none;}
-.food-list-item:active{opacity:.7;}
-.search-bar{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:10px;}
-.search-input{flex:1;background:transparent;border:none;outline:none;font-size:14px;color:#fff;font-family:'Outfit',sans-serif;}
-.search-input::placeholder{color:var(--text3);}
-/* SWIPE */
-.swipe-container{position:relative;width:100%;height:100%;}
-.swipe-card-shadow{position:absolute;top:8px;left:6px;right:6px;bottom:-6px;border-radius:22px;background:rgba(255,255,255,0.03);border:1px solid var(--border);}
-.swipe-card{position:absolute;top:0;left:0;right:0;bottom:6px;border-radius:22px;overflow:hidden;border:1px solid var(--border-accent);background:var(--bg2);cursor:grab;user-select:none;}
-.swipe-card.animate{transition:transform .3s ease,opacity .3s ease;}
-.swipe-label{position:absolute;top:18px;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700;opacity:0;transition:opacity .1s;z-index:10;pointer-events:none;}
-.swipe-label-left{left:14px;background:rgba(239,68,68,0.92);color:#fff;transform:rotate(-12deg);}
-.swipe-label-right{right:14px;background:rgba(34,197,94,0.92);color:#fff;transform:rotate(12deg);}
-.swipe-actions{display:flex;gap:14px;justify-content:center;}
-.swipe-btn{width:56px;height:56px;border-radius:50%;border:2px solid;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;background:transparent;transition:transform .1s;}
-.swipe-btn:active{transform:scale(0.88);}
-.swipe-btn-no{border-color:rgba(239,68,68,0.5);color:#fca5a5;}
-.swipe-btn-undo{border-color:rgba(255,255,255,0.15);color:var(--text2);font-size:16px;}
-.swipe-btn-yes{border-color:rgba(34,197,94,0.5);color:#86efac;}
-.sw-meal-btn{padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s;}
-.sw-meal-btn.sel{background:var(--accent);color:#fff;border-color:var(--accent);}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* AUTH */
+.auth-brand{font-size:36px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;}
+.auth-box{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:24px;width:90%;max-width:340px;}
+.input-group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+
+/* NOTIFICATIONS */
+#toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 20px;font-size:13px;font-weight:600;white-space:nowrap;z-index:9999;opacity:0;transition:opacity .3s;backdrop-filter:blur(12px);}
+#toast.show{opacity:1;}
+#toast.ok{border-color:rgba(34,197,94,0.5);color:#22c55e;}
+#toast.err{border-color:rgba(239,68,68,0.5);color:#fca5a5;}
+
+/* QUICK MODAL öğün butonları */
+.quick-meal-btn{padding:14px;border-radius:16px;background:var(--card);border:1.5px solid var(--border);cursor:pointer;text-align:center;font-size:22px;transition:all .15s;}
+.quick-meal-btn:hover,.quick-meal-btn:active{border-color:var(--accent2);background:var(--card-accent);}
+.quick-meal-label{font-size:11px;color:var(--text3);margin-top:4px;font-weight:600;}
+
+/* PAGING */
+.pag-btn{padding:6px 12px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--text2);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;}
+.pag-btn.active{background:var(--card-accent);border-color:var(--accent);color:var(--accent2);}
+
+/* CHALLENGES */
+.challenge-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:10px;overflow:hidden;position:relative;}
+.challenge-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad);}
+
 /* LEADERBOARD */
-.lb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;margin-bottom:6px;}
-.lb-item.me{background:var(--card-accent);border:1px solid var(--border-accent);}
-.lb-item.other{background:var(--card);border:1px solid var(--border);}
-.lb-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;}
-/* CHAT */
-.chat-messages{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:6px;}
-.chat-messages::-webkit-scrollbar{display:none;}
-.bubble{padding:11px 14px;border-radius:14px;font-size:14px;line-height:1.55;max-width:88%;word-break:break-word;}
-.bubble-ai{background:rgba(255,255,255,0.07);border:1px solid var(--border);border-bottom-left-radius:4px;align-self:flex-start;}
-.bubble-user{background:linear-gradient(135deg,rgba(232,84,122,0.28),rgba(201,61,97,0.22));border:1px solid var(--border-accent);border-bottom-right-radius:4px;align-self:flex-end;}
-.typing-dots::after{content:'● ● ●';animation:dots 1s infinite;font-size:12px;letter-spacing:4px;color:var(--accent);}
-@keyframes dots{0%,100%{opacity:.3}50%{opacity:1}}
-.chat-bar{display:flex;gap:8px;padding:10px 16px max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--border);background:rgba(0,0,0,0.3);flex-shrink:0;}
-.chat-input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:12px;font-size:14px;font-family:'Outfit',sans-serif;color:#fff;background:rgba(255,255,255,0.06);outline:none;}
-.chat-input:focus{border-color:var(--accent);}
-.chat-input::placeholder{color:var(--text3);}
-.chat-send{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-/* WATER */
-.water-grid{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
-.water-drop{width:34px;height:38px;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;border:none;transition:all .15s;}
-.water-drop.filled{background:rgba(96,165,250,0.3);border:1px solid rgba(96,165,250,0.5);}
-.water-drop.empty{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);}
-/* ONBOARD */
-.ob-step{flex:1;display:flex;flex-direction:column;}
-.ob-step.hidden{display:none;}
-.onboard-bar{height:3px;background:rgba(255,255,255,0.08);border-radius:99px;margin:8px 16px 4px;}
-.onboard-fill{height:3px;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent3));transition:width .3s;}
-.ob-dots{display:flex;gap:5px;justify-content:center;padding:6px 0;}
-.ob-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all .2s;}
-.ob-dot.active{background:var(--accent);width:20px;border-radius:3px;}
-.ob-dot.done{background:rgba(232,84,122,0.4);}
-/* PROFILE */
-.menu-item{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);cursor:pointer;}
-.menu-item:last-child{border-bottom:none;}
-.menu-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
-/* QUICK ADD */
-.quick-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;}
-.quick-item{border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;border:1px solid var(--border);background:var(--card);transition:all .15s;}
-.quick-item:active{transform:scale(0.93);}
-/* CONFETTI */
-@keyframes flyUp{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(-80px) rotate(720deg);opacity:0}}
-.confetti-el{position:fixed;pointer-events:none;animation:flyUp .9s ease-out forwards;z-index:9999;font-size:22px;}
-/* MACRO BAR */
-.macro-bar-wrap{display:flex;border-radius:99px;overflow:hidden;height:6px;margin-top:8px;}
-.macro-seg{height:6px;}
-/* STAT */
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-.stat-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;}
-.stat-val{font-size:22px;font-weight:700;}
-.stat-lbl{font-size:10px;color:var(--text3);margin-top:2px;}
+.lb-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.lb-rank{width:28px;height:28px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.lb-me .lb-rank{background:var(--card-accent);border:1px solid var(--border-accent);color:var(--accent2);}
+
+/* RESPONSIVE */
+@media(max-width:400px){.mini-card .mc-val{font-size:14px;}.ring-kcal{font-size:28px;}}
 </style>
 </head>
 <body>
@@ -208,25 +243,83 @@ select.form-input option{background:#1a0a2e;color:#fff;}
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title" id="food-modal-title">Yemek Ekle</div>
-    <div class="search-bar">
-      <span style="color:var(--text3);">🔍</span>
-      <input class="search-input" id="food-search" placeholder="Yemek ara..." autocomplete="off"/>
+    <!-- Hızlı ekleme yöntemleri -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <button onclick="document.getElementById('food-tab-search').style.display='block';document.getElementById('food-tab-photo').style.display='none';document.getElementById('food-tab-ai').style.display='none';document.querySelectorAll('.food-tab-btn').forEach(function(b){b.style.background='var(--card)';b.style.color='var(--text2)'});this.style.background='var(--accent)';this.style.color='#fff';" class="food-tab-btn" style="flex:1;padding:8px;border-radius:10px;border:1px solid var(--border);background:var(--accent);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">🔍 Ara</button>
+      <button onclick="document.getElementById('food-tab-photo').style.display='block';document.getElementById('food-tab-search').style.display='none';document.getElementById('food-tab-ai').style.display='none';document.querySelectorAll('.food-tab-btn').forEach(function(b){b.style.background='var(--card)';b.style.color='var(--text2)'});this.style.background='var(--accent)';this.style.color='#fff';" class="food-tab-btn" style="flex:1;padding:8px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">📷 Fotoğraf</button>
+      <button onclick="document.getElementById('food-tab-ai').style.display='block';document.getElementById('food-tab-search').style.display='none';document.getElementById('food-tab-photo').style.display='none';document.querySelectorAll('.food-tab-btn').forEach(function(b){b.style.background='var(--card)';b.style.color='var(--text2)'});this.style.background='var(--accent)';this.style.color='#fff';" class="food-tab-btn" style="flex:1;padding:8px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">✨ AI</button>
     </div>
-    <div id="food-search-results" style="max-height:200px;overflow-y:auto;margin-bottom:10px;"></div>
-    <div class="divider"></div>
-    <div class="form-group">
+    <!-- Arama tab -->
+    <div id="food-tab-search">
+      <div class="search-bar">
+        <span style="color:var(--text3);">🔍</span>
+        <input class="search-input" id="food-search" placeholder="Yemek ara..." autocomplete="off"/>
+      </div>
+      <div id="food-search-results" style="max-height:200px;overflow-y:auto;margin-bottom:10px;"></div>
+    </div>
+    <!-- Fotoğraf tab -->
+    <div id="food-tab-photo" style="display:none;">
+      <div style="border:2px dashed var(--border);border-radius:14px;padding:24px;text-align:center;cursor:pointer;margin-bottom:10px;" onclick="document.getElementById('food-photo-input').click()">
+        <div style="font-size:32px;margin-bottom:8px;">📷</div>
+        <div style="font-size:13px;color:var(--text3);">Fotoğraf çek veya seç</div>
+        <input type="file" id="food-photo-input" accept="image/*" capture="environment" style="display:none" onchange="analyzeFoodPhoto(event)">
+      </div>
+      <div id="food-photo-result" style="display:none;"></div>
+    </div>
+    <!-- AI tab -->
+    <div id="food-tab-ai" style="display:none;">
+      <div class="form-group">
+        <div class="form-label">Ne yedin? Açıkla:</div>
+        <div style="display:flex;gap:8px;">
+          <input class="form-input" id="food-ai-text" placeholder="ör: 1 tabak pilav, 1 çay bardağı süt" style="flex:1;"/>
+          <button class="btn btn-secondary btn-sm" id="food-ai-btn" onclick="calcFoodAI()">✨</button>
+        </div>
+      </div>
+    </div>
+    <div class="divider" style="display:none;"></div>
+    <div style="display:none;" class="form-group">
       <div class="form-label">Yoksa AI ile hesapla:</div>
       <div style="display:flex;gap:8px;">
-        <input class="form-input" id="food-ai-text" placeholder="ör: 1 tabak pilav, 1 çay bardağı süt" style="flex:1;"/>
-        <button class="btn btn-secondary btn-sm" id="food-ai-btn" onclick="calcFoodAI()">✨</button>
+        <input class="form-input" id="food-ai-text-old" placeholder="ör: 1 tabak pilav" style="flex:1;display:none;"/>
       </div>
     </div>
     <div id="food-ai-result" style="display:none;" class="card-accent">
-      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:4px;">✨ AI Tahmini</div>
-      <div id="food-ai-kcal" style="font-size:24px;font-weight:700;color:var(--accent);"></div>
-      <div id="food-ai-macros" style="font-size:12px;color:var(--text2);margin-top:2px;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:2px;">✨ AI Tahmini</div>
+          <div id="food-ai-kcal" style="font-size:22px;font-weight:800;color:var(--accent);line-height:1;"></div>
+          <div id="food-ai-macros" style="font-size:11px;color:var(--text3);margin-top:3px;"></div>
+        </div>
+        <div style="text-align:right;font-size:12px;color:var(--text3);" id="food-ai-portion-info"></div>
+      </div>
     </div>
-    <button class="btn btn-primary" id="food-save-btn" onclick="saveFoodEntry()" style="display:none;margin-top:10px;margin-bottom:8px;">✓ Listeye Ekle</button>
+    <!-- Porsiyon seçimi - yemek seçince görünür -->
+    <div id="portion-selector" style="display:none;background:var(--bg3);border-radius:14px;padding:12px;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px;" id="portion-food-name">Yemek</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <div style="flex:1;">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Miktar</div>
+          <input type="number" id="portion-qty" value="1" min="0.1" step="0.5" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:#fff;padding:8px;font-size:16px;text-align:center;font-family:inherit;outline:none;" oninput="updatePortionCalc()">
+        </div>
+        <div style="flex:2;">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Birim</div>
+          <select id="portion-unit" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:#fff;padding:8px;font-size:14px;font-family:inherit;outline:none;" onchange="updatePortionCalc()">
+            <option value="porsiyon">Porsiyon</option>
+            <option value="gram">Gram</option>
+            <option value="adet">Adet</option>
+            <option value="dilim">Dilim</option>
+            <option value="kase">Kase</option>
+            <option value="bardak">Bardak</option>
+            <option value="yemek_kasigi">Yemek Kaşığı</option>
+          </select>
+        </div>
+      </div>
+      <div style="text-align:center;background:var(--card-accent);border-radius:10px;padding:8px;" id="portion-calc">
+        <span style="font-size:20px;font-weight:800;color:var(--accent);" id="portion-kcal-display">0</span>
+        <span style="font-size:12px;color:var(--text3);"> kcal</span>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="food-save-btn"  onclick="saveFoodEntry()" style="display:none;margin-top:10px;margin-bottom:8px;">✓ Listeye Ekle</button>
     <button class="btn btn-ghost" onclick="closeModal('food-modal')">İptal</button>
   </div>
 </div>
@@ -505,40 +598,34 @@ select.form-input option{background:#1a0a2e;color:#fff;}
 
 <!-- ====== DASHBOARD ====== -->
 <div class="screen" id="screen-dashboard">
-  <!-- Dashboard Header -->
-  <div style="padding:16px 16px 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+  <!-- Header -->
+  <div style="padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
     <div>
-      <div style="font-size:12px;color:var(--text3);font-weight:500;" id="dash-greet">Günaydın,</div>
-      <div style="font-size:22px;font-weight:800;line-height:1.2;" id="dash-name">...</div>
+      <div style="font-size:13px;color:var(--text2);font-weight:500;" id="dash-greet">Günaydın 🌅</div>
+      <div style="font-size:22px;font-weight:800;" id="dash-name">...</div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
       <div id="dash-streak" class="badge badge-accent" style="font-size:12px;">0🔥</div>
-      <div id="dash-avatar" onclick="goTo('profile')" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 0 0 2px rgba(255,255,255,0.1);">?</div>
+      <div id="dash-avatar" onclick="goTo('profile')" style="width:40px;height:40px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 0 0 2px rgba(168,85,247,0.3);">?</div>
     </div>
   </div>
 
   <div class="page-content" style="padding-top:12px;">
-    <!-- Kalori Halkası - Büyük, merkezi -->
+    <!-- Kalori Halkası -->
     <div style="display:flex;flex-direction:column;align-items:center;padding:8px 0 16px;">
       <div style="position:relative;width:190px;height:190px;">
         <svg width="190" height="190" viewBox="0 0 190 190">
           <circle cx="95" cy="95" r="80" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="12"/>
           <circle cx="95" cy="95" r="80" fill="none" stroke="url(#dash-rg)" stroke-width="12" id="kcal-arc" stroke-dasharray="0 502" stroke-dashoffset="125" stroke-linecap="round" transform="rotate(-90 95 95)" style="transition:stroke-dasharray .8s ease;"/>
-          <defs>
-            <linearGradient id="dash-rg" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="var(--accent)"/>
-              <stop offset="100%" stop-color="var(--accent3)"/>
-            </linearGradient>
-          </defs>
+          <defs><linearGradient id="dash-rg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#ec4899"/></linearGradient></defs>
         </svg>
         <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-          <div style="font-size:36px;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;" id="d-kcal-eaten">0</div>
+          <div style="font-size:36px;font-weight:800;line-height:1;background:linear-gradient(135deg,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;" id="d-kcal-eaten">0</div>
           <div style="font-size:11px;color:var(--text3);margin-top:2px;">kcal yendi</div>
-          <div style="font-size:12px;color:var(--text2);margin-top:4px;font-weight:600;" id="d-kcal-left-badge">+0 kaldı</div>
+          <div style="font-size:13px;font-weight:700;margin-top:4px;color:var(--green);" id="d-kcal-left-badge">+0 kaldı</div>
         </div>
       </div>
-      <!-- Makro bantları -->
-      <div style="display:flex;gap:6px;margin-top:12px;">
+      <div style="display:flex;gap:6px;margin-top:10px;">
         <span class="badge badge-accent" style="font-size:12px;" id="d-prot">P:0g</span>
         <span class="badge badge-amber" style="font-size:12px;" id="d-carb">K:0g</span>
         <span class="badge badge-gray" style="font-size:12px;" id="d-fat">Y:0g</span>
@@ -547,32 +634,41 @@ select.form-input option{background:#1a0a2e;color:#fff;}
       </div>
     </div>
 
-    <!-- 3 Mini Kart: Su, Adım, Aktif -->
+    <!-- 3 Mini Kart -->
     <div style="display:flex;gap:8px;margin-bottom:14px;">
-      <div onclick="goTo('exercise');setTimeout(()=>setExTab('water'),300)" style="flex:1;background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.2);border-radius:16px;padding:12px;cursor:pointer;">
-        <div style="font-size:18px;margin-bottom:4px;">💧</div>
-        <div style="font-size:17px;font-weight:800;color:#38bdf8;" id="d-water">0</div>
+      <div onclick="goTo('exercise');setTimeout(()=>setExTab('water'),300)" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:12px;cursor:pointer;">
+        <div style="font-size:20px;margin-bottom:6px;">💧</div>
+        <div style="font-size:17px;font-weight:800;color:var(--blue);" id="d-water">0/8</div>
         <div style="font-size:10px;color:var(--text3);margin-top:1px;">bardak su</div>
       </div>
-      <div onclick="goTo('exercise');setTimeout(()=>setExTab('water'),300)" style="flex:1;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:16px;padding:12px;cursor:pointer;">
-        <div style="font-size:18px;margin-bottom:4px;">👟</div>
-        <div style="font-size:17px;font-weight:800;color:#22c55e;" id="d-steps">0</div>
+      <div onclick="goTo('exercise');setTimeout(()=>setExTab('water'),300)" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:12px;cursor:pointer;">
+        <div style="font-size:20px;margin-bottom:6px;">👟</div>
+        <div style="font-size:17px;font-weight:800;color:var(--green);" id="d-steps">0</div>
         <div style="font-size:10px;color:var(--text3);margin-top:1px;">adım</div>
       </div>
-      <div onclick="goTo('exercise');setTimeout(()=>setExTab('plan'),300)" style="flex:1;background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.2);border-radius:16px;padding:12px;cursor:pointer;">
-        <div style="font-size:18px;margin-bottom:4px;">🏋️</div>
-        <div style="font-size:17px;font-weight:800;color:#f97316;" id="d-ex">0</div>
+      <div onclick="goTo('exercise');setTimeout(()=>setExTab('plan'),300)" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:12px;cursor:pointer;">
+        <div style="font-size:20px;margin-bottom:6px;">🔥</div>
+        <div style="font-size:17px;font-weight:800;color:var(--orange);" id="d-ex">0</div>
         <div style="font-size:10px;color:var(--text3);margin-top:1px;">egzersiz</div>
       </div>
     </div>
 
-    <!-- CTA: Ne Yesem? -->
-    <div onclick="openSwipe('food')" style="background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:18px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:14px;box-shadow:0 8px 32px rgba(232,84,122,0.35);">
+    <!-- CTA -->
+    <div onclick="openSwipe('food')" style="background:var(--grad);border-radius:20px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:14px;box-shadow:0 8px 32px rgba(124,58,237,0.4);">
       <div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:500;" id="d-cta-sub">Bugün ne yemek istersin?</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.7);" id="d-cta-sub">Ne yemek istersin?</div>
         <div style="font-size:17px;font-weight:800;margin-top:1px;">Ne Yesem? 🍽️</div>
       </div>
-      <div style="width:38px;height:38px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;">→</div>
+      <div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;">→</div>
+    </div>
+
+    <!-- Bugünkü Öğünler (kısa) -->
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:700;">Bugünkü Öğünler</span>
+        <button onclick="goTo('food')" style="background:none;border:none;color:var(--accent2);font-size:12px;cursor:pointer;font-family:inherit;">Tümü →</button>
+      </div>
+      <div id="d-meals-summary"></div>
     </div>
 
     <!-- Hedefe İlerleme -->
@@ -583,21 +679,17 @@ select.form-input option{background:#1a0a2e;color:#fff;}
       </div>
       <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:8px;">
         <span>Başlangıç: <b style="color:var(--text2)" id="d-start-w">-</b>kg</span>
-        <span>Şu an: <b style="color:var(--accent)" id="d-curr-w">-</b>kg</span>
+        <span>Şu an: <b style="color:var(--accent2)" id="d-curr-w">-</b>kg</span>
         <span>Hedef: <b style="color:var(--text2)" id="d-goal-w">-</b>kg</span>
       </div>
-      <div class="progress-track" style="height:6px;"><div class="progress-fill" id="d-goal-prog" style="width:0%;"></div></div>
+      <div class="progress-track"><div class="progress-fill" id="d-goal-prog" style="width:0%;"></div></div>
       <div style="font-size:11px;color:var(--text3);margin-top:7px;" id="d-goal-sub">Veri bekleniyor...</div>
     </div>
 
-    <!-- Bugünün Görevleri -->
+    <!-- Görevler -->
     <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px;">Bugünün Görevleri</div>
     <div class="card" id="d-tasks" style="margin-bottom:10px;"></div>
-    
-    <!-- Motivasyon -->
     <div id="d-motivation" class="card-accent" style="margin-bottom:10px;"></div>
-    
-    <!-- AI Koç Butonu -->
     <button class="btn btn-secondary" onclick="goTo('chat')" style="margin-bottom:8px;">✨ AI Koçuma Sor</button>
     <div style="display:none" id="d-meals"></div>
   </div>
@@ -610,34 +702,59 @@ select.form-input option{background:#1a0a2e;color:#fff;}
     <button class="nav-item" onclick="goTo('profile')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profil</span></button>
   </div>
 </div>
-
-<!-- ====== FOOD ====== -->
 <div class="screen" id="screen-food">
-  <div style="flex-shrink:0;padding:14px 16px 0;background:rgba(8,6,14,0.8);backdrop-filter:blur(24px);">
-    <!-- Başlık + arama -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+  <div style="flex-shrink:0;padding:16px 20px 0;background:rgba(8,6,15,0.9);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
       <span style="font-size:22px;font-weight:800;">Yemekler 🍽️</span>
-      <button class="btn btn-secondary btn-sm" onclick="openSwipe('food')" style="width:auto;font-size:12px;">Ne Yesem?</button>
+      <button class="btn btn-secondary btn-sm" onclick="openSwipe('food')" style="border-radius:99px;">Ne Yesem?</button>
     </div>
-    <!-- Kalori özet satırı -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-      <div style="flex:1;">
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px;">
-          <span><b style="color:var(--accent);font-size:14px;" id="f-eaten">0</b> kcal</span>
-          <span><span id="f-goal">1800</span> kcal hedef</span>
+    <!-- Kalori özet kutusu -->
+    <div style="background:var(--card);border-radius:18px;padding:14px;margin-bottom:12px;border:1px solid var(--border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div>
+          <div style="font-size:11px;color:var(--text3);">Bugün yenildi</div>
+          <div style="font-size:28px;font-weight:800;color:var(--accent2);line-height:1;" id="f-eaten">0</div>
+          <div style="font-size:11px;color:var(--text3);">/ <span id="f-goal">1800</span> kcal</div>
         </div>
-        <div class="progress-track" style="height:6px;border-radius:99px;"><div class="progress-fill" id="f-prog" style="width:0%;border-radius:99px;"></div></div>
+        <div style="text-align:right;">
+          <div style="font-size:11px;color:var(--text3);">Kalan</div>
+          <div style="font-size:22px;font-weight:800;color:var(--green);line-height:1;" id="f-left">0</div>
+          <div style="font-size:11px;color:var(--text3);">kcal</div>
+        </div>
+      </div>
+      <div class="progress-track" style="margin-bottom:10px;"><div class="progress-fill" id="f-prog" style="width:0%;"></div></div>
+      <div style="display:flex;justify-content:space-between;">
+        <div style="text-align:center;flex:1;">
+          <div style="font-size:14px;font-weight:700;color:#60a5fa;" id="f-prot-val">0g</div>
+          <div style="font-size:10px;color:var(--text3);">Protein</div>
+        </div>
+        <div style="text-align:center;flex:1;border-left:1px solid var(--border);border-right:1px solid var(--border);">
+          <div style="font-size:14px;font-weight:700;color:#34d399;" id="f-carb-val">0g</div>
+          <div style="font-size:10px;color:var(--text3);">Karb.</div>
+        </div>
+        <div style="text-align:center;flex:1;">
+          <div style="font-size:14px;font-weight:700;color:#fb923c;" id="f-fat-val">0g</div>
+          <div style="font-size:10px;color:var(--text3);">Yağ</div>
+        </div>
       </div>
     </div>
-    <!-- Makro bantları -->
-    <div class="macro-bar-wrap" id="f-macro-bar" style="margin-bottom:12px;"></div>
+    <div class="macro-bar-wrap" id="f-macro-bar" style="display:none;"></div>
     <!-- Öğün tabları -->
-    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;" id="f-meal-tabs">
-      <!-- JS ile doldurulur -->
-    </div>
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none;" id="f-meal-tabs"></div>
   </div>
   
-  <div class="page-content" style="padding-top:10px;">
+  <div class="page-content" style="padding-top:12px;">
+    <!-- Günün Tarifi -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;">⭐ Günün Tarifi</div>
+      <div onclick="showDailyRecipe()" style="border-radius:20px;overflow:hidden;position:relative;cursor:pointer;background:var(--card);border:1px solid var(--border);">
+        <div style="width:100%;height:130px;background:linear-gradient(135deg,var(--bg3),var(--card));display:flex;align-items:center;justify-content:center;font-size:60px;" id="daily-recipe-img">🥗</div>
+        <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.85),transparent);padding:14px;">
+          <div style="font-size:14px;font-weight:700;" id="daily-recipe-name">Bugünün Tarifi</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);" id="daily-recipe-info">Yükleniyor...</div>
+        </div>
+      </div>
+    </div>
     <!-- Öğün yemek listesi -->
     <div id="f-meals"></div>
     <!-- Haftalık plan -->
@@ -654,8 +771,6 @@ select.form-input option{background:#1a0a2e;color:#fff;}
     <button class="nav-item" onclick="goTo('profile')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profil</span></button>
   </div>
 </div>
-
-<!-- ====== NE YESEm? (eski Swipe) ====== -->
 <div class="screen" id="screen-swipe">
   <!-- Header -->
   <div style="padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--border);background:rgba(8,6,14,0.8);backdrop-filter:blur(24px);">
@@ -696,6 +811,7 @@ select.form-input option{background:#1a0a2e;color:#fff;}
           <div style="padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;">
             <div style="display:flex;gap:6px;flex-wrap:wrap;" id="sw-macros"></div>
             <div id="sw-yt" style="display:none;width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:12px;cursor:pointer;color:var(--accent);margin-top:4px;"></div>
+          <button onclick="showSwipeRecipe()" id="sw-recipe-btn" style="display:none;width:100%;margin-top:6px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:12px;cursor:pointer;color:var(--text2);font-family:inherit;">📖 Tarifi Göster</button>
           </div>
         </div>
       </div>
@@ -1442,6 +1558,9 @@ async function loadDash(){
     else if(h<17)ctaSub.textContent='Ara öğün zamanı 🍎';
     else ctaSub.textContent='Akşam yemeği için önerimiz var 🌙';
   }
+  // d-water sadece rakam göster
+  const dw=document.getElementById('d-water');
+  if(dw&&dw.textContent.includes('/')){}
   document.getElementById('dash-name').textContent=(UP.name||'Kullanıcı')+' 👋';
   document.getElementById('dash-avatar').textContent=initials(UP.name);
   const goal=UP.daily_calorie_goal||1800;
@@ -1463,7 +1582,7 @@ async function loadDash(){
   const pct=Math.min(100,goal>0?Math.round(totKcal/goal*100):0);
   const circ=502;
   const arcEl=document.getElementById('kcal-arc');
-  if(arcEl)arcEl.setAttribute('stroke-dasharray',`${Math.round(circ*pct/100)} ${circ}`);
+  if(arcEl)arcEl.setAttribute('stroke-dasharray',Math.round(circ*pct/100)+' '+circ);
   const pctEl=document.getElementById('kcal-pct');
   if(pctEl)pctEl.textContent=pct+'%';
   document.getElementById('d-kcal-eaten').textContent=totKcal;
@@ -1516,8 +1635,28 @@ async function loadDash(){
       <div style="font-size:20px;width:28px;text-align:center;">${t.emoji}</div>
       <div style="flex:1;"><div style="font-size:13px;font-weight:500;${t.done?'color:var(--text3);text-decoration:line-through;':''}">${t.label}</div>
       <div class="progress-track" style="margin-top:4px;"><div class="progress-fill" style="width:${t.pct}%;"></div></div></div>
-      <span style="font-size:18px;">${t.done?'✅':'→'}</span>
+      <span style="font-size:16px;">${t.done?'✅':'›'}</span>
     </div>`).join('');
+  
+  // Öğün özeti - dashboard'da bugünkü öğünler
+  const summaryEl=document.getElementById('d-meals-summary');
+  if(summaryEl&&foods){
+    const mealDots={breakfast:'#f59e0b',lunch:'#a855f7',dinner:'#60a5fa',snack:'#22c55e'};
+    const mealNames={breakfast:'Kahvaltı',lunch:'Öğle',dinner:'Akşam',snack:'Ara Öğün'};
+    const meals=['breakfast','lunch','dinner','snack'];
+    let sumHtml='';
+    meals.forEach(mk=>{
+      const mFoods=foods.filter(f=>f.meal_type===mk);
+      const mKcal=mFoods.reduce((s,f)=>s+(f.calories||0),0);
+      sumHtml+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;'+(mk!=='snack'?'border-bottom:1px solid var(--border);':'')+'opacity:'+(mFoods.length?1:.4)+';">'
+        +'<div style="width:8px;height:8px;border-radius:50%;background:'+mealDots[mk]+';flex-shrink:0;"></div>'
+        +'<div style="flex:1;"><div style="font-size:13px;font-weight:600;">'+mealNames[mk]+'</div>'
+        +'<div style="font-size:11px;color:var(--text3);">'+(mFoods.length?mFoods.map(f=>f.food_name).slice(0,2).join(', ')+(mFoods.length>2?' +'+( mFoods.length-2):''):'Henüz eklenmedi')+'</div></div>'
+        +'<div style="font-size:12px;font-weight:700;color:var(--text2);">'+(mKcal?mKcal+' kcal':'')+'</div>'
+        +'</div>';
+    });
+    summaryEl.innerHTML=sumHtml;
+  }
   // Motivation
   const motList={lose_weight:['Bugün harika gidiyorsun! 🌸','Her adım seni hedefe yaklaştırıyor','Kendine inan, yapabilirsin! 💪'],gain_weight:['Protein almayı unutma! 💪','Bugün antrenman zamanı!','Vücudun değişiyor, devam et! 🔥'],maintain:['Dengeyi korumak da bir başarı!','Sağlıklı yaşam yolundasın 🌿','Harika ilerliyorsun!'],performance:['Bugün limitlerini zorla! 🔥','Performansın artıyor!','Azim kazandırır! 💪']};
   const ml=motList[UP.goal_type||'lose_weight']||motList.maintain;
@@ -1581,6 +1720,7 @@ async function loadFood(){
     </div>`;
   }
   document.getElementById('f-meals').innerHTML=html;
+  initDailyRecipe();
   const pct=Math.min(100,goal>0?Math.round(totKcal/goal*100):0);
   document.getElementById('f-eaten').textContent=totKcal;
   document.getElementById('f-prog').style.width=pct+'%';
@@ -1636,7 +1776,25 @@ async function searchFoods(q){
   },350);
 }
 
+let _selFoodData=null;
 function selectFood(f){
+  _selFoodData=f;
+  document.getElementById('food-search').value=f.name;
+  document.getElementById('food-search-results').innerHTML='';
+  // Porsiyon seçimini göster
+  const ps=document.getElementById('portion-selector');
+  if(ps){
+    ps.style.display='block';
+    document.getElementById('portion-food-name').textContent=f.name;
+    // Varsayılan birim
+    const unit=document.getElementById('portion-unit');
+    if(unit)unit.value='porsiyon';
+    const qty=document.getElementById('portion-qty');
+    if(qty)qty.value='1';
+    updatePortionCalc();
+  }
+  document.getElementById('food-save-btn').style.display='flex';
+  // Eski AI result'u güncelle (compat)
   const pG=f.default_portion_g||100,r=pG/100;
   pendingFood={
     food_name:f.name,
@@ -1644,15 +1802,55 @@ function selectFood(f){
     protein_g:+((f.protein_per_100g||0)*r).toFixed(1),
     carbs_g:+((f.carbs_per_100g||0)*r).toFixed(1),
     fat_g:+((f.fat_per_100g||0)*r).toFixed(1),
-    portion_desc:f.default_portion_name||pG+'g',
+    portion_desc:'1 porsiyon',
     photo_url:f.photo_url||null
   };
-  document.getElementById('food-search').value=f.name;
-  document.getElementById('food-search-results').innerHTML='';
-  document.getElementById('food-ai-result').style.display='block';
-  document.getElementById('food-ai-kcal').textContent=pendingFood.calories+' kcal';
-  document.getElementById('food-ai-macros').textContent=`P:${pendingFood.protein_g}g · K:${pendingFood.carbs_g}g · Y:${pendingFood.fat_g}g`;
-  document.getElementById('food-save-btn').style.display='flex';
+  const ar=document.getElementById('food-ai-result');
+  if(ar){ar.style.display='block';
+    document.getElementById('food-ai-kcal').textContent=pendingFood.calories+' kcal';
+    document.getElementById('food-ai-macros').textContent='P:'+pendingFood.protein_g+'g · K:'+pendingFood.carbs_g+'g · Y:'+pendingFood.fat_g+'g';
+  }
+}
+
+function updatePortionCalc(){
+  if(!_selFoodData)return;
+  const qty=parseFloat(document.getElementById('portion-qty')?.value)||1;
+  const unit=document.getElementById('portion-unit')?.value||'porsiyon';
+  const f=_selFoodData;
+  const defG=f.default_portion_g||100;
+  const kcalPer100=f.calories_per_100g||0;
+  const protPer100=f.protein_per_100g||0;
+  const carbPer100=f.carbs_per_100g||0;
+  const fatPer100=f.fat_per_100g||0;
+  let grams;
+  if(unit==='gram')grams=qty;
+  else if(unit==='adet')grams=qty*(defG>0?defG:60);
+  else if(unit==='dilim')grams=qty*30;
+  else if(unit==='kase')grams=qty*200;
+  else if(unit==='bardak')grams=qty*240;
+  else if(unit==='yemek_kasigi')grams=qty*15;
+  else grams=qty*defG; // porsiyon
+  const kcal=Math.round(kcalPer100*grams/100);
+  const prot=((protPer100*grams/100)).toFixed(1);
+  const carb=((carbPer100*grams/100)).toFixed(1);
+  const fat2=((fatPer100*grams/100)).toFixed(1);
+  const el=document.getElementById('portion-kcal-display');
+  if(el)el.textContent=kcal;
+  // pendingFood güncelle
+  pendingFood={
+    food_name:f.name,
+    calories:kcal,
+    protein_g:+prot,
+    carbs_g:+carb,
+    fat_g:+fat2,
+    portion_desc:qty+' '+(unit==='porsiyon'?'porsiyon':unit==='gram'?'g':unit)+' (~'+Math.round(grams)+'g)',
+    photo_url:f.photo_url||null
+  };
+  // ai-kcal güncelle
+  const ak=document.getElementById('food-ai-kcal');
+  if(ak)ak.textContent=kcal+' kcal';
+  const am=document.getElementById('food-ai-macros');
+  if(am)am.textContent='P:'+prot+'g · K:'+carb+'g · Y:'+fat2+'g';
 }
 
 async function calcFoodAI(){
@@ -1814,13 +2012,13 @@ function buildPlanPrompt(kcal){
   var mc=UP&&UP.meal_count||4;
   var days=['Pazartesi','Sali','Carsamba','Persembe','Cuma','Cumartesi','Pazar'];
   var obj_template='{"gun":"GUN"';
-  if(mc>=1)obj_template+=',"kahvalti":"kahvalti yemegi (~kcal)"';
-  if(mc>=2)obj_template+=',"ogle":"ogle yemegi (~kcal)"';
-  if(mc>=3)obj_template+=',"aksam":"aksam yemegi (~kcal)"';
-  if(mc>=4)obj_template+=',"ara":"ara ogun (~kcal)"';
+  if(mc>=1)obj_template+=',"kahvalti":"yemek adi (miktar, ~Xkcal)"';
+  if(mc>=2)obj_template+=',"ogle":"yemek adi (miktar, ~Xkcal)"';
+  if(mc>=3)obj_template+=',"aksam":"yemek adi (miktar, ~Xkcal)"';
+  if(mc>=4)obj_template+=',"ara":"atistirma (miktar, ~Xkcal)"';
   obj_template+='}';
   var arr=days.map(function(g){return obj_template.replace('GUN',g);}).join(',');
-  return kcal+' kalori, 7 gunluk Turkce yemek plani. SADECE JSON array, baska hicbir sey yazma: ['+arr+'] Her gun farkli yemek yaz.';
+  return kcal+' kalori, 7 gunluk Turkce yemek plani. Her yemek icin porsiyon miktarini yaz (ornek: "Mercimek corbasi 1 kase, 300kcal", "Tavuk izgara 150g, ekmek 2 dilim, 450kcal"). SADECE JSON array: ['+arr+'] Her gun farkli yemek yaz.';
 }
 async function generateWeeklyPlan(force=false){
   const res=document.getElementById('weekly-plan-result');
@@ -2293,7 +2491,9 @@ function showSwCard(){
     if(ph)ph.style.display='none';
   };
   img.src=_pSrc||'';
-  if(!_pSrc){if(ph){ph.style.display='flex';ph.textContent='🍽️';}}
+  if(!_pSrc){
+    if(ph){ph.style.display='flex';ph.innerHTML='<div style="text-align:center"><div style="font-size:48px;margin-bottom:8px;">🍽️</div><div style="font-size:12px;color:var(--text3);">Resim yakında eklenecek</div></div>';}
+  }
   img.onerror=function(){
     if(swType==='food' && item.name){
       // Pexels API'den çek ve DB'ye kaydet
@@ -2312,6 +2512,8 @@ function showSwCard(){
       <span class="badge badge-amber">K:${Math.round((item.carbs_per_100g||0)*pG/100)}g</span>
       <span class="badge badge-gray">Y:${Math.round((item.fat_per_100g||0)*pG/100)}g</span>`;
     document.getElementById('sw-yt').style.display='none';
+  const recipeBtn=document.getElementById('sw-recipe-btn');
+  if(recipeBtn)recipeBtn.style.display='block';
   }else{
     document.getElementById('sw-sub').textContent=(item.duration_min||0)+'dk · ~'+Math.round((item.duration_min||0)*(item.calories_per_min||5))+' kcal';
     document.getElementById('sw-macros').innerHTML=`<span class="badge badge-accent">${item.category||''}</span>`;
@@ -3039,6 +3241,11 @@ KURALLAR: Türkçe yaz. Markdown kullanma (**, ##). Kısa ve samimi ol (max 4 c�
 
 // ============ PROFILE ============
 async function loadProfile(){
+  // UP yoksa Supabase'den çek
+  if(!UP&&CU){
+    const{data}=await sb.from('profiles').select('*').eq('id',CU.id).limit(1);
+    if(data&&data[0])UP=data[0];
+  }
   if(!UP)return;
   const ini=initials(UP.name);
   document.getElementById('prof-avatar').innerHTML=ini+'<div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;">✏️</div>';
@@ -3412,6 +3619,163 @@ function renderShopList(box,list){
     +'<button class="btn btn-primary" style="flex:1;" onclick="shareShopList()">📤 Paylas</button>'
     +'</div>';
 }
+
+// ── FOTOĞRAFLA YEMEK EKLEME ────────────────────────────────────
+async function analyzeFoodPhoto(event){
+  var file=event.target.files[0];
+  if(!file)return;
+  var resultEl=document.getElementById('food-photo-result');
+  resultEl.style.display='block';
+  resultEl.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);">📷 Analiz ediliyor...</div>';
+  try{
+    var b64=await new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result.split(',')[1]);};r.onerror=rej;r.readAsDataURL(file);});
+    var mime=file.type||'image/jpeg';
+    var resp=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:200,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:mime,data:b64}},
+          {type:'text',text:'Bu yemek nedir? Sadece JSON yaz: {"name":"yemek adi","calories":100g_kcal_sayisi,"protein":g_sayisi,"carbs":g_sayisi,"fat":g_sayisi,"portion_g":tipik_porsiyon_gram_sayisi}'}
+        ]}]})});
+    var d=await resp.json();
+    var raw=(d.content&&d.content[0]&&d.content[0].text||'').replace(/```json|```/g,'').trim();
+    var food=null;
+    try{food=JSON.parse(raw);}catch(e){var s=raw.indexOf('{');var e2=raw.lastIndexOf('}');if(s>=0&&e2>s)try{food=JSON.parse(raw.slice(s,e2+1));}catch(e3){}}
+    if(!food||!food.name){resultEl.innerHTML='<div style="color:var(--accent);padding:10px;">Tanınamadı, tekrar dene.</div>';return;}
+    var foodStr=JSON.stringify(food);
+    resultEl.innerHTML='<div style="background:var(--card-accent);border-radius:14px;padding:12px;margin-bottom:10px;">'
+      +'<div style="font-size:15px;font-weight:700;margin-bottom:4px;">'+food.name+'</div>'
+      +'<div style="font-size:12px;color:var(--text3);">'+food.calories+' kcal/100g · P:'+food.protein+'g · K:'+food.carbs+'g · Y:'+food.fat+'g</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:8px;margin-bottom:10px;">'
+      +'<div style="flex:1;"><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Adet</div>'
+      +'<input type="number" id="photo-qty" value="1" min="0.5" step="0.5" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:#fff;padding:8px;font-size:16px;text-align:center;font-family:inherit;outline:none;"></div>'
+      +'<div style="flex:1;"><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Öğün</div>'
+      +'<select id="photo-meal" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:#fff;padding:8px;font-size:12px;font-family:inherit;outline:none;">'
+      +'<option value="breakfast">🌅 Kahvaltı</option><option value="lunch">☀️ Öğle</option><option value="dinner">🌙 Akşam</option><option value="snack">🍎 Ara Öğün</option>'
+      +'</select></div></div>'
+      +'<button onclick="addPhotoFood('+foodStr.replace(/"/g,"'")+')" class="btn btn-primary">Ekle</button>';
+    var sel=document.getElementById('photo-meal');
+    if(sel&&curMeal)sel.value=curMeal;
+  }catch(e){resultEl.innerHTML='<div style="color:var(--accent);padding:10px;">Hata: '+e.message+'</div>';}
+}
+
+async function addPhotoFood(food){
+  var qty=parseFloat(document.getElementById('photo-qty')?.value)||1;
+  var meal=document.getElementById('photo-meal')?.value||curMeal||'snack';
+  var portG=(food.portion_g||100)*qty;
+  var kcal=Math.round((food.calories||0)*portG/100);
+  var r=await sb.from('food_logs').insert({user_id:CU.id,food_name:food.name,calories:kcal,
+    protein_g:+((food.protein||0)*portG/100).toFixed(1),
+    carbs_g:+((food.carbs||0)*portG/100).toFixed(1),
+    fat_g:+((food.fat||0)*portG/100).toFixed(1),
+    meal_type:meal,portion_desc:qty+' adet (~'+Math.round(portG)+'g)',log_date:today()});
+  if(r.error){err('Eklenemedi');return;}
+  closeModal('food-modal');loadFood();ok(food.name+' eklendi ✓');
+}
+
+// ── SWIPE TARİF ─────────────────────────────────────────────────
+async function showSwipeRecipe(){
+  var item=swQueue&&swQueue[swIdx];
+  if(!item)return;
+  var btn=document.getElementById('sw-recipe-btn');
+  if(btn){btn.textContent='⏳ Yükleniyor...';btn.disabled=true;}
+  try{
+    var r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:300,
+        messages:[{role:'user',content:'"'+item.name+'" tarifini yaz. Malzemeler ve hazırlık adımları. Kısa tut.'}]})});
+    var d=await r.json();
+    var text=(d.content&&d.content[0]&&d.content[0].text)||'Tarif bulunamadı.';
+    var modal=document.createElement('div');
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);';
+    var box=document.createElement('div');
+    box.style.cssText='background:var(--bg2);border-radius:28px 28px 0 0;width:100%;max-width:430px;padding:20px;max-height:70vh;overflow-y:auto;';
+    box.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
+      +'<div style="font-size:17px;font-weight:800;">📖 '+item.name+'</div>'
+      +'<button onclick="closeFixed(this)" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">x</button>'
+      +'</div><div style="font-size:14px;line-height:1.7;color:var(--text2);">'+text.split('\n').join('<br>')+'</div>';
+    modal.appendChild(box);
+    modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+    document.body.appendChild(modal);
+  }catch(e){ok('Tarif yüklenemedi');}
+  if(btn){btn.textContent='📖 Tarifi Göster';btn.disabled=false;}
+}
+
+// ── GÜNÜN TARİFİ ────────────────────────────────────────────────
+var DAILY_RECIPES=[
+  {emoji:'🥗',name:'Çoban Salatası',info:'280 kcal · 10 dk · Kolay',recipe:'Domates, salatalık, soğan, biber doğra. Zeytinyağı, limon, tuz ekle. Beyaz peynirle servis et.'},
+  {emoji:'🍲',name:'Mercimek Çorbası',info:'310 kcal · 30 dk · Kolay',recipe:'Kırmızı mercimeği soğan ile kavur. Su ekle, 20 dk pişir. Blenderdan geçir, nane ile servis et.'},
+  {emoji:'🍗',name:'Tavuk Sote',info:'380 kcal · 25 dk · Orta',recipe:'Tavuk etini küp doğra. Zeytinyağında biber ve soğanla kavur. Baharat ekle, 15 dk pişir.'},
+  {emoji:'🥚',name:'Menemen',info:'290 kcal · 15 dk · Kolay',recipe:'Soğan ve biberi kavur, domates ekle. Yumurtaları kır, karıştırarak pişir. Nane ile servis et.'},
+  {emoji:'🫘',name:'Kuru Fasulye',info:'420 kcal · 60 dk · Kolay',recipe:'Önceden ıslatılmış fasulyeyi soğan ve domatesle kavur. Su ekle, yumuşayana kadar pişir.'},
+  {emoji:'🐟',name:'Fırın Somon',info:'350 kcal · 20 dk · Kolay',recipe:'Somonu limon, zeytinyağı ve kekikle marine et. 200°C fırında 15-18 dk pişir.'},
+  {emoji:'🥩',name:'Izgara Köfte',info:'410 kcal · 20 dk · Orta',recipe:'Kıyma, soğan, ekmek içi ve baharatları yoğur. Köfte yap, ızgarada 8 dk pişir.'},
+];
+function showDailyRecipe(){
+  var day=new Date().getDay();
+  var r=DAILY_RECIPES[day%DAILY_RECIPES.length];
+  var modal=document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);';
+  var box=document.createElement('div');
+  box.style.cssText='background:var(--bg2);border-radius:28px 28px 0 0;width:100%;max-width:430px;padding:20px;max-height:75vh;overflow-y:auto;';
+  box.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'
+    +'<div style="font-size:17px;font-weight:800;">'+r.emoji+' '+r.name+'</div>'
+    +'<button onclick="closeFixed(this)" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;">x</button></div>'
+    +'<div style="display:inline-flex;align-items:center;background:var(--card-accent);border-radius:99px;padding:4px 12px;font-size:12px;color:var(--accent2);margin-bottom:14px;">'+r.info+'</div>'
+    +'<div style="font-size:14px;line-height:1.8;color:var(--text2);">'+r.recipe+'</div>';
+  modal.appendChild(box);
+  modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+}
+function initDailyRecipe(){
+  var day=new Date().getDay();
+  var r=DAILY_RECIPES[day%DAILY_RECIPES.length];
+  var el=document.getElementById('daily-recipe-img');var nl=document.getElementById('daily-recipe-name');var il=document.getElementById('daily-recipe-info');
+  if(el)el.textContent=r.emoji;if(nl)nl.textContent=r.name;if(il)il.textContent=r.info;
+}
+
+// ── GÖRSEL YANLIŞ BİLDİRİMİ ────────────────────────────────────
+async function reportWrongPhoto(btnOrName,photoUrl){
+  var foodName=typeof btnOrName==='string'?btnOrName:(btnOrName?.dataset?.name||'');
+  var imgEl=typeof btnOrName==='object'?btnOrName?.closest('div')?.querySelector('img'):null;
+  var url=photoUrl||(imgEl?.src)||'';
+  if(!CU||!foodName)return;
+  try{
+    await sb.from('photo_reports').insert({user_id:CU.id,food_name:foodName,wrong_url:url,created_at:new Date().toISOString()});
+    var hidden=JSON.parse(localStorage.getItem('hidden_photos')||'{}');
+    hidden[foodName]=true;
+    localStorage.setItem('hidden_photos',JSON.stringify(hidden));
+    if(window._photoCache)delete window._photoCache[foodName];
+    ok('Bildirim alındı 👍');
+  }catch(e){ok('Bildirim alındı 👍');}
+}
+
+// ── YEMEK ARAMA DEBOUNCE ────────────────────────────────────────
+function _doSearchFood(v){
+  var q=v.trim();
+  if(q.length<2){document.getElementById('food-search-results').innerHTML='';return;}
+  // searchFoods ana fonksiyonu çağır
+  if(typeof searchFoods==='function')searchFoods(q);
+}
+
+// ── KİLO LOG (compat) ───────────────────────────────────────────
+function loadWeightLog(){} // loadProgress içinde yapılıyor
+function openWeightModal(){
+  var w=prompt('Bugünkü kilonuzu girin (kg):');
+  if(!w||isNaN(parseFloat(w)))return;
+  sb.from('weight_logs').insert({user_id:CU.id,weight:parseFloat(w),log_date:today(),notes:'Manuel giriş'})
+    .then(function(r){if(!r.error){ok('Kilo kaydedildi ✓');loadDash();}else{err('Kaydedilemedi');}});
+}
+
+// ── PROFİL DÜZENLE (saveEdit) ───────────────────────────────────
+async function saveEdit(id){
+  var name=document.getElementById('edit-fname')?.value?.trim();
+  var cat=document.getElementById('edit-fcat')?.value;
+  if(!name){alert('Ad boş olamaz');return;}
+  // foods tablosu düzenle (admin için)
+  // profil ekranında bu farklı - openEditProfileModal kullanılıyor
+}
+
+function closeFixed(btn){var p=btn;for(var i=0;i<20;i++){if(!p||!p.style)break;if(p.style.cssText&&p.style.cssText.indexOf('fixed')>=0){p.remove();return;}p=p.parentElement;}}
 </script>
 </body>
 </html>
