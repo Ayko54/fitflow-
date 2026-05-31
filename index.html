@@ -1813,6 +1813,8 @@ async function generateWeeklyPlan(force=false){
       if(m)try{plan=JSON.parse(m[0]);}catch(e2){}
     }
     if(!plan||!plan.days||!plan.days.length){
+      console.error('Plan parse failed. Raw:', raw.slice(0,500));
+      console.error('Plan object:', plan);
       res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;">Plan formatı hatali. <button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;">Tekrar Dene</button></div>';
       return;
     }
