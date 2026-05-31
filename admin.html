@@ -219,9 +219,18 @@ async function loadFoods(){
   // Service key ile direkt REST API çağrısı - RLS bypass
   var key=SVCKEY||SB_KEY;
   var url=SB_URL+'/rest/v1/foods?select=id,name,category,photo_url,photo_status&order=name.asc&limit=5000';
-  var resp=await fetch(url,{headers:{apikey:key,Authorization:'Bearer '+key}});
-  var r={data:await resp.json(),error:resp.ok?null:{message:'HTTP '+resp.status}};
-  foods=r.data||[];
+  var resp=await fetch(url,{headers:{apikey:key,'Authorization':'Bearer '+key}});
+  if(!resp.ok){
+    console.error('Foods error:',resp.status);
+    if(!SVCKEY){
+      SVCKEY=prompt('401 hatasi! Service Role Key girin:');
+      if(SVCKEY){localStorage.setItem('ffsvc',SVCKEY);loadFoods();return;}
+    }else{alert('Yukleme hatasi: '+resp.status+'. Key yanlis olabilir.');}
+    foods=[];
+  }else{
+    foods=await resp.json();
+    if(!Array.isArray(foods))foods=[];
+  }
   var cats=[...new Set(foods.map(function(f){return f.category;}).filter(Boolean))].sort();
   var s=document.getElementById('fcat');
   s.innerHTML='<option value="all">Tum Kategoriler</option>';
