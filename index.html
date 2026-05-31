@@ -1788,53 +1788,63 @@ async function generateWeeklyPlan(force=false){
   if(cached&&!force){
     try{weeklyPlanDays=JSON.parse(cached);renderWeeklyPlanTabs();return;}catch(e){}
   }
-  res.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">AI haftalik plan hazirlıyor...</div>';
+  res.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">Plan hazırlanıyor...</div>';
   try{
     const kcal=UP&&UP.daily_calorie_goal||1800;
     const goal=UP&&UP.goal_type||'lose_weight';
+    // Kısa prompt - sadece yemek adları, detay yok
     const resp=await fetch('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-haiku-4-5-20251001',
-        max_tokens:1500,
-        system:'You are a Turkish nutrition expert. Return ONLY valid JSON, nothing else. No markdown, no explanation. Format: {"days":[{"day":"string","breakfast":"string","lunch":"string","dinner":"string","snack":"string","total_kcal":number}],"shopping_list":{"sebzeler":["string"],"etler":["string"],"tahillar":["string"],"sut_urunleri":["string"],"diger":["string"]}}',
-        messages:[{role:'user',content:'Create a 7-day Turkish meal plan. Daily calories: '+kcal+'. Goal: '+goal+'. Each day must have different meals. Return ONLY JSON.'}]
+        max_tokens:800,
+        system:'Return ONLY a JSON array. No explanation. Short meal names only.',
+        messages:[{role:'user',content:'7-day Turkish meal plan, '+kcal+' calories/day. Return ONLY this JSON, no other text: [{"day":"Pazartesi","b":"breakfast meal","l":"lunch meal","d":"dinner meal","s":"snack"},{"day":"Sali","b":"...","l":"...","d":"...","s":"..."},{"day":"Carsamba","b":"...","l":"...","d":"...","s":"..."},{"day":"Persembe","b":"...","l":"...","d":"...","s":"..."},{"day":"Cuma","b":"...","l":"...","d":"...","s":"..."},{"day":"Cumartesi","b":"...","l":"...","d":"...","s":"..."},{"day":"Pazar","b":"...","l":"...","d":"...","s":"..."}]'}]
       })
     });
     if(!resp.ok){
-      res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;">Plan olusturulamadi ('+resp.status+'). <button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;">Tekrar Dene</button></div>';
+      res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;">Plan oluşturulamadı ('+resp.status+'). <button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;">Tekrar Dene</button></div>';
       return;
     }
     const d=await resp.json();
     if(!d||!d.content||!d.content[0]){
-      res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;">Yanit alinamadi. <button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;">Tekrar Dene</button></div>';
+      res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;">Yanıt alınamadı. <button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;">Tekrar Dene</button></div>';
       return;
     }
     var raw=d.content[0].text.replace(/```json|```/g,'').trim();
     var plan=null;
-    try{plan=JSON.parse(raw);}catch(e1){
-      // Kontrol karakterlerini temizle ve tekrar dene
-      var cleaned=raw.replace(/[\x00-\x1F\x7F]/g,' ').trim();
-      try{plan=JSON.parse(cleaned);}catch(e2){
-        var s=cleaned.indexOf('{');var e=cleaned.lastIndexOf('}');
-        if(s>=0&&e>s){try{plan=JSON.parse(cleaned.slice(s,e+1));}catch(e3){console.error('JSON err:',e3.message,cleaned.slice(0,100));}}
+    // Array formatı dene
+    try{
+      var arr=JSON.parse(raw);
+      if(Array.isArray(arr)){
+        plan={days:arr.map(function(x){return{day:x.day,breakfast:x.b||x.breakfast,lunch:x.l||x.lunch,dinner:x.d||x.dinner,snack:x.s||x.snack};})};
+      }else if(arr.days){
+        plan=arr;
+      }
+    }catch(e1){
+      // { } içini bul
+      var s=raw.indexOf('[');var e2=raw.lastIndexOf(']');
+      if(s>=0&&e2>s){
+        try{
+          var arr2=JSON.parse(raw.slice(s,e2+1));
+          plan={days:arr2.map(function(x){return{day:x.day,breakfast:x.b||x.breakfast,lunch:x.l||x.lunch,dinner:x.d||x.dinner,snack:x.s||x.snack};})};
+        }catch(e3){console.error('Parse fail:',e3.message);}
       }
     }
     if(!plan||!plan.days||!plan.days.length){
-      console.error('Plan parse failed. Raw:', raw.slice(0,500));
-      console.error('Plan object:', plan);
-      res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;">Plan formatı hatali. <button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;">Tekrar Dene</button></div>';
+      console.error('Plan null. Raw:',raw.slice(0,300));
+      res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;">Format hatası. <button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;">Tekrar Dene</button></div>';
       return;
     }
     weeklyPlanDays=plan.days;
-    weeklyShoppingList=plan.shopping_list||null;
+    weeklyShoppingList=null;
     sessionStorage.setItem(cacheKey,JSON.stringify(weeklyPlanDays));
     activePlanDay=0;
     renderWeeklyPlanTabs();
   }catch(e){
     console.error('Plan error:',e);
-    res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;">Baglanti hatasi. <button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;">Tekrar Dene</button></div>';
+    res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;">Bağlantı hatası. <button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;">Tekrar Dene</button></div>';
   }
 }
 
