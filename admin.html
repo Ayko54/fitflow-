@@ -195,10 +195,7 @@ if(localStorage.getItem('ffa')!=='aykan2024'){
   localStorage.setItem('ffa','aykan2024');
 }
 var SVCKEY=localStorage.getItem('ffsvc')||'';
-if(!SVCKEY){
-  SVCKEY=prompt('Supabase Service Role Key (Storage upload icin):');
-  if(SVCKEY)localStorage.setItem('ffsvc',SVCKEY);
-}
+
 function resetKeys(){
   localStorage.removeItem('ffa');
   localStorage.removeItem('ffsvc');
@@ -217,7 +214,9 @@ function slug(n){
 
 async function loadFoods(){
   document.getElementById('grid').innerHTML='<div class="lm">Yukleniyor...</div>';
-  var r=await sb.from('foods').select('id,name,category,photo_url,photo_status').order('name').limit(5000);
+  // Service key ile ayrı client oluştur - RLS bypass
+  var adminSb=SVCKEY?window.supabase.createClient(SB_URL,SVCKEY):sb;
+  var r=await adminSb.from('foods').select('id,name,category,photo_url,photo_status').order('name').limit(5000);
   foods=r.data||[];
   var cats=[...new Set(foods.map(function(f){return f.category;}).filter(Boolean))].sort();
   var s=document.getElementById('fcat');
@@ -535,11 +534,20 @@ async function checkMaintenanceStatus(){
   }catch(e){}
 }
 
-sb.from('foods').select('photo_status').limit(1).then(function(r){
-  if(r.error&&r.error.message.indexOf('photo_status')>=0){
-    alert('SQL Editor da su komutu calistir:\nALTER TABLE foods ADD COLUMN IF NOT EXISTS photo_status text;');
-  }else{loadFoods();checkMaintenanceStatus();}
-});
+// Auth + init
+(function(){
+  if(localStorage.getItem('ffa')!=='aykan2024'){
+    var p=prompt('Admin sifre:');
+    if(p!=='aykan2024'){document.body.innerHTML='<h2 style="color:red;padding:40px">Yetkisiz</h2>';return;}
+    localStorage.setItem('ffa','aykan2024');
+  }
+  if(!SVCKEY){
+    SVCKEY=prompt('Supabase Service Role Key:');
+    if(SVCKEY)localStorage.setItem('ffsvc',SVCKEY);
+  }
+  loadFoods();
+  checkMaintenanceStatus();
+})();
 
 function switchTab(tab){
   ['photos','calories','add','reports'].forEach(function(t){
