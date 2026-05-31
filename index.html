@@ -1526,9 +1526,15 @@ async function loadFood(){
   document.getElementById('f-goal').textContent=goal;
   const d=today();
   const meals=[{key:'breakfast',label:'🌅 Kahvaltı'},{key:'lunch',label:'☀️ Öğle'},{key:'dinner',label:'🌙 Akşam'},{key:'snack',label:'🍎 Ara Öğün'}];
+  // Skeleton göster - hızlı görünüm
+  if(!document.getElementById('f-meals').innerHTML){
+    document.getElementById('f-meals').innerHTML=meals.map(m=>'<div style="margin-bottom:14px;"><div style="height:20px;background:var(--card);border-radius:8px;width:40%;margin-bottom:8px;"></div><div style="height:60px;background:var(--card);border-radius:12px;"></div></div>').join('');
+  }
+  // Tek sorguda tüm öğünleri çek
+  const{data:_allLogs}=await sb.from('food_logs').select('*').eq('user_id',CU.id).eq('log_date',d).order('created_at',{ascending:true});
   let totKcal=0,totP=0,totC=0,totF=0,html='';
   for(const m of meals){
-    const{data:items}=await sb.from('food_logs').select('*').eq('user_id',CU.id).eq('log_date',d).eq('meal_type',m.key).order('created_at',{ascending:true});
+    const items=(_allLogs||[]).filter(l=>l.meal_type===m.key);
     let mk=0;
     (items||[]).forEach(i=>{mk+=i.calories||0;totKcal+=i.calories||0;totP+=i.protein_g||0;totC+=i.carbs_g||0;totF+=i.fat_g||0;});
     html+=`<div style="margin-bottom:14px;">
@@ -1806,11 +1812,14 @@ async function generateWeeklyPlan(force=false){
       return;
     }
     var raw=d.content[0].text.replace(/```json|```/g,'').trim();
-    // JSON parse - hata toleranslı
     var plan=null;
     try{plan=JSON.parse(raw);}catch(e1){
-      var m=raw.match(/\{[\s\S]*\}/);
-      if(m)try{plan=JSON.parse(m[0]);}catch(e2){}
+      // Kontrol karakterlerini temizle ve tekrar dene
+      var cleaned=raw.replace(/[\x00-\x1F\x7F]/g,' ').trim();
+      try{plan=JSON.parse(cleaned);}catch(e2){
+        var s=cleaned.indexOf('{');var e=cleaned.lastIndexOf('}');
+        if(s>=0&&e>s){try{plan=JSON.parse(cleaned.slice(s,e+1));}catch(e3){console.error('JSON err:',e3.message,cleaned.slice(0,100));}}
+      }
     }
     if(!plan||!plan.days||!plan.days.length){
       console.error('Plan parse failed. Raw:', raw.slice(0,500));
@@ -2101,7 +2110,12 @@ async function selSwMeal(btn){
       'protein','bar','smoothie','granola'
     ]
   };
-  const{data:allFoods}=await sb.from('foods').select('*').limit(150);
+  // Foods cache - sayfada bir kez çek
+  if(!window._foodsCache){
+    const{data:fc}=await sb.from('foods').select('*').limit(500);
+    window._foodsCache=fc||[];
+  }
+  const allFoods=window._foodsCache;
   const keywords=mealFoods[swMeal]||[];
   const allNotShown=(allFoods||[]).filter(f=>!shownIds.includes(f.id));
   const matched=allNotShown.filter(f=>keywords.some(k=>(f.name||'').toLowerCase().includes(k)));
@@ -2166,7 +2180,8 @@ async function openSwipe(type, mealHint){
       ]
     };
     // Tüm yemekleri çek
-    const{data: allFoods}=await sb.from('foods').select('*').limit(150);
+    if(!window._foodsCache){const{data:fc}=await sb.from('foods').select('*').limit(500);window._foodsCache=fc||[];}
+    const allFoods=window._foodsCache;
     const keywords = mealFoods[swMeal] || [];
     const allNotShown = (allFoods||[]).filter(f=>!shownIds.includes(f.id));
     // Öğüne uygun olanlar
