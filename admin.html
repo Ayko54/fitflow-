@@ -65,9 +65,13 @@ input,select{background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#f
   <div class="stat y"><b id="spend">0</b> Bekleyen</div>
   <div class="stat"><b id="stot">0</b> Toplam</div>
   <button class="btn" onclick="resetKeys()">🔑 Key</button>
-  <button class="btn" id="maint-btn" onclick="toggleMaintenance()" style="background:#dc2626;border-color:#b91c1c;">🔧 Bakım Modu</button>
+  <button class="btn" id="maint-btn" onclick="toggleMaintenance()" style="background:#dc2626;border-color:#b91c1c;">🔧 Bakım</button>
+  <button class="btn" id="tab-photos-btn" onclick="switchTab('photos')" style="background:#7c3aed;border-color:#6d28d9;">📸</button>
+  <button class="btn" id="tab-calories-btn" onclick="switchTab('calories')">🔢</button>
+  <button class="btn" id="tab-add-btn" onclick="switchTab('add')">➕</button>
+  <button class="btn" id="tab-reports-btn" onclick="switchTab('reports')">⚠️</button>
 </div>
-<div class="filters">
+<div class="filters" id="photos-filters">
   <input id="fq" placeholder="🔍 Ara..." oninput="applyFilter()" style="width:180px">
   <select id="fst" onchange="applyFilter()">
     <option value="all">Tümü</option>
@@ -80,8 +84,59 @@ input,select{background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#f
   <button class="btn" onclick="loadFoods()">↻ Yenile</button>
   <span id="pinfo" style="color:#666;font-size:12px"></span>
 </div>
+<!-- Photos Tab -->
+<div id="tab-photos-content">
 <div id="grid" class="grid"><div class="lm">Yükleniyor...</div></div>
 <div class="pag" id="pag"></div>
+</div>
+
+<!-- Calorie Control Tab -->
+<div id="tab-calories-content" style="display:none;padding:16px 20px;">
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+    <div style="flex:1;">
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px;">Kalori Kontrol</div>
+      <div style="font-size:12px;color:#666;">Kalorisi 0 veya boş olan yemekler AI ile doğrulanır. Bir kez doğrulananlar tekrar sorgulanmaz.</div>
+    </div>
+    <button class="btn bg" id="cal-check-btn" onclick="runCalorieCheck()">AI ile Kontrol Et</button>
+  </div>
+  <div id="cal-stats" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;"></div>
+  <div id="cal-list" style="max-height:500px;overflow-y:auto;"></div>
+</div>
+
+<!-- Add Food Tab -->
+<div id="tab-add-content" style="display:none;padding:16px 20px;">
+  <div style="font-size:15px;font-weight:700;margin-bottom:16px;">Yeni Yemek Ekle</div>
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:500px;">
+    <input id="add-name" placeholder="Yemek adi" style="background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:10px 14px;font-size:14px;outline:none;">
+    <div style="display:flex;gap:8px;">
+      <input id="add-calories" type="number" placeholder="Kalori (kcal/100g)" style="flex:1;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:10px 14px;font-size:14px;outline:none;">
+      <input id="add-protein" type="number" placeholder="Protein (g)" style="flex:1;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:10px 14px;font-size:14px;outline:none;">
+    </div>
+    <div style="display:flex;gap:8px;">
+      <input id="add-carbs" type="number" placeholder="Karbonhidrat (g)" style="flex:1;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:10px 14px;font-size:14px;outline:none;">
+      <input id="add-fat" type="number" placeholder="Yag (g)" style="flex:1;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:10px 14px;font-size:14px;outline:none;">
+    </div>
+    <select id="add-category" style="background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:10px 14px;font-size:14px;outline:none;">
+      <option value="Genel">Genel</option><option value="Kahvalti">Kahvalti</option>
+      <option value="Corba">Corba</option><option value="Et Yemegi">Et Yemegi</option>
+      <option value="Tavuk">Tavuk</option><option value="Balik">Balik</option>
+      <option value="Sebze">Sebze</option><option value="Salata">Salata</option>
+      <option value="Tatli">Tatli</option><option value="Meyve">Meyve</option>
+      <option value="Baklagil">Baklagil</option><option value="Tahil">Tahil</option>
+      <option value="Sut Urunleri">Sut Urunleri</option><option value="Icecek">Icecek</option>
+      <option value="Atistirmalik">Atistirmalik</option><option value="Fast Food">Fast Food</option>
+    </select>
+    <input id="add-photo" placeholder="Fotograf URL (opsiyonel)" style="background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;padding:10px 14px;font-size:14px;outline:none;">
+    <button class="btn bg" onclick="addNewFood()" style="padding:12px;">Ekle</button>
+    <div id="add-result" style="font-size:13px;color:#22c55e;"></div>
+  </div>
+</div>
+
+<!-- Reports Tab -->
+<div id="tab-reports-content" style="display:none;padding:16px 20px;">
+  <div style="font-size:15px;font-weight:700;margin-bottom:16px;">Gorsel Yanlis Bildirimleri</div>
+  <div id="reports-list"><div class="lm">Yukleniyor...</div></div>
+</div>
 
 <div class="overlay" id="ov" onclick="if(event.target===this)closeM()">
 <div class="modal">
@@ -203,7 +258,7 @@ function render(){
     var img=f.photo_url||(STURL+slug(f.name)+'.jpg');
     var cls=s==='approved'?'ok':s==='rejected'?'bad':'';
     var dcls=s==='approved'?'dok':s==='rejected'?'dbad':'dwait';
-    html+='<div class="card '+cls+'" id="c'+f.id+'">'
+    html+='<div class="card '+cls+'" id="c'+f.id+'" oncontextmenu="showCatMenu(''+f.id+'',''+f.category+'',event);return false;">'
       +'<div class="imgbox">'
       +'<img src="'+img+'" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=ni>&#127374;</div>\'">'
       +'<div class="dot '+dcls+'"></div>'
