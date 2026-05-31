@@ -540,6 +540,124 @@ sb.from('foods').select('photo_status').limit(1).then(function(r){
     alert('SQL Editor da su komutu calistir:\nALTER TABLE foods ADD COLUMN IF NOT EXISTS photo_status text;');
   }else{loadFoods();checkMaintenanceStatus();}
 });
+
+function switchTab(tab){
+  ['photos','calories','add','reports'].forEach(function(t){
+    var c=document.getElementById('tab-'+t+'-content');
+    var b=document.getElementById('tab-'+t+'-btn');
+    if(c)c.style.display=t===tab?'block':'none';
+    if(b){b.style.background=t===tab?'#7c3aed':'#1a1a1a';b.style.borderColor=t===tab?'#6d28d9':'#333';}
+  });
+  var f=document.getElementById('photos-filters');
+  if(f)f.style.display=tab==='photos'?'flex':'none';
+  if(tab==='reports')loadReports();
+}
+
+async function runCalorieCheck(){
+  var btn=document.getElementById('cal-check-btn');
+  btn.textContent='Kontrol ediliyor...';btn.disabled=true;
+  var res=await sb.from('foods').select('id,name,calories_per_100g,calorie_verified')
+    .or('calories_per_100g.is.null,calories_per_100g.eq.0')
+    .is('calorie_verified',null).limit(30);
+  var items=res.data||[];
+  if(!items.length){
+    document.getElementById('cal-list').innerHTML='<div class="lm" style="color:#22c55e">Tum kaloriler dogrulanmis!</div>';
+    btn.textContent='AI ile Kontrol Et';btn.disabled=false;return;
+  }
+  var listEl=document.getElementById('cal-list');
+  listEl.innerHTML='<div class="lm">'+items.length+' yemek sorgulanıyor...</div>';
+  var updated=0;var results=[];
+  for(var i=0;i<items.length;i++){
+    var food=items[i];
+    try{
+      var r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:50,
+          messages:[{role:'user',content:'"'+food.name+'" 100 gramı kaç kalori? Sadece rakam yaz.'}]})});
+      var d=await r.json();
+      var txt=(d.content&&d.content[0]&&d.content[0].text)||'0';
+      var cal=parseInt(txt.replace(/[^0-9]/g,''))||0;
+      if(cal>0&&cal<2000){
+        await sb.from('foods').update({calories_per_100g:cal,calorie_verified:true}).eq('id',food.id);
+        results.push({name:food.name,cal:cal,ok:true});updated++;
+      }else{
+        await sb.from('foods').update({calorie_verified:true}).eq('id',food.id);
+        results.push({name:food.name,cal:0,ok:false});
+      }
+    }catch(e){results.push({name:food.name,cal:0,ok:false});}
+    await new Promise(function(r){setTimeout(r,400);});
+  }
+  listEl.innerHTML=results.map(function(r){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #2a2a2a;">'
+      +'<span>'+(r.ok?'OK':'?')+'</span><div style="flex:1;font-size:12px;">'+r.name+'</div>'
+      +'<div style="font-size:12px;color:'+(r.cal?'#22c55e':'#666')+';">'+(r.cal?r.cal+' kcal':'Bilgi yok')+'</div></div>';
+  }).join('');
+  document.getElementById('cal-stats').innerHTML='<div class="stat g"><b>'+updated+'</b> Guncellendi</div>';
+  btn.textContent='AI ile Kontrol Et';btn.disabled=false;
+}
+
+async function addNewFood(){
+  var name=document.getElementById('add-name').value.trim();
+  if(!name){alert('Ad girin');return;}
+  var cal=parseInt(document.getElementById('add-calories').value)||null;
+  var prot=parseFloat(document.getElementById('add-protein').value)||null;
+  var carbs=parseFloat(document.getElementById('add-carbs').value)||null;
+  var fat=parseFloat(document.getElementById('add-fat').value)||null;
+  var cat=document.getElementById('add-category').value;
+  var photo=document.getElementById('add-photo').value.trim()||null;
+  var trMap={'ş':'s','ğ':'g','ü':'u','ö':'o','ç':'c','ı':'i','Ş':'s','Ğ':'g','Ü':'u','Ö':'o','Ç':'c','İ':'i'};
+  var slug=name.toLowerCase().replace(/[şğüöçıŞĞÜÖÇİ]/g,function(c){return trMap[c]||c;}).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  var r=await sb.from('foods').insert({
+    name:name,slug:slug,category:cat,
+    calories_per_100g:cal,protein_per_100g:prot,carbs_per_100g:carbs,fat_per_100g:fat,
+    photo_url:photo,photo_status:photo?'approved':null,
+    default_portion_g:100,default_portion_name:'1 porsiyon',
+    calorie_verified:cal?true:null
+  }).select();
+  var res=document.getElementById('add-result');
+  if(r.error){res.style.color='#ef4444';res.textContent='Hata: '+r.error.message;}
+  else{res.style.color='#22c55e';res.textContent='"'+name+'" eklendi!';
+    document.getElementById('add-name').value='';document.getElementById('add-calories').value='';}
+}
+
+async function loadReports(){
+  var r=await sb.from('photo_reports').select('*').order('created_at',{ascending:false}).limit(50);
+  var data=r.data||[];
+  if(!data.length){document.getElementById('reports-list').innerHTML='<div class="lm">Bildirim yok</div>';return;}
+  document.getElementById('reports-list').innerHTML=data.map(function(rep){
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #2a2a2a;">'
+      +'<img src="'+(rep.wrong_url||'')+'" style="width:50px;height:50px;border-radius:8px;object-fit:cover;background:#1a1a1a;" onerror="this.style.display='none'">'
+      +'<div style="flex:1;"><div style="font-size:13px;font-weight:600;">'+(rep.food_name||'')+'</div>'
+      +'<div style="font-size:11px;color:#666;">'+new Date(rep.created_at).toLocaleString('tr-TR')+'</div></div>'
+      +'<button onclick="dismissReport(''+rep.id+'')" class="btn" style="font-size:11px;padding:5px 8px;">Kapat</button>'
+      +'</div>';
+  }).join('');
+}
+
+async function dismissReport(id){
+  await sb.from('photo_reports').delete().eq('id',id);
+  loadReports();
+}
+
+async function changeCategory(id,newCat){
+  await sb.from('foods').update({category:newCat}).eq('id',id);
+  var f=foods.find(function(x){return x.id==id;});
+  if(f)f.category=newCat;
+  var m=document.getElementById('cat-menu');if(m)m.remove();
+  render();
+}
+
+function showCatMenu(id,currentCat,e){
+  e.stopPropagation();
+  var cats=['Genel','Kahvalti','Corba','Et Yemegi','Tavuk','Balik','Sebze','Salata','Tatli','Meyve','Baklagil','Tahil','Sut Urunleri','Icecek','Atistirmalik','Fast Food'];
+  var old=document.getElementById('cat-menu');if(old)old.remove();
+  var menu=document.createElement('div');menu.id='cat-menu';
+  menu.style.cssText='position:fixed;top:'+e.clientY+'px;left:'+e.clientX+'px;background:#1a1a1a;border:1px solid #333;border-radius:10px;z-index:9999;padding:6px;min-width:150px;box-shadow:0 8px 24px rgba(0,0,0,0.5);';
+  menu.innerHTML=cats.map(function(c){
+    return '<div onclick="changeCategory(''+id+'',''+c+'')" style="padding:7px 12px;cursor:pointer;font-size:12px;border-radius:6px;background:'+(c===currentCat?'#7c3aed':'transparent')+';">'+(c===currentCat?'v ':'')+c+'</div>';
+  }).join('');
+  document.body.appendChild(menu);
+  setTimeout(function(){document.addEventListener('click',function(){menu.remove();},{once:true});},100);
+}
 </script>
 </body>
 </html>
