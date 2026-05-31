@@ -3343,7 +3343,7 @@ async function generateShoppingList(){
   }
   try{
     var r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1200,
         system:'Return only JSON.',
         messages:[{role:'user',content:'Bu 7 gunluk yemek planina gore 1 kisi icin alisveris listesi hazirla. Her malzemenin yanina miktar yaz (kg, g, adet, litre). SADECE JSON: {"sebze":[],"et":[],"tahil":[],"sut":[],"diger":[]}\nOrnek format: ["Tavuk but 1.5 kg","Domates 500g","Yumurta 1 duzine"]\n\n7 Gunluk Plan:\n'+meals.slice(0,21).join('\n')+'.'}]})});
     var d=await r.json();
