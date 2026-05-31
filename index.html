@@ -1340,6 +1340,11 @@ async function afterLogin(){
     document.getElementById('screen-auth').classList.remove('active');
   }else{
     applyTheme(UP.gender||'female');goTo('dashboard');
+    // Arka planda plan hazırla - yemek ekranına gelince hazır olsun
+    setTimeout(function(){
+      var cacheKey='weeklyPlan_'+new Date().toISOString().split('T')[0];
+      if(!sessionStorage.getItem(cacheKey))prefetchWeeklyPlan();
+    },3000);
   }
 }
 
@@ -1780,6 +1785,18 @@ async function deleteFoodLog(id){
     ok('Silindi ✓');loadFood();
   }catch(e){err('Silinemedi');}
 }
+function buildPlanPrompt(kcal){
+  var mc=UP&&UP.meal_count||4;
+  var days=['Pazartesi','Sali','Carsamba','Persembe','Cuma','Cumartesi','Pazar'];
+  var obj_template='{"gun":"GUN"';
+  if(mc>=1)obj_template+=',"kahvalti":"kahvalti yemegi (~kcal)"';
+  if(mc>=2)obj_template+=',"ogle":"ogle yemegi (~kcal)"';
+  if(mc>=3)obj_template+=',"aksam":"aksam yemegi (~kcal)"';
+  if(mc>=4)obj_template+=',"ara":"ara ogun (~kcal)"';
+  obj_template+='}';
+  var arr=days.map(function(g){return obj_template.replace('GUN',g);}).join(',');
+  return kcal+' kalori, 7 gunluk Turkce yemek plani. SADECE JSON array, baska hicbir sey yazma: ['+arr+'] Her gun farkli yemek yaz.';
+}
 async function generateWeeklyPlan(force=false){
   const res=document.getElementById('weekly-plan-result');
   if(!res)return;
@@ -1797,18 +1814,8 @@ async function generateWeeklyPlan(force=false){
       body:JSON.stringify({
         model:'claude-haiku-4-5-20251001',
         max_tokens:1200,
-        system:'Sen Türk diyetisyenisin. SADECE geçerli JSON döndür, başka hiçbir şey yazma.',
-        messages:[{role:'user',content:`${kcal} kalorilik 7 günlük Türkçe yemek planı. SADECE bu JSON formatında döndür, açıklama yapma:
-[
-{"gun":"Pazartesi","kahvalti":"Menemen (~350kcal)","ogle":"Mercimek çorbası + pilav (~550kcal)","aksam":"Tavuk ızgara + salata (~480kcal)","ara":"Yoğurt + meyve (~200kcal)"},
-{"gun":"Salı","kahvalti":"...","ogle":"...","aksam":"...","ara":"..."},
-{"gun":"Çarşamba","kahvalti":"...","ogle":"...","aksam":"...","ara":"..."},
-{"gun":"Perşembe","kahvalti":"...","ogle":"...","aksam":"...","ara":"..."},
-{"gun":"Cuma","kahvalti":"...","ogle":"...","aksam":"...","ara":"..."},
-{"gun":"Cumartesi","kahvalti":"...","ogle":"...","aksam":"...","ara":"..."},
-{"gun":"Pazar","kahvalti":"...","ogle":"...","aksam":"...","ara":"..."}
-]
-Her gün farklı yemek yaz. Türkçe yaz. Sadece JSON yaz.`}]
+        system:'Sen Türk diyetisyenisin. SADECE gecerli JSON don, baska hicbir sey yazma.',
+        messages:[{role:'user',content:buildPlanPrompt(kcal)}]
       })
     });
     if(!resp.ok){res.innerHTML='<div style="color:var(--accent);padding:10px;text-align:center;">Hata ('+resp.status+'). <button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;">Tekrar Dene</button></div>';return;}
@@ -3283,6 +3290,87 @@ if('serviceWorker' in navigator){
 }
 
 init();
+
+async function generateShoppingList(){
+  if(!weeklyPlanDays||!weeklyPlanDays.length){ok('Once plan olustur');return;}
+  var meals=[];
+  weeklyPlanDays.forEach(function(day){
+    ['breakfast','lunch','dinner','snack'].forEach(function(k){if(day[k])meals.push(day[k]);});
+  });
+  // Modal oluştur
+  var overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});
+  var box=document.createElement('div');
+  box.style.cssText='background:var(--bg2);border-radius:24px 24px 0 0;width:100%;max-width:430px;padding:20px;max-height:80vh;overflow-y:auto;';
+  box.innerHTML='<div style="font-size:17px;font-weight:800;margin-bottom:16px;">Alisveris Listesi</div><div style="text-align:center;padding:20px;color:var(--text3);">Olusturuluyor...</div>';
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  try{
+    var r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,
+        system:'Return only JSON.',
+        messages:[{role:'user',content:'Shopping list for these meals as JSON: {"sebze":[],"et":[],"tahil":[],"sut":[],"diger":[]}\nMeals: '+meals.slice(0,14).join(', ')}]})});
+    var d=await r.json();
+    var raw=(d.content&&d.content[0]&&d.content[0].text||'').replace(/`/g,'').replace('json','').trim();
+    var list=null;
+    try{list=JSON.parse(raw);}catch(e1){
+      var s=raw.indexOf('{');var e2=raw.lastIndexOf('}');
+      if(s>=0&&e2>s)try{list=JSON.parse(raw.slice(s,e2+1));}catch(e3){}
+    }
+    var cats=[{k:'sebze',l:'Sebze'},{k:'et',l:'Et'},{k:'tahil',l:'Tahil'},{k:'sut',l:'Sut'},{k:'diger',l:'Diger'}];
+    _shopText='Alisveris Listesi\n\n';
+    var html='';
+    if(list){
+      cats.forEach(function(c){
+        if(list[c.k]&&list[c.k].length){
+          html+='<div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px;">'+c.l+'</div>';
+          list[c.k].forEach(function(item){
+            html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">'
+              +'<div class="shop-check" onclick="toggleCheck(this)" style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);cursor:pointer;flex-shrink:0;"></div>'
+              +'<div style="font-size:13px;">'+item+'</div></div>';
+            _shopText+='- '+item+'\n';
+          });
+          html+='</div>';
+          _shopText+='\n';
+        }
+      });
+    }else{
+      html='<div style="color:var(--text3);">Liste olusturulamadi.</div>';
+    }
+    box.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
+      +'<div style="font-size:17px;font-weight:800;">Alisveris Listesi</div>'
+      +'<button style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;" onclick="closeShopModal(this)">x</button>'
+      +'</div>'+html
+      +'<div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">'
+      +'<button class="btn btn-secondary" style="flex:1;" onclick="copyShopList()">Kopyala</button>'
+      +'<button class="btn btn-primary" style="flex:1;" onclick="shareShopList()">Paylas</button>'
+      +'</div>';
+  }catch(e){
+    box.innerHTML='<div style="padding:20px;color:var(--text3);">Hata: '+e.message+'</div>';
+  }
+}
+
+var _shopText='';
+function copyShopList(){navigator.clipboard&&navigator.clipboard.writeText(_shopText);ok('Kopyalandi!');}
+function shareShopList(){if(navigator.share)navigator.share({title:'Alisveris Listesi',text:_shopText}).catch(function(){});else copyShopList();}
+
+function toggleCheck(el){
+  el.textContent='✓';
+  el.style.background='var(--accent)';
+  el.style.color='#fff';
+  el.style.border='none';
+  el.style.fontSize='11px';
+  el.style.display='flex';
+  el.style.alignItems='center';
+  el.style.justifyContent='center';
+}
+
+function closeShopModal(btn){
+  var p=btn;
+  while(p&&p.style&&p.style.cssText&&p.style.cssText.indexOf('fixed')<0){p=p.parentElement;}
+  if(p)p.remove();
+}
 </script>
 </body>
 </html>
