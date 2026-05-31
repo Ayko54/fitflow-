@@ -583,45 +583,97 @@ function switchTab(tab){
 
 async function runCalorieCheck(){
   var btn=document.getElementById('cal-check-btn');
-  btn.textContent='Kontrol ediliyor...';btn.disabled=true;
-  var res=await sb.from('foods').select('id,name,calories_per_100g,calorie_verified')
-    .or('calories_per_100g.is.null,calories_per_100g.eq.0')
-    .is('calorie_verified',null).limit(30);
-  var items=res.data||[];
-  if(!items.length){
-    document.getElementById('cal-list').innerHTML='<div class="lm" style="color:#22c55e">Tum kaloriler dogrulanmis!</div>';
-    btn.textContent='AI ile Kontrol Et';btn.disabled=false;return;
-  }
   var listEl=document.getElementById('cal-list');
-  listEl.innerHTML='<div class="lm">'+items.length+' yemek sorgulanıyor...</div>';
-  var updated=0;var results=[];
+  var statsEl=document.getElementById('cal-stats');
+
+  // Önce listeyi göster - kontrol bekleyenleri çek
+  btn.textContent='Yukleniyor...';btn.disabled=true;
+  var key=SVCKEY||SB_KEY;
+  var resp=await fetch(SB_URL+'/rest/v1/foods?select=id,name,calories_per_100g,calorie_verified&or=(calories_per_100g.is.null,calories_per_100g.eq.0)&calorie_verified=is.null&limit=2000',{
+    headers:{apikey:key,'Authorization':'Bearer '+key}
+  });
+  var items=resp.ok?(await resp.json()):[];
+  if(!Array.isArray(items))items=[];
+
+  statsEl.innerHTML='<div class="stat y"><b>'+items.length+'</b> Kontrol bekliyor</div>';
+
+  if(!items.length){
+    listEl.innerHTML='<div class="lm" style="color:#22c55e">Tum kaloriler dogrulanmis!</div>';
+    btn.textContent='AI ile Kontrol Et';btn.disabled=false;
+    return;
+  }
+
+  // Listeyi göster
+  listEl.innerHTML='<div style="margin-bottom:10px;font-size:12px;color:#888;">'+items.length+' yemek kontrol edilecek. Baslamak icin "AI ile Kontrol Et" tusuna bas.</div>'
+    +items.slice(0,50).map(function(f){
+      return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #2a2a2a;">'
+        +'<span style="color:#f59e0b;">○</span>'
+        +'<div style="flex:1;font-size:12px;">'+f.name+'</div>'
+        +'<div style="font-size:11px;color:#666;">Kontrol bekleniyor</div>'
+        +'</div>';
+    }).join('')+(items.length>50?'<div style="font-size:11px;color:#666;padding:8px 0;">...ve '+(items.length-50)+' tane daha</div>':'');
+
+  btn.textContent='AI ile Kontrol Et ('+items.length+')';
+  btn.disabled=false;
+  btn.dataset.ready='1';
+  btn.onclick=function(){if(this.dataset.ready==='1')doCalorieAI(items);};
+}
+
+async function doCalorieAI(items){
+  var btn=document.getElementById('cal-check-btn');
+  var listEl=document.getElementById('cal-list');
+  var statsEl=document.getElementById('cal-stats');
+  btn.textContent='Isleniyor...';btn.disabled=true;
+  var key=SVCKEY||SB_KEY;
+  var updated=0;var errors=0;
+  var results=[];
+
+  // 5'li batch'ler halinde işle - rate limit için
   for(var i=0;i<items.length;i++){
     var food=items[i];
     try{
       var r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:50,
-          messages:[{role:'user',content:'"'+food.name+'" 100 gramı kaç kalori? Sadece rakam yaz.'}]})});
+          messages:[{role:'user',content:'"'+food.name+'" 100 gramı kaç kalori? SADECE rakam yaz, baska hicbir sey yazma.'}]})});
       var d=await r.json();
-      var txt=(d.content&&d.content[0]&&d.content[0].text)||'0';
-      var cal=parseInt(txt.replace(/[^0-9]/g,''))||0;
-      if(cal>0&&cal<2000){
-        await sb.from('foods').update({calories_per_100g:cal,calorie_verified:true}).eq('id',food.id);
-        results.push({name:food.name,cal:cal,ok:true});updated++;
+      var txt=(d.content&&d.content[0]&&d.content[0].text||'0').replace(/[^0-9]/g,'');
+      var cal=parseInt(txt)||0;
+      if(cal>0&&cal<9000){
+        await fetch(SB_URL+'/rest/v1/foods?id=eq.'+food.id,{method:'PATCH',
+          headers:{apikey:key,'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+          body:JSON.stringify({calories_per_100g:cal,calorie_verified:true})});
+        results.push({name:food.name,cal:cal,ok:true});
+        updated++;
       }else{
-        await sb.from('foods').update({calorie_verified:true}).eq('id',food.id);
+        await fetch(SB_URL+'/rest/v1/foods?id=eq.'+food.id,{method:'PATCH',
+          headers:{apikey:key,'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+          body:JSON.stringify({calorie_verified:true})});
         results.push({name:food.name,cal:0,ok:false});
       }
-    }catch(e){results.push({name:food.name,cal:0,ok:false});}
-    await new Promise(function(r){setTimeout(r,400);});
+    }catch(e){errors++;results.push({name:food.name,cal:0,ok:false});}
+
+    // Her 5'te bir ekranı güncelle
+    if(i%5===0||i===items.length-1){
+      statsEl.innerHTML='<div class="stat g"><b>'+updated+'</b> Guncellendi</div>'
+        +'<div class="stat"><b>'+(i+1)+'</b> / '+items.length+' islendi</div>';
+      listEl.innerHTML=results.slice(-20).reverse().map(function(r){
+        return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #2a2a2a;">'
+          +'<span>'+(r.ok?'✅':'❓')+'</span>'
+          +'<div style="flex:1;font-size:12px;">'+r.name+'</div>'
+          +'<div style="font-size:12px;color:'+(r.cal?'#22c55e':'#666')+';">'+(r.cal?r.cal+' kcal':'Bilgi yok')+'</div>'
+          +'</div>';
+      }).join('');
+    }
+    await new Promise(function(r){setTimeout(r,350);});
   }
-  listEl.innerHTML=results.map(function(r){
-    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #2a2a2a;">'
-      +'<span>'+(r.ok?'OK':'?')+'</span><div style="flex:1;font-size:12px;">'+r.name+'</div>'
-      +'<div style="font-size:12px;color:'+(r.cal?'#22c55e':'#666')+';">'+(r.cal?r.cal+' kcal':'Bilgi yok')+'</div></div>';
-  }).join('');
-  document.getElementById('cal-stats').innerHTML='<div class="stat g"><b>'+updated+'</b> Guncellendi</div>';
+
+  statsEl.innerHTML='<div class="stat g"><b>'+updated+'</b> Guncellendi</div>'
+    +'<div class="stat r"><b>'+errors+'</b> Hata</div>';
   btn.textContent='AI ile Kontrol Et';btn.disabled=false;
+  btn.dataset.ready='0';
+  btn.onclick=runCalorieCheck;
 }
+
 
 async function addNewFood(){
   var name=document.getElementById('add-name').value.trim();
@@ -714,6 +766,52 @@ function showCatMenu(el,e){
 }
 
 
+
+function openEdit(id){
+  var f=foods.find(function(x){return x.id==id;});
+  if(!f)return;
+  var overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  var cats=['Genel','Kahvalti','Corba','Et Yemegi','Tavuk','Balik','Sebze','Salata','Tatli','Meyve','Baklagil','Tahil','Sut Urunleri','Icecek','Atistirmalik','Fast Food'];
+  var box=document.createElement('div');
+  box.style.cssText='background:#1a1a1a;border-radius:16px;padding:20px;width:100%;max-width:400px;';
+  box.innerHTML='<div style="font-size:15px;font-weight:700;margin-bottom:16px;">Yemek Duzenle</div>'
+    +'<div style="margin-bottom:10px;"><label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">Yemek Adi</label>'
+    +'<input id="edit-fname" value="'+f.name.replace(/"/g,'&quot;')+'" style="width:100%;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:#fff;padding:8px 12px;font-size:14px;outline:none;"></div>'
+    +'<div style="margin-bottom:16px;"><label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">Kategori</label>'
+    +'<select id="edit-fcat" style="width:100%;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:#fff;padding:8px 12px;font-size:14px;outline:none;">'
+    +cats.map(function(c){return '<option value="'+c+'"'+(c===(f.category||'Genel')?' selected':'')+'>'+c+'</option>';}).join('')
+    +'</select></div>'
+    +'<div style="display:flex;gap:8px;">'
+    +'<button onclick="closeEditModal()" style="flex:1;padding:10px;border-radius:8px;border:1px solid #333;background:transparent;color:#888;cursor:pointer;">Iptal</button>'
+    +'<button id="edit-save-btn" style="flex:1;padding:10px;border-radius:8px;border:none;background:#7c3aed;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Kaydet</button>'
+    +'</div>';
+  overlay.appendChild(box);
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});
+  document.body.appendChild(overlay);
+  // Kaydet butonuna click ekle
+  var saveBtn=document.getElementById('edit-save-btn');
+  if(saveBtn)saveBtn.onclick=function(){saveEdit(id);};
+}
+
+async function saveEdit(id){
+  var name=document.getElementById('edit-fname').value.trim();
+  var cat=document.getElementById('edit-fcat').value;
+  if(!name){alert('Ad bos olamaz');return;}
+  var key=SVCKEY||SB_KEY;
+  var trMap={'ş':'s','ğ':'g','ü':'u','ö':'o','ç':'c','ı':'i','Ş':'s','Ğ':'g','Ü':'u','Ö':'o','Ç':'c','İ':'i'};
+  var slug=name.toLowerCase().replace(/[şğüöçıŞĞÜÖÇİ]/g,function(c){return trMap[c]||c;}).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  var r=await fetch(SB_URL+'/rest/v1/foods?id=eq.'+id,{
+    method:'PATCH',
+    headers:{apikey:key,'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+    body:JSON.stringify({name:name,category:cat,slug:slug})
+  });
+  if(!r.ok){alert('Hata: '+r.status);return;}
+  var f=foods.find(function(x){return x.id==id;});
+  if(f){f.name=name;f.category=cat;}
+  document.querySelector('[style*=fixed]')&&document.querySelector('[style*=fixed]').remove();
+  render();
+}
 </script>
 </body>
 </html>
