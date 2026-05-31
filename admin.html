@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FitFlow Admin</title>
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,sans-serif;background:#0a0612;color:#fff;}
@@ -186,7 +186,9 @@ var SB_URL='https://cmsvgmvymlrfdhhvpuwt.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtc3ZnbXZ5bWxyZmRoaHZwdXd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MDI2NzIsImV4cCI6MjA5NTQ3ODY3Mn0.yAhOYz2-z0VL3bSfc5YL7nS3Dh1_eOVlxzD-HYjN9sw';
 var PEXELS='q80iZBRqts5DwaM1EmkDMTph6DGlkEwY6Pggsqrc18o6j6bt4gkiuX4y';
 var STURL='https://cmsvgmvymlrfdhhvpuwt.supabase.co/storage/v1/object/public/food-images/';
-var sb=supabase.createClient(SB_URL,SB_KEY);
+var sb;
+try{sb=supabase.createClient(SB_URL,SB_KEY);}
+catch(e){document.body.innerHTML='<div style="padding:40px;color:#fff"><h2 style="color:#ef4444">Supabase yuklenemedi - sayfayi yenile</h2></div>';throw e;}
 
 // Auth
 if(localStorage.getItem('ffa')!=='aykan2024'){
