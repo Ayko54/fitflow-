@@ -1686,7 +1686,7 @@ async function saveFoodEntry(){
   finally{setBtn('food-save-btn',false,'✓ Listeye Ekle');unlockBtn('food-save-btn');}
 }
 
-let weeklyPlanDays=[];let activePlanDay=0;
+let weeklyPlanDays=[];let activePlanDay=0;let weeklyShoppingList=null;
 
 function showPortionMenu(id, kcal, prot, carb, fat){
   // Modal oluştur
@@ -1787,14 +1787,25 @@ async function generateWeeklyPlan(force=false){
   try{
     const resp=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       model:'claude-haiku-4-5-20251001',max_tokens:1200,
-      system:'Sen Türk mutfağı uzmanı bir diyetisyensin. Sadece JSON döndür: {"days":[{"day":"Pazartesi","breakfast":"yemek adı (~kcal)","lunch":"yemek (~kcal)","dinner":"yemek (~kcal)","snack":"atıştırmalık (~kcal)"}]} Başka hiçbir şey yazma.',
-      messages:[{role:'user',content:`Kalori hedefi: ${UP.daily_calorie_goal||1800} kcal. Hedef: ${UP.goal_type}. Beslenme: ${UP.diet_type||'normal'}. Alerjiler: ${UP.allergies||'yok'}. 7 günlük Türk mutfağı yemek planı yap.`}]
+      system:'Sen Türk mutfağı uzmanı bir diyetisyensin. Sadece JSON döndür, başka hiçbir şey yazma. Format: {"days":[{"day":"Pazartesi","meals":{"breakfast":"yemek (~kcal)","lunch":"yemek (~kcal)","dinner":"yemek (~kcal)","snack":"atıştırmalık (~kcal)"},"total_kcal":sayı}],"shopping_list":{"sebzeler":["..."],"etler":["..."],"tahillar":["..."],"sut_urunleri":["..."],"diger":["..."]}}',
+      messages:[{role:'user',content:`Kalori hedefi: ${UP.daily_calorie_goal||1800} kcal/gün. Hedef: ${UP.goal_type||'lose_weight'}. Beslenme: ${UP.diet_type||'normal'}. Alerjiler: ${UP.allergies||'yok'}. Öğün sayısı: ${UP.meal_count||4}.
+7 günlük çeşitli Türk mutfağı yemek planı yap. KURALLAR:
+- Her gün farklı yemekler öner, aynı yemeği 2 günden fazla tekrarlama
+- Protein, sebze, karbonhidrat dengesini koru
+- Günlük toplam kaloriyi hedefe yakın tut
+- 7 günlük alışveriş listesi de ekle
+JSON dışında hiçbir şey yazma.`}]
     })});
     if(!resp.ok){res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;">Plan oluşturulamadı. Tekrar dene.</div>';return;}
     const d=await resp.json();
     const raw=d.content[0].text.replace(/```json|```/g,'').trim();
     let plan;try{plan=JSON.parse(raw);}catch(e){res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;">Plan oluşturulamadı. Tekrar dene.</div>';return;}
-    weeklyPlanDays=plan.days||[];
+    weeklyPlanDays=(plan.days||[]).map(d=>{
+      // Hem eski hem yeni format destekle
+      if(d.meals) return {...d, breakfast:d.meals.breakfast||d.breakfast, lunch:d.meals.lunch||d.lunch, dinner:d.meals.dinner||d.dinner, snack:d.meals.snack||d.snack};
+      return d;
+    });
+    weeklyShoppingList=plan.shopping_list||null;
     sessionStorage.setItem(cacheKey,JSON.stringify(weeklyPlanDays));
     activePlanDay=0;
     renderWeeklyPlanTabs();
@@ -1812,29 +1823,22 @@ function renderWeeklyPlanTabs(){
   });
   tabsHtml+='</div>';
   const day=weeklyPlanDays[activePlanDay];
-  const dayContent=`<div class="card" style="margin-bottom:8px;">
-    <div style="font-weight:600;font-size:15px;margin-bottom:10px;color:var(--accent);">${day.day}</div>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;">
-        <div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px;">🌅 KAHVALTI</div>
-        <div style="font-size:13px;color:var(--text);">${day.breakfast}</div>
-      </div>
-      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;">
-        <div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px;">☀️ ÖĞLE</div>
-        <div style="font-size:13px;color:var(--text);">${day.lunch}</div>
-      </div>
-      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;">
-        <div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px;">🌙 AKŞAM</div>
-        <div style="font-size:13px;color:var(--text);">${day.dinner}</div>
-      </div>
-      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;">
-        <div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px;">🍎 ARA ÖĞÜN</div>
-        <div style="font-size:13px;color:var(--text);">${day.snack}</div>
-      </div>
-    </div>
-    <button class="btn btn-ghost btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;font-size:11px;color:var(--text3);">↻ Planı Yenile</button>
+  const mealRows=[
+    {key:'breakfast',label:'🌅 Kahvaltı'},
+    {key:'lunch',label:'☀️ Öğle'},
+    {key:'dinner',label:'🌙 Akşam'},
+    {key:'snack',label:'🍎 Ara Öğün'},
+  ].filter(m=>day[m.key]);
+  const dayContent=`<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:10px;">
+    ${mealRows.map(m=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:14px;">
+      <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.5px;margin-bottom:6px;">${m.label}</div>
+      <div style="font-size:14px;font-weight:500;line-height:1.4;">${day[m.key]||'-'}</div>
+    </div>`).join('')}
+    ${day.total_kcal?`<div style="text-align:center;font-size:12px;color:var(--text3);">Toplam: ~${day.total_kcal} kcal</div>`:''}
   </div>`;
-  res.innerHTML='<div class="sec-title" style="margin-top:0;">7 Günlük Yemek Planın 📋</div>'+tabsHtml+dayContent;
+  // Alışveriş listesi butonu
+  const shoppingBtn=weeklyShoppingList?`<button onclick="showShoppingList()" class="btn btn-secondary" style="margin-bottom:10px;font-size:13px;">🛒 Alışveriş Listesi</button>`:'';
+  res.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div class="sec-title" style="margin:0;">7 Günlük Plan 📋</div><button onclick="generateWeeklyPlan(true)" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;">↻ Yenile</button></div>'+shoppingBtn+tabsHtml+dayContent;
 }
 
 function switchPlanDay(i){
@@ -2165,7 +2169,19 @@ async function openSwipe(type, mealHint){
       data=r.data||[];
     }
     if(data.length===0){const r=await sb.from('exercises').select('*').limit(15);data=r.data||[];}
-    swQueue=data.filter(e=>!shownIds.includes(e.id));
+    // Hedefe göre egzersizleri sırala
+    const exGoal=UP&&UP.goal_type||'lose_weight';
+    const exPriority={
+      lose_weight:['cardio','aerobik','yuruyus','kosu','bisiklet','yuzme','hiit'],
+      gain_weight:['bench','deadlift','squat','kol','sirt','gogus','omuz'],
+      maintain:['yoga','pilates','stretching','core','denge'],
+      performance:['kosu','hiz','interval','guc']
+    };
+    const prioW=(exPriority[exGoal]||[]);
+    const allEx=data.filter(e=>!shownIds.includes(e.id));
+    const prioEx=allEx.filter(e=>prioW.some(w=>(e.name||'').toLowerCase().includes(w)));
+    const restEx=allEx.filter(e=>!prioW.some(w=>(e.name||'').toLowerCase().includes(w)));
+    swQueue=[...prioEx,...restEx];
   }
   goTo('swipe');
   showSwCard();
