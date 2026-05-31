@@ -1785,6 +1785,31 @@ async function deleteFoodLog(id){
     ok('Silindi ✓');loadFood();
   }catch(e){err('Silinemedi');}
 }
+async function prefetchWeeklyPlan(){
+  if(!UP)return;
+  var cacheKey='weeklyPlan_'+new Date().toISOString().split('T')[0];
+  if(sessionStorage.getItem(cacheKey))return;
+  try{
+    var kcal=UP.daily_calorie_goal||1800;
+    var r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:800,
+        system:'Return only JSON array.',
+        messages:[{role:'user',content:buildPlanPrompt(kcal)}]})});
+    if(!r.ok)return;
+    var d=await r.json();
+    if(!d||!d.content||!d.content[0])return;
+    var raw=d.content[0].text.replace(/```json|```/g,'').trim();
+    var arr=null;
+    try{arr=JSON.parse(raw);if(!Array.isArray(arr))arr=arr.days||null;}catch(e1){
+      var s=raw.indexOf('[');var e2=raw.lastIndexOf(']');
+      if(s>=0&&e2>s)try{arr=JSON.parse(raw.slice(s,e2+1));}catch(e3){}
+    }
+    if(!arr||!arr.length)return;
+    weeklyPlanDays=arr.map(function(x){return{day:x.gun||x.day||'',breakfast:x.kahvalti||x.breakfast||x.b||'',lunch:x.ogle||x.lunch||x.l||'',dinner:x.aksam||x.dinner||x.d||'',snack:x.ara||x.snack||x.s||''};});
+    sessionStorage.setItem(cacheKey,JSON.stringify(weeklyPlanDays));
+  }catch(e){}
+}
+
 function buildPlanPrompt(kcal){
   var mc=UP&&UP.meal_count||4;
   var days=['Pazartesi','Sali','Carsamba','Persembe','Cuma','Cumartesi','Pazar'];
@@ -3326,12 +3351,14 @@ async function generateShoppingList(){
     var list=null;
     try{list=JSON.parse(raw);}catch(e1){
       var s=raw.indexOf('{');var e2=raw.lastIndexOf('}');
-      if(s>=0&&e2>s)try{list=JSON.parse(raw.slice(s,e2+1));}catch(e3){}
+      if(s>=0&&e2>s)try{list=JSON.parse(raw.slice(s,e2+1));}catch(e3){console.error('Shop parse err:',raw.slice(0,200));}
     }
     if(list)sessionStorage.setItem(shopCacheKey,JSON.stringify(list));
+    else console.error('Shop list null. Raw:',raw.slice(0,300));
     renderShopList(box,list);
   }catch(e){
-    box.innerHTML='<div style="padding:20px;color:var(--text3);">Hata: '+e.message+'</div>';
+    console.error('Shop list error:',e.message);
+    renderShopList(box,null);
   }
 }
 
