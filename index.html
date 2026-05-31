@@ -383,7 +383,7 @@ select.form-input option{background:#1a0a2e;color:#fff;}
     </div>
     <!-- Erkek kart -->
     <div onclick="selectGender('male',this)" id="g-male" style="border-radius:20px;overflow:hidden;border:2px solid var(--border);cursor:pointer;margin-bottom:12px;position:relative;transition:border-color .2s;">
-      <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop" 
+      <img src="https://picsum.photos/seed/male-fitness/400/300" 
         alt="Erkek" style="width:100%;height:160px;object-fit:cover;object-position:top;display:block;"
         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div style="display:none;width:100%;height:160px;align-items:center;justify-content:center;background:var(--bg3);font-size:60px;">🧑</div>
@@ -395,7 +395,7 @@ select.form-input option{background:#1a0a2e;color:#fff;}
     </div>
     <!-- Kadın kart -->
     <div onclick="selectGender('female',this)" id="g-female" style="border-radius:20px;overflow:hidden;border:2px solid var(--border);cursor:pointer;position:relative;transition:border-color .2s;">
-      <img src="https://images.unsplash.com/photo-1611077544869-be6b9f6c39e0?w=400&h=300&fit=crop"
+      <img src="https://picsum.photos/seed/female-fitness/400/300"
         alt="Kadın" style="width:100%;height:160px;object-fit:cover;object-position:top;display:block;"
         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div style="display:none;width:100%;height:160px;align-items:center;justify-content:center;background:var(--bg3);font-size:60px;">👩</div>
@@ -1777,39 +1777,54 @@ async function deleteFoodLog(id){
 async function generateWeeklyPlan(force=false){
   const res=document.getElementById('weekly-plan-result');
   if(!res)return;
-  // Check localStorage cache (today's plan)
   const cacheKey='weeklyPlan_'+today();
   const cached=sessionStorage.getItem(cacheKey);
   if(cached&&!force){
     try{weeklyPlanDays=JSON.parse(cached);renderWeeklyPlanTabs();return;}catch(e){}
   }
-  res.innerHTML='<div style="text-align:center;padding:16px;color:var(--text3);font-size:13px;">✨ AI haftalık plan hazırlıyor...</div>';
+  res.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">AI haftalik plan hazirlıyor...</div>';
   try{
-    const resp=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      model:'claude-haiku-4-5-20251001',max_tokens:1200,
-      system:'Sen Türk mutfağı uzmanı bir diyetisyensin. Sadece JSON döndür, başka hiçbir şey yazma. Format: {"days":[{"day":"Pazartesi","meals":{"breakfast":"yemek (~kcal)","lunch":"yemek (~kcal)","dinner":"yemek (~kcal)","snack":"atıştırmalık (~kcal)"},"total_kcal":sayı}],"shopping_list":{"sebzeler":["..."],"etler":["..."],"tahillar":["..."],"sut_urunleri":["..."],"diger":["..."]}}',
-      messages:[{role:'user',content:`Kalori hedefi: ${UP.daily_calorie_goal||1800} kcal/gün. Hedef: ${UP.goal_type||'lose_weight'}. Beslenme: ${UP.diet_type||'normal'}. Alerjiler: ${UP.allergies||'yok'}. Öğün sayısı: ${UP.meal_count||4}.
-7 günlük çeşitli Türk mutfağı yemek planı yap. KURALLAR:
-- Her gün farklı yemekler öner, aynı yemeği 2 günden fazla tekrarlama
-- Protein, sebze, karbonhidrat dengesini koru
-- Günlük toplam kaloriyi hedefe yakın tut
-- 7 günlük alışveriş listesi de ekle
-JSON dışında hiçbir şey yazma.`}]
-    })});
-    if(!resp.ok){res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;">Plan oluşturulamadı. Tekrar dene.</div>';return;}
-    const d=await resp.json();
-    const raw=d.content[0].text.replace(/```json|```/g,'').trim();
-    let plan;try{plan=JSON.parse(raw);}catch(e){res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;">Plan oluşturulamadı. Tekrar dene.</div>';return;}
-    weeklyPlanDays=(plan.days||[]).map(d=>{
-      // Hem eski hem yeni format destekle
-      if(d.meals) return {...d, breakfast:d.meals.breakfast||d.breakfast, lunch:d.meals.lunch||d.lunch, dinner:d.meals.dinner||d.dinner, snack:d.meals.snack||d.snack};
-      return d;
+    const kcal=UP&&UP.daily_calorie_goal||1800;
+    const goal=UP&&UP.goal_type||'lose_weight';
+    const resp=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:1500,
+        system:'You are a Turkish nutrition expert. Return ONLY valid JSON, nothing else. No markdown, no explanation. Format: {"days":[{"day":"string","breakfast":"string","lunch":"string","dinner":"string","snack":"string","total_kcal":number}],"shopping_list":{"sebzeler":["string"],"etler":["string"],"tahillar":["string"],"sut_urunleri":["string"],"diger":["string"]}}',
+        messages:[{role:'user',content:'Create a 7-day Turkish meal plan. Daily calories: '+kcal+'. Goal: '+goal+'. Each day must have different meals. Return ONLY JSON.'}]
+      })
     });
+    if(!resp.ok){
+      res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;">Plan olusturulamadi ('+resp.status+'). <button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;">Tekrar Dene</button></div>';
+      return;
+    }
+    const d=await resp.json();
+    if(!d||!d.content||!d.content[0]){
+      res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;">Yanit alinamadi. <button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;">Tekrar Dene</button></div>';
+      return;
+    }
+    var raw=d.content[0].text.replace(/```json|```/g,'').trim();
+    // JSON parse - hata toleranslı
+    var plan=null;
+    try{plan=JSON.parse(raw);}catch(e1){
+      var m=raw.match(/\{[\s\S]*\}/);
+      if(m)try{plan=JSON.parse(m[0]);}catch(e2){}
+    }
+    if(!plan||!plan.days||!plan.days.length){
+      res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;">Plan formatı hatali. <button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;">Tekrar Dene</button></div>';
+      return;
+    }
+    weeklyPlanDays=plan.days;
     weeklyShoppingList=plan.shopping_list||null;
     sessionStorage.setItem(cacheKey,JSON.stringify(weeklyPlanDays));
     activePlanDay=0;
     renderWeeklyPlanTabs();
-  }catch(e){res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;"><div style="font-size:32px;margin-bottom:8px;">⚠️</div>Plan oluşturulamadı. <br/><button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;padding:8px 16px;">Tekrar Dene</button></div>';}
+  }catch(e){
+    console.error('Plan error:',e);
+    res.innerHTML='<div style="color:var(--accent);font-size:13px;padding:10px;text-align:center;">Baglanti hatasi. <button class="btn btn-outline btn-sm" onclick="generateWeeklyPlan(true)" style="margin-top:8px;width:auto;">Tekrar Dene</button></div>';
+  }
 }
 
 function renderWeeklyPlanTabs(){
