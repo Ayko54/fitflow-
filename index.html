@@ -383,7 +383,7 @@ select.form-input option{background:#1a0a2e;color:#fff;}
     </div>
     <!-- Erkek kart -->
     <div onclick="selectGender('male',this)" id="g-male" style="border-radius:20px;overflow:hidden;border:2px solid var(--border);cursor:pointer;margin-bottom:12px;position:relative;transition:border-color .2s;">
-      <img src="https://images.pexels.com/photos/1431282/pexels-photo-1431282.jpeg?auto=compress&cs=tinysrgb&w=400" 
+      <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop" 
         alt="Erkek" style="width:100%;height:160px;object-fit:cover;object-position:top;display:block;"
         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div style="display:none;width:100%;height:160px;align-items:center;justify-content:center;background:var(--bg3);font-size:60px;">🧑</div>
@@ -395,7 +395,7 @@ select.form-input option{background:#1a0a2e;color:#fff;}
     </div>
     <!-- Kadın kart -->
     <div onclick="selectGender('female',this)" id="g-female" style="border-radius:20px;overflow:hidden;border:2px solid var(--border);cursor:pointer;position:relative;transition:border-color .2s;">
-      <img src="https://images.pexels.com/photos/3768916/pexels-photo-3768916.jpeg?auto=compress&cs=tinysrgb&w=400"
+      <img src="https://images.unsplash.com/photo-1611077544869-be6b9f6c39e0?w=400&h=300&fit=crop"
         alt="Kadın" style="width:100%;height:160px;object-fit:cover;object-position:top;display:block;"
         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div style="display:none;width:100%;height:160px;align-items:center;justify-content:center;background:var(--bg3);font-size:60px;">👩</div>
@@ -1160,7 +1160,7 @@ function getExercisePhoto(name, size) {
   for (const k of sorted) {
     if (nLow.includes(k.toLowerCase())) return PEXELS_PHOTO_DB[k];
   }
-  return 'https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&h=350';
+  return '';
 }
 // ============================================================
 
@@ -1823,22 +1823,24 @@ function renderWeeklyPlanTabs(){
   });
   tabsHtml+='</div>';
   const day=weeklyPlanDays[activePlanDay];
-  const mealRows=[
-    {key:'breakfast',label:'🌅 Kahvaltı'},
-    {key:'lunch',label:'☀️ Öğle'},
-    {key:'dinner',label:'🌙 Akşam'},
-    {key:'snack',label:'🍎 Ara Öğün'},
-  ].filter(m=>day[m.key]);
-  const dayContent=`<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:10px;">
-    ${mealRows.map(m=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:14px;">
-      <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.5px;margin-bottom:6px;">${m.label}</div>
-      <div style="font-size:14px;font-weight:500;line-height:1.4;">${day[m.key]||'-'}</div>
-    </div>`).join('')}
-    ${day.total_kcal?`<div style="text-align:center;font-size:12px;color:var(--text3);">Toplam: ~${day.total_kcal} kcal</div>`:''}
-  </div>`;
+  var mealRows=[
+    {key:'breakfast',label:'Kahvalti'},
+    {key:'lunch',label:'Ogle'},
+    {key:'dinner',label:'Aksam'},
+    {key:'snack',label:'Ara Ogun'},
+  ].filter(function(m){return day[m.key];});
+  var dayContent='<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:10px;">'
+    +mealRows.map(function(m){
+      return '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:14px;">'
+        +'<div style="font-size:11px;color:var(--text3);font-weight:700;margin-bottom:6px;">'+m.label+'</div>'
+        +'<div style="font-size:14px;font-weight:500;line-height:1.4;">'+(day[m.key]||'-')+'</div>'
+        +'</div>';
+    }).join('')
+    +(day.total_kcal?'<div style="text-align:center;font-size:12px;color:var(--text3);">Toplam: ~'+day.total_kcal+' kcal</div>':'')
+    +'</div>';
   // Alışveriş listesi butonu
-  const shoppingBtn=weeklyShoppingList?`<button onclick="showShoppingList()" class="btn btn-secondary" style="margin-bottom:10px;font-size:13px;">🛒 Alışveriş Listesi</button>`:'';
-  res.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div class="sec-title" style="margin:0;">7 Günlük Plan 📋</div><button onclick="generateWeeklyPlan(true)" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;">↻ Yenile</button></div>'+shoppingBtn+tabsHtml+dayContent;
+  var shoppingBtn=weeklyShoppingList?'<button onclick="showShoppingList()" class="btn btn-secondary" style="width:100%;margin-bottom:10px;">Alisveris Listesi</button>':'';
+  res.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><span style="font-size:14px;font-weight:700;">7 Gunluk Plan</span><button onclick="generateWeeklyPlan(true)" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;">Yenile</button></div>'+shoppingBtn+tabsHtml+dayContent;
 }
 
 function switchPlanDay(i){
