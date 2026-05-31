@@ -258,7 +258,7 @@ function render(){
     var img=f.photo_url||(STURL+slug(f.name)+'.jpg');
     var cls=s==='approved'?'ok':s==='rejected'?'bad':'';
     var dcls=s==='approved'?'dok':s==='rejected'?'dbad':'dwait';
-    html+='<div class="card '+cls+'" id="c'+f.id+'" oncontextmenu="showCatMenu(''+f.id+'',''+f.category+'',event);return false;">'
+    html+='<div class="card '+cls+'" id="c'+f.id+'" oncontextmenu="showCatMenu(this,event)" data-id="'+f.id+'" data-cat="'+(f.category||'Genel')+'">'
       +'<div class="imgbox">'
       +'<img src="'+img+'" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=ni>&#127374;</div>\'">'
       +'<div class="dot '+dcls+'"></div>'
@@ -622,15 +622,29 @@ async function addNewFood(){
 async function loadReports(){
   var r=await sb.from('photo_reports').select('*').order('created_at',{ascending:false}).limit(50);
   var data=r.data||[];
-  if(!data.length){document.getElementById('reports-list').innerHTML='<div class="lm">Bildirim yok</div>';return;}
-  document.getElementById('reports-list').innerHTML=data.map(function(rep){
-    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #2a2a2a;">'
-      +'<img src="'+(rep.wrong_url||'')+'" style="width:50px;height:50px;border-radius:8px;object-fit:cover;background:#1a1a1a;" onerror="this.style.display='none'">'
-      +'<div style="flex:1;"><div style="font-size:13px;font-weight:600;">'+(rep.food_name||'')+'</div>'
-      +'<div style="font-size:11px;color:#666;">'+new Date(rep.created_at).toLocaleString('tr-TR')+'</div></div>'
-      +'<button onclick="dismissReport(''+rep.id+'')" class="btn" style="font-size:11px;padding:5px 8px;">Kapat</button>'
-      +'</div>';
-  }).join('');
+  var el=document.getElementById('reports-list');
+  if(!data.length){el.innerHTML='<div class="lm">Bildirim yok</div>';return;}
+  var rows=[];
+  data.forEach(function(rep){
+    var div=document.createElement('div');
+    div.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #2a2a2a;';
+    var img=document.createElement('img');
+    img.src=rep.wrong_url||'';
+    img.style.cssText='width:50px;height:50px;border-radius:8px;object-fit:cover;background:#1a1a1a;';
+    img.onerror=function(){this.style.display='none';};
+    var info=document.createElement('div');
+    info.style.flex='1';
+    info.innerHTML='<div style="font-size:13px;font-weight:600;">'+(rep.food_name||'')+'</div>'
+      +'<div style="font-size:11px;color:#666;">'+new Date(rep.created_at).toLocaleString('tr-TR')+'</div>';
+    var btn=document.createElement('button');
+    btn.className='btn';btn.textContent='Kapat';
+    btn.style.cssText='font-size:11px;padding:5px 8px;';
+    btn.onclick=function(){dismissReport(rep.id);};
+    div.appendChild(img);div.appendChild(info);div.appendChild(btn);
+    rows.push(div);
+  });
+  el.innerHTML='';
+  rows.forEach(function(row){el.appendChild(row);});
 }
 
 async function dismissReport(id){
@@ -646,18 +660,25 @@ async function changeCategory(id,newCat){
   render();
 }
 
-function showCatMenu(id,currentCat,e){
+function showCatMenu(el,e){
+  var id=el.dataset.id;
+  var currentCat=el.dataset.cat||'Genel';
   e.stopPropagation();
   var cats=['Genel','Kahvalti','Corba','Et Yemegi','Tavuk','Balik','Sebze','Salata','Tatli','Meyve','Baklagil','Tahil','Sut Urunleri','Icecek','Atistirmalik','Fast Food'];
   var old=document.getElementById('cat-menu');if(old)old.remove();
-  var menu=document.createElement('div');menu.id='cat-menu';
-  menu.style.cssText='position:fixed;top:'+e.clientY+'px;left:'+e.clientX+'px;background:#1a1a1a;border:1px solid #333;border-radius:10px;z-index:9999;padding:6px;min-width:150px;box-shadow:0 8px 24px rgba(0,0,0,0.5);';
-  menu.innerHTML=cats.map(function(c){
-    return '<div onclick="changeCategory(''+id+'',''+c+'')" style="padding:7px 12px;cursor:pointer;font-size:12px;border-radius:6px;background:'+(c===currentCat?'#7c3aed':'transparent')+';">'+(c===currentCat?'v ':'')+c+'</div>';
-  }).join('');
+  var menu=document.createElement('div');
+  menu.id='cat-menu';
+  menu.style.cssText='position:fixed;top:'+e.clientY+'px;left:'+e.clientX+'px;background:#1a1a1a;border:1px solid #333;border-radius:10px;z-index:9999;padding:6px;min-width:150px;box-shadow:0 8px 24px rgba(0,0,0,0.5);max-height:300px;overflow-y:auto;';
+  cats.forEach(function(c){
+    var item=document.createElement('div');
+    item.style.cssText='padding:7px 12px;cursor:pointer;font-size:12px;border-radius:6px;'+(c===currentCat?'background:#7c3aed;':'');
+    item.textContent=(c===currentCat?'✓ ':'')+c;
+    item.onmouseover=function(){if(c!==currentCat)this.style.background='#252525';};
+    item.onmouseout=function(){if(c!==currentCat)this.style.background='';};
+    item.onclick=function(){changeCategory(id,c);};
+    menu.appendChild(item);
+  });
   document.body.appendChild(menu);
-  setTimeout(function(){document.addEventListener('click',function(){menu.remove();},{once:true});},100);
+  setTimeout(function(){document.addEventListener('click',function h(){menu.remove();document.removeEventListener('click',h);});},100);
 }
-</script>
-</body>
-</html>
+
