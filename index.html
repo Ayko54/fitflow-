@@ -359,105 +359,37 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
 <div class="modal-overlay" id="quick-modal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div style="font-size:16px;font-weight:600;margin-bottom:14px;">Hızlı Ekle</div>
-    <div class="quick-grid">
-      <div class="quick-item" onclick="closeAndOpen('quick-modal','food-modal','breakfast')"><div style="font-size:26px;margin-bottom:5px;">🍳</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Kahvaltı</div></div>
-      <div class="quick-item" onclick="closeAndOpen('quick-modal','food-modal','lunch')"><div style="font-size:26px;margin-bottom:5px;">🍽️</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Öğle</div></div>
-      <div class="quick-item" onclick="closeAndOpen('quick-modal','food-modal','dinner')"><div style="font-size:26px;margin-bottom:5px;">🌙</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Akşam</div></div>
-      <div class="quick-item" onclick="closeAndOpen('quick-modal','food-modal','snack')"><div style="font-size:26px;margin-bottom:5px;">🍎</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Ara Öğün</div></div>
-      <div class="quick-item" onclick="closeModal('quick-modal');openModal('extra-ex-modal')"><div style="font-size:26px;margin-bottom:5px;">🏃</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Egzersiz</div></div>
-      <div class="quick-item" onclick="closeModal('quick-modal');quickAddWater()"><div style="font-size:26px;margin-bottom:5px;">💧</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Su</div></div>
-      <div class="quick-item" onclick="closeModal('quick-modal');openModal('weight-modal')"><div style="font-size:26px;margin-bottom:5px;">⚖️</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Kilo</div></div>
-      <div class="quick-item" onclick="closeModal('quick-modal');goTo('chat')"><div style="font-size:26px;margin-bottom:5px;">✨</div><div style="font-size:12px;font-weight:500;color:var(--text2);">AI Sor</div></div>
-      <div class="quick-item" onclick="closeModal('quick-modal');openMealPhoto()"><div style="font-size:26px;margin-bottom:5px;">📷</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Fotoğrafla</div></div>
-    </div>
-    <button class="btn btn-ghost" onclick="closeModal('quick-modal')">Kapat</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="mood-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Bugün nasıl hissediyorsun? 💭</div>
-    <div style="display:flex;justify-content:space-around;margin-bottom:16px;">
-      <div onclick="saveMood('great')" style="text-align:center;padding:12px;border-radius:12px;cursor:pointer;" class="mood-opt"><div style="font-size:34px;">😄</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">Harika</div></div>
-      <div onclick="saveMood('good')" style="text-align:center;padding:12px;border-radius:12px;cursor:pointer;" class="mood-opt"><div style="font-size:34px;">😊</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">İyi</div></div>
-      <div onclick="saveMood('ok')" style="text-align:center;padding:12px;border-radius:12px;cursor:pointer;" class="mood-opt"><div style="font-size:34px;">😐</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">Orta</div></div>
-      <div onclick="saveMood('bad')" style="text-align:center;padding:12px;border-radius:12px;cursor:pointer;" class="mood-opt"><div style="font-size:34px;">😔</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">Kötü</div></div>
-      <div onclick="saveMood('terrible')" style="text-align:center;padding:12px;border-radius:12px;cursor:pointer;" class="mood-opt"><div style="font-size:34px;">😞</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">Berbat</div></div>
-    </div>
-    <button class="btn btn-ghost" onclick="closeModal('mood-modal')">Kapat</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="coupon-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">🎁 Kupon Kodu</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:14px;">Kupon kodu girerek ekstra AI mesaj hakkı kazan!</p>
-    <div class="form-group"><input class="form-input" id="coupon-input" placeholder="Kupon kodunu gir..." style="text-transform:uppercase;letter-spacing:2px;"/></div>
-    <button class="btn btn-primary" id="coupon-btn" onclick="applyCoupon()">Uygula</button>
-    <button class="btn btn-ghost" onclick="closeModal('coupon-modal')" style="margin-top:8px;">İptal</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="password-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">🔑 Şifre Değiştir</div>
-    <div class="form-group"><label class="form-label">Yeni Şifre</label><input class="form-input" id="new-password" type="password" placeholder="En az 6 karakter"/></div>
-    <div class="form-group"><label class="form-label">Şifreyi Onayla</label><input class="form-input" id="confirm-password" type="password" placeholder="Şifreyi tekrar gir"/></div>
-    <button class="btn btn-primary" id="password-btn" onclick="changePassword()">Güncelle</button>
-    <button class="btn btn-ghost" onclick="closeModal('password-modal')" style="margin-top:8px;">İptal</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="edit-profile-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">📏 Profil Düzenle</div>
-    <div class="form-group"><label class="form-label">Ad</label><input class="form-input" id="edit-name" placeholder="Adın"/></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div class="form-group"><label class="form-label">Kilo (kg)</label>
-        <select class="form-input" id="edit-weight" style="height:46px;"></select></div>
-      <div class="form-group"><label class="form-label">Hedef Kilo (kg)</label>
-        <select class="form-input" id="edit-goal-weight" style="height:46px;"></select></div>
-      <div class="form-group"><label class="form-label">Boy (cm)</label>
-        <select class="form-input" id="edit-height" style="height:46px;"></select></div>
-      <div class="form-group"><label class="form-label">Yaş</label>
-        <select class="form-input" id="edit-age" style="height:46px;"></select></div>
-    </div>
-    <button class="btn btn-primary" id="edit-profile-btn" onclick="saveProfileEdit()">Kaydet</button>
-    <button class="btn btn-ghost" onclick="closeModal('edit-profile-modal')" style="margin-top:8px;">İptal</button>
-  </div>
-</div>
-
-<div id="app">
-<!-- ====== AUTH ====== -->
-<div class="screen active" id="screen-auth">
-  <div style="flex:1;overflow-y:auto;">
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px 24px;text-align:center;">
-      <div style="font-size:60px;margin-bottom:12px;">🌿</div>
-      <div style="font-family:'Playfair Display',serif;font-size:36px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;">FitFlow</div>
-      <div style="font-size:14px;color:var(--text3);margin-bottom:32px;">Hedefine giden yolda yanındayız</div>
-    </div>
-    <div style="padding:0 16px 32px;">
-      <div id="auth-login">
-        <div class="form-group"><label class="form-label">E-posta</label><input class="form-input" id="login-email" type="email" placeholder="ornek@email.com" autocomplete="email"/></div>
-        <div class="form-group"><label class="form-label">Şifre</label><input class="form-input" id="login-password" type="password" placeholder="Şifren" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-        <button class="btn btn-primary" id="login-btn" onclick="doLogin()" style="margin-bottom:10px;">Giriş Yap</button>
-        <button class="btn btn-ghost" onclick="showAuthForm('register')">Hesabın yok mu? Kayıt ol →</button>
+    <div class="modal-title">Hızlı Ekle</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div onclick="closeModal('quick-modal');openFoodModal('breakfast')" style="background:var(--card);border:1.5px solid var(--border);border-radius:18px;padding:18px;cursor:pointer;text-align:center;">
+        <div style="font-size:30px;margin-bottom:8px;">🌅</div>
+        <div style="font-size:14px;font-weight:700;">Kahvaltı</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;">Yemek ekle</div>
       </div>
-      <div id="auth-register" style="display:none;">
-        <div class="form-group"><label class="form-label">Adın</label><input class="form-input" id="reg-name" placeholder="Adın" autocomplete="name"/></div>
-        <div class="form-group"><label class="form-label">E-posta</label><input class="form-input" id="reg-email" type="email" placeholder="ornek@email.com" autocomplete="email"/></div>
-        <div class="form-group"><label class="form-label">Şifre (en az 6 karakter)</label><input class="form-input" id="reg-password" type="password" placeholder="Şifren" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()"/></div>
-        <button class="btn btn-primary" id="register-btn" onclick="doRegister()" style="margin-bottom:10px;">Hesap Oluştur</button>
-        <button class="btn btn-ghost" onclick="showAuthForm('login')">← Giriş sayfasına dön</button>
+      <div onclick="closeModal('quick-modal');openFoodModal('lunch')" style="background:var(--card);border:1.5px solid var(--border);border-radius:18px;padding:18px;cursor:pointer;text-align:center;">
+        <div style="font-size:30px;margin-bottom:8px;">☀️</div>
+        <div style="font-size:14px;font-weight:700;">Öğle</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;">Yemek ekle</div>
+      </div>
+      <div onclick="closeModal('quick-modal');openFoodModal('dinner')" style="background:var(--card);border:1.5px solid var(--border);border-radius:18px;padding:18px;cursor:pointer;text-align:center;">
+        <div style="font-size:30px;margin-bottom:8px;">🌙</div>
+        <div style="font-size:14px;font-weight:700;">Akşam</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;">Yemek ekle</div>
+      </div>
+      <div onclick="closeModal('quick-modal');openFoodModal('snack')" style="background:var(--card);border:1.5px solid var(--border);border-radius:18px;padding:18px;cursor:pointer;text-align:center;">
+        <div style="font-size:30px;margin-bottom:8px;">🍎</div>
+        <div style="font-size:14px;font-weight:700;">Ara Öğün</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;">Yemek ekle</div>
       </div>
     </div>
+    <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;margin-bottom:10px;">
+      <button onclick="closeModal('quick-modal');goTo('exercise')" style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;cursor:pointer;font-family:inherit;color:var(--text2);"><span style="font-size:20px;">🏃</span><span style="font-size:11px;font-weight:600;">Egzersiz</span></button>
+      <button onclick="closeModal('quick-modal');goTo('exercise');setTimeout(function(){setExTab('water');},300)" style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;cursor:pointer;font-family:inherit;color:var(--text2);"><span style="font-size:20px;">💧</span><span style="font-size:11px;font-weight:600;">Su</span></button>
+      <button onclick="closeModal('quick-modal');openWeightModal()" style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;cursor:pointer;font-family:inherit;color:var(--text2);"><span style="font-size:20px;">⚖️</span><span style="font-size:11px;font-weight:600;">Kilo</span></button>
+      <button onclick="closeModal('quick-modal');goTo('chat')" style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;cursor:pointer;font-family:inherit;color:var(--text2);"><span style="font-size:20px;">✨</span><span style="font-size:11px;font-weight:600;">AI Sor</span></button>
+    </div>
+    <button class="btn btn-ghost" onclick="closeModal('quick-modal')" style="color:var(--text3);">Kapat</button>
   </div>
-</div>
 
 <!-- ====== ONBOARDING ====== -->
 <div class="screen" id="screen-onboard">
@@ -509,9 +441,9 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
   <div id="ob-s2" class="ob-step hidden" style="flex:1;overflow-y:auto;padding:16px;">
     <div style="text-align:center;margin-bottom:20px;"><div style="font-size:40px;margin-bottom:8px;">📏</div><div style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:4px;">Vücut Bilgilerin</div><div style="font-size:13px;color:var(--text3);">Program buna göre hesaplanır</div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div class="form-group"><label class="form-label">Boy (cm)</label><input class="form-input" id="ob-height" type="number" min="100" max="250" placeholder="165"/></div>
-      <div class="form-group"><label class="form-label">Kilo (kg)</label><input class="form-input" id="ob-weight" type="number" min="30" max="300" step="0.1" placeholder="70"/></div>
-      <div class="form-group"><label class="form-label">Yaş</label><input class="form-input" id="ob-age" type="number" min="10" max="100" placeholder="25"/></div>
+      <div class="form-group"><label class="form-label">Boy (cm)</label><div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;color:var(--text3);">140</span><b style="color:var(--accent2);" id="ob-hd">170 cm</b><span style="font-size:11px;color:var(--text3);">220 cm</span></div><input type="range" id="ob-height" min="140" max="220" value="170" style="width:100%;height:6px;border-radius:99px;accent-color:var(--accent2);cursor:pointer;" oninput="obD.height_cm=parseInt(this.value);document.getElementById('ob-hd').textContent=this.value+' cm'"></div></div>
+      <div class="form-group"><label class="form-label">Kilo (kg)</label><div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;color:var(--text3);">40</span><b style="color:var(--accent2);" id="ob-wd">70 kg</b><span style="font-size:11px;color:var(--text3);">200 kg</span></div><input type="range" id="ob-weight" min="40" max="200" value="70" style="width:100%;height:6px;border-radius:99px;accent-color:var(--accent2);cursor:pointer;" oninput="obD.current_weight=parseInt(this.value);document.getElementById('ob-wd').textContent=this.value+' kg'"></div></div>
+      <div class="form-group"><label class="form-label">Yaş</label><div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;color:var(--text3);">13</span><b style="color:var(--accent2);" id="ob-ad">25 yaş</b><span style="font-size:11px;color:var(--text3);">80</span></div><input type="range" id="ob-age" min="13" max="80" value="25" style="width:100%;height:6px;border-radius:99px;accent-color:var(--accent2);cursor:pointer;" oninput="obD.age=parseInt(this.value);document.getElementById('ob-ad').textContent=this.value+' yaş'"></div></div>
     </div>
   </div>
   <div id="ob-s2-footer" style="display:none;padding:12px 16px;border-top:1px solid var(--border);display:none;">
@@ -527,7 +459,7 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
       <div class="opt-pill-wide" onclick="selOne('goal-opts',this)" data-val="performance"><span style="font-size:26px;">🏃</span><div><strong>Performans Artır</strong><small>Atletik kapasite</small></div></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
-      <div class="form-group"><label class="form-label">Hedef Kilo (kg)</label><input class="form-input" id="ob-goal-weight" type="number" step="0.1" placeholder="62"/></div>
+      <div class="form-group"><label class="form-label">Hedef Kilo (kg)</label><div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;color:var(--text3);">40</span><b style="color:#22c55e;" id="ob-gwd">65 kg</b><span style="font-size:11px;color:var(--text3);">150</span></div><input type="range" id="ob-goal-weight" min="40" max="150" value="65" style="width:100%;height:6px;border-radius:99px;accent-color:#22c55e;cursor:pointer;" oninput="obD.goal_weight=parseInt(this.value);document.getElementById('ob-gwd').textContent=this.value+' kg'"></div></div>
       <div class="form-group"><label class="form-label">Süre (hafta)</label><input class="form-input" id="ob-goal-weeks" type="number" min="1" max="104" placeholder="12"/></div>
     </div>
   </div>
@@ -1723,12 +1655,15 @@ async function loadFood(){
   initDailyRecipe();
   const pct=Math.min(100,goal>0?Math.round(totKcal/goal*100):0);
   document.getElementById('f-eaten').textContent=totKcal;
-  document.getElementById('f-prog').style.width=pct+'%';
-  const tot=(totP+totC+totF)||1;
-  document.getElementById('f-macro-bar').innerHTML=`
-    <div class="macro-seg" style="width:${Math.round(totP/tot*100)}%;background:var(--accent);border-radius:99px 0 0 99px;"></div>
-    <div class="macro-seg" style="width:${Math.round(totC/tot*100)}%;background:var(--accent3);"></div>
-    <div class="macro-seg" style="width:${Math.round(totF/tot*100)}%;background:rgba(255,255,255,0.15);border-radius:0 99px 99px 0;"></div>`;
+  const fp=Math.min(100,Math.round(totKcal/goal*100));
+  document.getElementById('f-prog').style.width=fp+'%';
+  var flEl=document.getElementById('f-left');if(flEl)flEl.textContent=Math.max(0,goal-totKcal);
+  var pvEl=document.getElementById('f-prot-val');if(pvEl)pvEl.textContent=Math.round(totP)+'g';
+  var cvEl=document.getElementById('f-carb-val');if(cvEl)cvEl.textContent=Math.round(totC)+'g';
+  var fvEl=document.getElementById('f-fat-val');if(fvEl)fvEl.textContent=Math.round(totF)+'g';
+  var dpEl=document.getElementById('d-prot');if(dpEl)dpEl.textContent='P:'+Math.round(totP)+'g';
+  var dcEl=document.getElementById('d-carb');if(dcEl)dcEl.textContent='K:'+Math.round(totC)+'g';
+  var dfEl=document.getElementById('d-fat');if(dfEl)dfEl.textContent='Y:'+Math.round(totF)+'g';
   // Auto-generate weekly plan
   generateWeeklyPlan();
 }
@@ -1990,7 +1925,7 @@ async function prefetchWeeklyPlan(){
   try{
     var kcal=UP.daily_calorie_goal||1800;
     var r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:800,
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,
         system:'Return only JSON array.',
         messages:[{role:'user',content:buildPlanPrompt(kcal)}]})});
     if(!r.ok)return;
@@ -2010,17 +1945,15 @@ async function prefetchWeeklyPlan(){
 
 function buildPlanPrompt(kcal){
   var mc=UP&&UP.meal_count||4;
-  var days=['Pazartesi','Sali','Carsamba','Persembe','Cuma','Cumartesi','Pazar'];
-  var obj_template='{"gun":"GUN"';
-  if(mc>=1)obj_template+=',"kahvalti":"yemek adi (miktar, ~Xkcal)"';
-  if(mc>=2)obj_template+=',"ogle":"yemek adi (miktar, ~Xkcal)"';
-  if(mc>=3)obj_template+=',"aksam":"yemek adi (miktar, ~Xkcal)"';
-  if(mc>=4)obj_template+=',"ara":"atistirma (miktar, ~Xkcal)"';
-  obj_template+='}';
-  var arr=days.map(function(g){return obj_template.replace('GUN',g);}).join(',');
-  return kcal+' kalori, 7 gunluk Turkce yemek plani. Her yemek icin porsiyon miktarini yaz (ornek: "Mercimek corbasi 1 kase, 300kcal", "Tavuk izgara 150g, ekmek 2 dilim, 450kcal"). SADECE JSON array: ['+arr+'] Her gun farkli yemek yaz.';
-}
-async function generateWeeklyPlan(force=false){
+  var meals=[];
+  if(mc>=1)meals.push('"kahvalti":"yemek porsiyon(~kcal)"');
+  if(mc>=2)meals.push('"ogle":"yemek porsiyon(~kcal)"');
+  if(mc>=3)meals.push('"aksam":"yemek porsiyon(~kcal)"');
+  if(mc>=4)meals.push('"ara":"atistirma(~kcal)"');
+  var t='{"gun":"X",'+meals.join(',')+'}';
+  var days=['Pzt','Sal','Car','Per','Cum','Cmt','Paz'];
+  return 'Daily '+kcal+' kcal Turkish meal plan 7 days. Include portion sizes. ONLY JSON array: ['+days.map(function(g){return t.replace('X',g);}).join(',')+']. Different meals each day.';
+}async function generateWeeklyPlan(force=false){
   const res=document.getElementById('weekly-plan-result');
   if(!res)return;
   const cacheKey='weeklyPlan_'+today();
@@ -2037,7 +1970,7 @@ async function generateWeeklyPlan(force=false){
       body:JSON.stringify({
         model:'claude-haiku-4-5-20251001',
         max_tokens:1200,
-        system:'Sen Türk diyetisyenisin. SADECE gecerli JSON don, baska hicbir sey yazma.',
+        system:'Return ONLY a valid JSON array, no other text.',
         messages:[{role:'user',content:buildPlanPrompt(kcal)}]
       })
     });
@@ -2326,10 +2259,25 @@ async function selSwMeal(btn){
     document.getElementById('sw-macros').innerHTML='';
   }
   // Gösterilen yemekleri sıfırla (bugünkü bu öğün için)
-  // Sadece bu öğün için gösterilenleri al (action=skip olanlar da dahil)
   const{data:shown}=await sb.from('swipe_history').select('item_id')
     .eq('user_id',CU.id).eq('log_date',today()).eq('item_type','food').eq('meal_type',swMeal);
   const shownIds=(shown||[]).map(s=>s.item_id);
+  const MEAL_LIMIT=10;
+  if(shownIds.length>=MEAL_LIMIT){
+    const dEl=document.getElementById('sw-done');
+    if(dEl){
+      dEl.style.display='flex';
+      var hh=document.createElement('div');hh.style.cssText='text-align:center;padding:40px 20px;';
+      var t1=document.createElement('div');t1.style.fontSize='48px';t1.textContent='⏰';
+      var t2=document.createElement('div');t2.style.cssText='font-size:16px;font-weight:700;margin:12px 0;';t2.textContent='Bu öğün için hakkın bitti!';
+      var t3=document.createElement('div');t3.style.cssText='font-size:12px;color:var(--text3);';t3.textContent='Gece 00:00da yenilenir';
+      hh.appendChild(t1);hh.appendChild(t2);hh.appendChild(t3);
+      var gbb=document.createElement('button');gbb.className='btn btn-primary';gbb.style.marginTop='20px';gbb.textContent='Geri Dön';gbb.onclick=goBack;
+      hh.appendChild(gbb);dEl.innerHTML='';dEl.appendChild(hh);
+    }
+    return;
+  }
+  document.getElementById('sw-count').textContent=(MEAL_LIMIT-shownIds.length)+' hak';
   const mealFoods = {
     breakfast:[
       'menemen','yumurta','omlet','sahanda','çılbır','simit','poğaça','açma','ekmek',
@@ -2891,9 +2839,9 @@ function showProjectionScreen(){
               <stop offset="100%" stop-color="#22c55e"/>
             </linearGradient>
           </defs>
-          <path d="M 20 20 Q 100 ${isLoss?40:30} 160 ${isLoss?70:50} Q 220 ${isLoss?90:65} 260 100" 
+          <path d="M 20 20 Q 100 ${isLoss?40:70} 160 ${isLoss?70:50} Q 220 ${isLoss?90:30} 260 ${isLoss?100:10}" 
             fill="url(#proj-fill)" stroke="none"/>
-          <path d="M 20 20 Q 100 ${isLoss?40:30} 160 ${isLoss?70:50} Q 220 ${isLoss?90:65} 260 100" 
+          <path d="M 20 20 Q 100 ${isLoss?40:70} 160 ${isLoss?70:50} Q 220 ${isLoss?90:30} 260 ${isLoss?100:10}" 
             fill="none" stroke="url(#proj-line)" stroke-width="3" stroke-linecap="round"/>
           <circle cx="20" cy="20" r="5" fill="#f97316"/>
           <circle cx="260" cy="100" r="7" fill="#22c55e"/>
@@ -3702,13 +3650,20 @@ async function showSwipeRecipe(){
 
 // ── GÜNÜN TARİFİ ────────────────────────────────────────────────
 var DAILY_RECIPES=[
-  {emoji:'🥗',name:'Çoban Salatası',info:'280 kcal · 10 dk · Kolay',recipe:'Domates, salatalık, soğan, biber doğra. Zeytinyağı, limon, tuz ekle. Beyaz peynirle servis et.'},
-  {emoji:'🍲',name:'Mercimek Çorbası',info:'310 kcal · 30 dk · Kolay',recipe:'Kırmızı mercimeği soğan ile kavur. Su ekle, 20 dk pişir. Blenderdan geçir, nane ile servis et.'},
-  {emoji:'🍗',name:'Tavuk Sote',info:'380 kcal · 25 dk · Orta',recipe:'Tavuk etini küp doğra. Zeytinyağında biber ve soğanla kavur. Baharat ekle, 15 dk pişir.'},
-  {emoji:'🥚',name:'Menemen',info:'290 kcal · 15 dk · Kolay',recipe:'Soğan ve biberi kavur, domates ekle. Yumurtaları kır, karıştırarak pişir. Nane ile servis et.'},
-  {emoji:'🫘',name:'Kuru Fasulye',info:'420 kcal · 60 dk · Kolay',recipe:'Önceden ıslatılmış fasulyeyi soğan ve domatesle kavur. Su ekle, yumuşayana kadar pişir.'},
-  {emoji:'🐟',name:'Fırın Somon',info:'350 kcal · 20 dk · Kolay',recipe:'Somonu limon, zeytinyağı ve kekikle marine et. 200°C fırında 15-18 dk pişir.'},
-  {emoji:'🥩',name:'Izgara Köfte',info:'410 kcal · 20 dk · Orta',recipe:'Kıyma, soğan, ekmek içi ve baharatları yoğur. Köfte yap, ızgarada 8 dk pişir.'},
+  {emoji:'🥗',name:'Coban Salatasi',info:'280 kcal - 10 dk - Kolay',
+   recipe:'Malzemeler: 2 domates, 1 salatalik, 1 sogan, 100g beyaz peynir, 3 kasik zeytinyagi, 1 limon, tuz.\n\nHazirlanis:\n1. Tum sebzeleri kucuk kup seklinde dograyın.\n2. Genis bir kaseye alin.\n3. Zeytinyagi, limon ve tuzu karistirin.\n4. Sos uzerine gezdirin, peynir serpin.\n5. 10 dakika buzdolabinda bekletin.\n\nIpucu: Taze nane veya maydanoz ekleyebilirsiniz.'},
+  {emoji:'🍲',name:'Mercimek Corbasi',info:'310 kcal - 35 dk - Kolay',
+   recipe:'Malzemeler: 1 su bardagi kirmizi mercimek, 1 sogan, 2 dis sarimsak, 1 havuc, 2 kasik zeytinyagi, kimyon, tuz, limon.\n\nHazirlanis:\n1. Zeytinyaginda sogan ve sarımsaklari kavurun (5 dk).\n2. Rendelenmis havucu ekleyin, 3 dk kavurun.\n3. Mercimegi ve 5 bardak suyu ekleyin.\n4. Kaynadiktan sonra 20-25 dk pisirin.\n5. Blender ile purer haline getirin.\n6. Kimyon, tuz ekleyin, limonla servis edin.'},
+  {emoji:'🍗',name:'Tavuk Sote',info:'380 kcal - 30 dk - Orta',
+   recipe:'Malzemeler: 400g tavuk gogsu, 1 kirmizi biber, 1 yesil biber, 2 sogan, 3 dis sarimsak, 3 kasik zeytinyagi, tuz, karabiber, kirmizi biber.\n\nHazirlanis:\n1. Tavuklari 2x2 cm kupler halinde kesin.\n2. Zeytinyaginda soganlari kavurun.\n3. Tavuklari ekleyip her tarafi muhurlyin (5-6 dk).\n4. Biberleri ekleyin, 8-10 dk kavurun.\n5. Baharatlari serpin, 5 dk daha pisirin.\n\nOnerisi: Bulgur pilavi ve cacikla servis edin.'},
+  {emoji:'🥚',name:'Menemen',info:'290 kcal - 20 dk - Kolay',
+   recipe:'Malzemeler: 4 yumurta, 2 domates, 2 yesil biber, 1 sogan, 2 kasik zeytinyagi, tuz, karabiber, taze nane.\n\nHazirlanis:\n1. Sogani ince dograyın, zeytinyaginda kavurun.\n2. Biberleri halkalar halinde kesin, birlikte kavurun.\n3. Rendelenmis domatesleri ekleyin, 7-8 dk pisirin.\n4. Yumurtalari kirin, karistırarak pisirin.\n5. Tuz ve karabiber ekleyin.\n6. Taze nane ile servis edin.'},
+  {emoji:'🫘',name:'Kuru Fasulye',info:'420 kcal - 90 dk - Kolay',
+   recipe:'Malzemeler: 2 bardak kuru fasulye (once islatilmis), 2 sogan, 3 dis sarimsak, 2 domates, 2 kasik salca, 3 kasik zeytinyagi, tuz, karabiber.\n\nHazirlanis:\n1. Zeytinyaginda soganlari kavurun.\n2. Sarımsak ve salcayi ekleyin, 2 dk kavurun.\n3. Kup dogranmis domatesleri ekleyin.\n4. Fasulyeleri ve uzerini gececek kadar su ekleyin.\n5. Kaynadiktan sonra kopugunu alin.\n6. Kucuk ateste 60-70 dk pisirin.'},
+  {emoji:'🐟',name:'Firin Levrek',info:'350 kcal - 30 dk - Kolay',
+   recipe:'Malzemeler: 2 adet levrek (~300g), 1 limon, 4 dis sarimsak, 4 kasik zeytinyagi, dereotu, tuz, karabiber, kekik.\n\nHazirlanis:\n1. Firini 200°C ye isitin.\n2. Baliklari yikayip kurulayın.\n3. Her iki yanina capraz kesikler atin.\n4. Zeytinyagi, sarimsak, limon suyu, tuz ve kekigi karistirin.\n5. Baliklari bu marinatla kaplayin.\n6. Karin bosluklarina dereotu ve limon dilimleri koyun.\n7. 200°C de 20-25 dk pisirin.'},
+  {emoji:'🥩',name:'Izgara Kofte',info:'410 kcal - 25 dk - Orta',
+   recipe:'Malzemeler: 500g kiyma (dana-koyun karisik), 1 sogan (rendelenmis), 2 dilim bayat ekmek ici (islatilmis), 2 dis sarimsak, 1 yumurta, tuz, karabiber, kimyon.\n\nHazirlanis:\n1. Tum malzemeleri en az 10 dk yogurun.\n2. Streç filmle sarip 30 dk buzdolabinda bekletin.\n3. Avuc ici buyuklugunde kofteler sekillendirin.\n4. Izgara veya tavayı yuksek ateste isitin.\n5. Her tarafini 3-4 dk olmak uzere toplam 8 dk pisirin.\n6. Cacik, kizarmis biber ve lavashla servis edin.'},
 ];
 function showDailyRecipe(){
   var day=new Date().getDay();
@@ -3721,7 +3676,7 @@ function showDailyRecipe(){
     +'<div style="font-size:17px;font-weight:800;">'+r.emoji+' '+r.name+'</div>'
     +'<button onclick="closeFixed(this)" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;">x</button></div>'
     +'<div style="display:inline-flex;align-items:center;background:var(--card-accent);border-radius:99px;padding:4px 12px;font-size:12px;color:var(--accent2);margin-bottom:14px;">'+r.info+'</div>'
-    +'<div style="font-size:14px;line-height:1.8;color:var(--text2);">'+r.recipe+'</div>';
+    +'<div style="font-size:14px;line-height:1.8;color:var(--text2);">'+r.recipe.split('\\n').join('<br>')+'</div>';
   modal.appendChild(box);
   modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
   document.body.appendChild(modal);
