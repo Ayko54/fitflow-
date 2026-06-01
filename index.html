@@ -1305,11 +1305,14 @@ function selectGender(g,el){
 }
 
 function obGo(step){
-  for(let i=1;i<=6;i++){
-    const s=document.getElementById('ob-s'+i);
-    const f=document.getElementById('ob-s'+i+'-footer');
-    if(s){s.classList.toggle('hidden',i!==step);s.style.display=i===step?'block':'';}
-    if(f){f.style.display=i===step?'block':'none';}
+  for(var i=1;i<=6;i++){
+    var s=document.getElementById('ob-s'+i);
+    var f=document.getElementById('ob-s'+i+'-footer');
+    if(s){
+      s.classList.toggle('hidden',i!==step);
+      s.style.display=i===step?'flex':'none';
+    }
+    if(f){f.style.display=i===step?'flex':'none';}
   }
   // step 1 footer is always shown differently
   const f1=document.getElementById('ob-s1-footer');
