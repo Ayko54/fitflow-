@@ -411,14 +411,14 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
     </div>
   </div>
   <!-- Step 1 -->
-  <div id="ob-s1" class="ob-step" style="flex:1;display:flex;flex-direction:column;padding:20px 16px;">
+  <div id="ob-s1" class="ob-step" style="flex:1;display:flex;flex-direction:column;padding:16px;">
     <div style="margin-bottom:16px;">
       <div style="font-size:26px;font-weight:800;margin-bottom:4px;">Cinsiyetin nedir?</div>
       <div style="font-size:13px;color:var(--text3);">Planını kişiselleştirmek için kullanacağız</div>
     </div>
     <!-- Kadın kartı -->
-    <div id="g-female" onclick="selectGender('female',this)" style="height:220px;border-radius:20px;overflow:hidden;position:relative;cursor:pointer;border:3px solid transparent;margin-bottom:10px;transition:border-color .2s;">
-      <img src="/kadin.png" style="width:100%;height:220px;object-fit:cover;object-position:center 10%;display:block;" onerror="this.style.display='none';document.getElementById('g-female-fb').style.display='flex'">
+    <div id="g-female" onclick="selectGender('female',this)" style="flex:1;min-height:180px;border-radius:20px;overflow:hidden;position:relative;cursor:pointer;border:3px solid transparent;margin-bottom:10px;transition:border-color .2s;">
+      <img src="/kadin.png" style="width:100%;height:100%;object-fit:cover;object-position:center 20%;display:block;position:absolute;inset:0;" onerror="this.style.display='none';document.getElementById('g-female-fb').style.display='flex'">
       <div id="g-female-fb" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:linear-gradient(135deg,#2d1b4e,#1a0d2e);font-size:80px;">👩</div>
       <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0.1) 60%);pointer-events:none;"></div>
       <div style="position:absolute;bottom:16px;left:18px;right:18px;display:flex;align-items:center;justify-content:space-between;pointer-events:none;">
@@ -427,8 +427,8 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
       </div>
     </div>
     <!-- Erkek kartı -->
-    <div id="g-male" onclick="selectGender('male',this)" style="height:220px;border-radius:20px;overflow:hidden;position:relative;cursor:pointer;border:3px solid transparent;margin-bottom:10px;transition:border-color .2s;">
-      <img src="/erkek.png" style="width:100%;height:220px;object-fit:cover;object-position:center 10%;display:block;" onerror="this.style.display='none';document.getElementById('g-male-fb').style.display='flex'">
+    <div id="g-male" onclick="selectGender('male',this)" style="flex:1;min-height:180px;border-radius:20px;overflow:hidden;position:relative;cursor:pointer;border:3px solid transparent;margin-bottom:10px;transition:border-color .2s;">
+      <img src="/erkek.png" style="width:100%;height:100%;object-fit:cover;object-position:center 20%;display:block;position:absolute;inset:0;" onerror="this.style.display='none';document.getElementById('g-male-fb').style.display='flex'">
       <div id="g-male-fb" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a2d4e,#0d1a2e);font-size:80px;">👨</div>
       <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0.1) 60%);pointer-events:none;"></div>
       <div style="position:absolute;bottom:16px;left:18px;right:18px;display:flex;align-items:center;justify-content:space-between;pointer-events:none;">
