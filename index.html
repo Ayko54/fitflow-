@@ -1361,7 +1361,17 @@ async function completeOnboarding(){
   obD.daily_calorie_goal=calcGoal(obD);
   setBtn('ob-next-btn',true,'Hazırlanıyor...');
   try{
-    const{error}=await sb.from('profiles').update(obD).eq('id',CU.id);
+    // Sadece bilinen alanları güncelle
+    const profileData={
+      gender:obD.gender,height_cm:obD.height_cm,current_weight:obD.current_weight,
+      age:obD.age,goal_type:obD.goal_type,goal_weight:obD.goal_weight,
+      goal_weeks:obD.goal_weeks,activity_level:obD.activity_level,
+      diet_type:obD.diet_type,allergies:obD.allergies,
+      sport_preferences:obD.sport_preferences,fitness_level:obD.fitness_level,
+      onboarding_completed:true,daily_calorie_goal:obD.daily_calorie_goal,
+      name:obD.name||CU.email.split('@')[0]
+    };
+    const{error}=await sb.from('profiles').update(profileData).eq('id',CU.id);
     if(error){err('Profil kaydedilemedi. Tekrar dene.');return;}
     try{await sb.from('weight_logs').insert({user_id:CU.id,weight:obD.current_weight,notes:'Başlangıç kilosu',log_date:today()});}catch(_){}
     const{data}=await sb.from('profiles').select('*').eq('id',CU.id).limit(1);
@@ -1370,7 +1380,7 @@ async function completeOnboarding(){
     // Koç ekranını göster, sonra projeksiyon, sonra dashboard
     showCoachScreen();
   }catch(e){err('Bağlantı hatası. Tekrar dene.');}
-  finally{setBtn('ob-next-btn',false,'Programımı Oluştur ✨');unlockBtn('ob-finish-btn');}
+  finally{setBtn('ob-next-btn',false,'Planımı Al 🚀');unlockBtn('ob-next-btn');}
 }
 
 // ============ DASHBOARD ============
