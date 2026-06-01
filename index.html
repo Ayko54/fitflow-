@@ -476,9 +476,9 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
     </div>
     <!-- Erkek kart -->
     <div onclick="selectGender('male',this)" id="g-male" style="border-radius:20px;overflow:hidden;border:2px solid var(--border);cursor:pointer;margin-bottom:12px;position:relative;transition:border-color .2s;">
-      <img src="https://picsum.photos/seed/male-fitness/400/300" 
-        alt="Erkek" style="width:100%;height:160px;object-fit:cover;object-position:top;display:block;"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <img src="/erkek.png" 
+        alt="Erkek" style="width:100%;height:220px;object-fit:cover;object-position:top center;display:block;"
+        onerror="this.src='https://picsum.photos/seed/male-sport/400/300';this.onerror=null;">
       <div style="display:none;width:100%;height:160px;align-items:center;justify-content:center;background:var(--bg3);font-size:60px;">🧑</div>
       <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(8,6,14,0.85),transparent 50%);"></div>
       <div style="position:absolute;bottom:14px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;">
@@ -488,9 +488,9 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
     </div>
     <!-- Kadın kart -->
     <div onclick="selectGender('female',this)" id="g-female" style="border-radius:20px;overflow:hidden;border:2px solid var(--border);cursor:pointer;position:relative;transition:border-color .2s;">
-      <img src="https://picsum.photos/seed/female-fitness/400/300"
-        alt="Kadın" style="width:100%;height:160px;object-fit:cover;object-position:top;display:block;"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <img src="/kadin.png"
+        alt="Kadın" style="width:100%;height:220px;object-fit:cover;object-position:top center;display:block;"
+        onerror="this.src='https://picsum.photos/seed/female-sport/400/300';this.onerror=null;">
       <div style="display:none;width:100%;height:160px;align-items:center;justify-content:center;background:var(--bg3);font-size:60px;">👩</div>
       <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(8,6,14,0.85),transparent 50%);"></div>
       <div style="position:absolute;bottom:14px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;">
