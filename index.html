@@ -411,76 +411,816 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
     </div>
   </div>
   <!-- Step 1 -->
-  <div id="ob-s1" class="ob-step" style="flex:1;overflow-y:auto;padding:16px;">
-    <div style="text-align:center;margin-bottom:20px;"><div style="font-size:48px;margin-bottom:10px;">👤</div><div style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:6px;">Merhaba! Seni tanıyalım</div><div style="font-size:13px;color:var(--text3);">Bu bilgileri sadece bir kez soruyoruz</div></div>
-    <div class="opt-pill-wide" onclick="selectGender('female',this)" id="g-female"><span style="font-size:28px;">👩</span><div><strong>Kadın</strong><small>Pembe & rose tema</small></div></div>
-    <div class="opt-pill-wide" onclick="selectGender('male',this)" id="g-male"><span style="font-size:28px;">👨</span><div><strong>Erkek</strong><small>Koyu mavi & turuncu tema</small></div></div>
+  <div id="ob-s1" class="ob-step" style="flex:1;overflow-y:auto;padding:20px 16px;">
+    <div style="margin-bottom:20px;">
+      <div style="font-size:26px;font-weight:800;margin-bottom:6px;">Cinsiyetin nedir?</div>
+      <div style="font-size:13px;color:var(--text3);">Planını kişiselleştirmek için kullanacağız</div>
+    </div>
+    <!-- Erkek -->
+    <div onclick="selectGender('male',this)" id="g-male" style="border-radius:20px;overflow:hidden;border:2px solid var(--border);cursor:pointer;margin-bottom:12px;position:relative;transition:border-color .2s;">
+      <img src="/erkek.png" alt="Erkek" style="width:100%;height:200px;object-fit:cover;object-position:top center;display:block;" onerror="this.style.display='none'">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 50%);"></div>
+      <div style="position:absolute;bottom:14px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:20px;font-weight:800;">Erkek</div>
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);display:none;align-items:center;justify-content:center;font-size:13px;color:#fff;" class="ob-check-male">✓</div>
+      </div>
+    </div>
+    <!-- Kadın -->
+    <div onclick="selectGender('female',this)" id="g-female" style="border-radius:20px;overflow:hidden;border:2px solid var(--border);cursor:pointer;position:relative;transition:border-color .2s;margin-bottom:12px;">
+      <img src="/kadin.png" alt="Kadın" style="width:100%;height:200px;object-fit:cover;object-position:top center;display:block;" onerror="this.style.display='none'">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 50%);"></div>
+      <div style="position:absolute;bottom:14px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:20px;font-weight:800;">Kadın</div>
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--accent3);display:none;align-items:center;justify-content:center;font-size:13px;color:#fff;" class="ob-check-female">✓</div>
+      </div>
+    </div>
+    <div style="text-align:center;">
+      <button onclick="selectGender('other',null)" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;">Diğerleri / Söylememeyi tercih ederim ›</button>
+    </div>
   </div>
   <div id="ob-s1-footer" style="padding:12px 16px;border-top:1px solid var(--border);">
     <button class="btn btn-primary" onclick="obNext(1)">Devam Et →</button>
   </div>
   <!-- Step 2 -->
-  <div id="ob-s2" class="ob-step hidden" style="flex:1;overflow-y:auto;padding:16px;">
-    <div style="text-align:center;margin-bottom:20px;"><div style="font-size:40px;margin-bottom:8px;">📏</div><div style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:4px;">Vücut Bilgilerin</div><div style="font-size:13px;color:var(--text3);">Program buna göre hesaplanır</div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div class="form-group"><label class="form-label">Boy (cm)</label><div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;color:var(--text3);">140cm</span><b style="color:var(--accent2);" id="ob-hd">170 cm</b><span style="font-size:11px;color:var(--text3);">220cm</span></div><input type="range" id="ob-height" min="140" max="220" value="170" style="width:100%;height:6px;border-radius:99px;accent-color:var(--accent2);cursor:pointer;" oninput="obD.height_cm=parseInt(this.value);document.getElementById('ob-hd').textContent=this.value+' cm'"></div></div>
-      <div class="form-group"><label class="form-label">Kilo (kg)</label><div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;color:var(--text3);">40kg</span><b style="color:var(--accent2);" id="ob-wd">70 kg</b><span style="font-size:11px;color:var(--text3);">200kg</span></div><input type="range" id="ob-weight" min="40" max="200" value="70" style="width:100%;height:6px;border-radius:99px;accent-color:var(--accent2);cursor:pointer;" oninput="obD.current_weight=parseInt(this.value);document.getElementById('ob-wd').textContent=this.value+' kg'"></div></div>
-      <div class="form-group"><label class="form-label">Yaş</label><div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;color:var(--text3);">13</span><b style="color:var(--accent2);" id="ob-ad">25 yaş</b><span style="font-size:11px;color:var(--text3);">80</span></div><input type="range" id="ob-age" min="13" max="80" value="25" style="width:100%;height:6px;border-radius:99px;accent-color:var(--accent2);cursor:pointer;" oninput="obD.age=parseInt(this.value);document.getElementById('ob-ad').textContent=this.value+' yaş'"></div></div>
+  <div id="ob-s2" class="ob-step hidden" style="flex:1;padding:24px 20px;display:flex;flex-direction:column;justify-content:center;">
+    <div style="margin-bottom:32px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:10px;">📏</div>
+      <div style="font-size:24px;font-weight:800;margin-bottom:6px;">Vücut Bilgilerin</div>
+      <div style="font-size:13px;color:var(--text3);">Program buna göre hesaplanır</div>
+    </div>
+    <!-- Boy -->
+    <div style="margin-bottom:28px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:600;color:var(--text2);">Boy (cm)</span>
+        <span style="font-size:24px;font-weight:800;color:var(--accent2);" id="ob-hd">170 cm</span>
+      </div>
+      <input type="range" id="ob-height" min="140" max="220" value="170"
+        style="width:100%;height:8px;border-radius:99px;accent-color:var(--accent2);cursor:pointer;"
+        oninput="obD.height_cm=parseInt(this.value);document.getElementById('ob-hd').textContent=this.value+' cm'">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px;"><span>140 cm</span><span>220 cm</span></div>
+    </div>
+    <!-- Kilo -->
+    <div style="margin-bottom:28px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:600;color:var(--text2);">Kilo (kg)</span>
+        <span style="font-size:24px;font-weight:800;color:var(--accent2);" id="ob-wd">70 kg</span>
+      </div>
+      <input type="range" id="ob-weight" min="40" max="200" value="70"
+        style="width:100%;height:8px;border-radius:99px;accent-color:var(--accent2);cursor:pointer;"
+        oninput="obD.current_weight=parseInt(this.value);document.getElementById('ob-wd').textContent=this.value+' kg'">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px;"><span>40 kg</span><span>200 kg</span></div>
+    </div>
+    <!-- Yaş -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:600;color:var(--text2);">Yaş</span>
+        <span style="font-size:24px;font-weight:800;color:var(--accent2);" id="ob-ad">25 yaş</span>
+      </div>
+      <input type="range" id="ob-age" min="13" max="80" value="25"
+        style="width:100%;height:8px;border-radius:99px;accent-color:var(--accent2);cursor:pointer;"
+        oninput="obD.age=parseInt(this.value);document.getElementById('ob-ad').textContent=this.value+' yaş'">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px;"><span>13</span><span>80</span></div>
     </div>
   </div>
-  <div id="ob-s2-footer" style="display:none;padding:12px 16px;border-top:1px solid var(--border);display:none;">
+  <div id="ob-s2-footer" style="display:none;padding:12px 16px;border-top:1px solid var(--border);">
     <div style="display:flex;gap:10px;"><button class="btn btn-ghost btn-sm" onclick="obBack(2)" style="width:auto;">← Geri</button><button class="btn btn-primary" onclick="obNext(2)" style="flex:1;">Devam Et →</button></div>
   </div>
   <!-- Step 3 -->
-  <div id="ob-s3" class="ob-step hidden" style="flex:1;overflow-y:auto;padding:16px;">
-    <div style="text-align:center;margin-bottom:20px;"><div style="font-size:40px;margin-bottom:8px;">🎯</div><div style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:4px;">Hedefin Ne?</div></div>
-    <div id="goal-opts">
-      <div class="opt-pill-wide sel" onclick="selOne('goal-opts',this)" data-val="lose_weight"><span style="font-size:26px;">🔥</span><div><strong>Kilo Ver</strong><small>Sağlıklı tempoda yağ yak</small></div></div>
-      <div class="opt-pill-wide" onclick="selOne('goal-opts',this)" data-val="gain_weight"><span style="font-size:26px;">💪</span><div><strong>Kilo Al</strong><small>Kas yap, güçlen</small></div></div>
-      <div class="opt-pill-wide" onclick="selOne('goal-opts',this)" data-val="maintain"><span style="font-size:26px;">⚖️</span><div><strong>Formda Kal</strong><small>Kilonu koru</small></div></div>
-      <div class="opt-pill-wide" onclick="selOne('goal-opts',this)" data-val="performance"><span style="font-size:26px;">🏃</span><div><strong>Performans Artır</strong><small>Atletik kapasite</small></div></div>
+  <div id="ob-s3" class="ob-step hidden" style="flex:1;overflow-y:auto;padding:20px 16px;">
+    <div style="margin-bottom:24px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:10px;">🎯</div>
+      <div style="font-size:24px;font-weight:800;margin-bottom:6px;">Hedefin Ne?</div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
-      <div class="form-group"><label class="form-label">Hedef Kilo (kg)</label><div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;color:var(--text3);">40kg</span><b style="color:#22c55e;" id="ob-gwd">65 kg</b><span style="font-size:11px;color:var(--text3);">150kg</span></div><input type="range" id="ob-goal-weight" min="40" max="150" value="65" style="width:100%;height:6px;border-radius:99px;accent-color:#22c55e;cursor:pointer;" oninput="obD.goal_weight=parseInt(this.value);document.getElementById('ob-gwd').textContent=this.value+' kg'"></div></div>
-      <div class="form-group"><label class="form-label">Süre (hafta)</label><input class="form-input" id="ob-goal-weeks" type="number" min="1" max="104" placeholder="12"/></div>
+    <div id="goal-opts" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;transition:all .2s;" class="sel" onclick="selOne('goal-opts',this)" data-val="lose_weight">
+        <span style="font-size:28px;">🔥</span>
+        <div><div style="font-size:15px;font-weight:700;">Kilo Ver</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Sağlıklı tempoda yağ yak</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;transition:all .2s;" onclick="selOne('goal-opts',this)" data-val="gain_weight">
+        <span style="font-size:28px;">💪</span>
+        <div><div style="font-size:15px;font-weight:700;">Kilo Al</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Kas yap, güçlen</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;transition:all .2s;" onclick="selOne('goal-opts',this)" data-val="maintain">
+        <span style="font-size:28px;">⚖️</span>
+        <div><div style="font-size:15px;font-weight:700;">Formda Kal</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Kilonu koru</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;transition:all .2s;" onclick="selOne('goal-opts',this)" data-val="performance">
+        <span style="font-size:28px;">🏃</span>
+        <div><div style="font-size:15px;font-weight:700;">Performans Artır</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Atletik kapasite</div></div>
+      </div>
+    </div>
+    <!-- Hedef kilo -->
+    <div style="margin-bottom:24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:600;color:var(--text2);">Hedef Kilo</span>
+        <span style="font-size:22px;font-weight:800;color:#22c55e;" id="ob-gwd">65 kg</span>
+      </div>
+      <input type="range" id="ob-goal-weight" min="40" max="150" value="65"
+        style="width:100%;height:8px;border-radius:99px;accent-color:#22c55e;cursor:pointer;"
+        oninput="obD.goal_weight=parseInt(this.value);document.getElementById('ob-gwd').textContent=this.value+' kg'">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px;"><span>40 kg</span><span>150 kg</span></div>
+    </div>
+    <!-- Süre slider -->
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:600;color:var(--text2);">Süre</span>
+        <span style="font-size:22px;font-weight:800;color:var(--orange);" id="ob-weeks-d">12 hafta</span>
+      </div>
+      <input type="range" id="ob-goal-weeks" min="4" max="52" value="12"
+        style="width:100%;height:8px;border-radius:99px;accent-color:var(--orange);cursor:pointer;"
+        oninput="obD.goal_weeks=parseInt(this.value);document.getElementById('ob-weeks-d').textContent=this.value+' hafta'">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px;"><span>4 hafta</span><span>52 hafta</span></div>
     </div>
   </div>
   <div id="ob-s3-footer" style="display:none;padding:12px 16px;border-top:1px solid var(--border);">
     <div style="display:flex;gap:10px;"><button class="btn btn-ghost btn-sm" onclick="obBack(3)" style="width:auto;">← Geri</button><button class="btn btn-primary" onclick="obNext(3)" style="flex:1;">Devam Et →</button></div>
   </div>
   <!-- Step 4 -->
-  <div id="ob-s4" class="ob-step hidden" style="flex:1;overflow-y:auto;padding:16px;">
-    <div style="text-align:center;margin-bottom:20px;"><div style="font-size:40px;margin-bottom:8px;">🚶</div><div style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:4px;">Günlük Hayatın</div></div>
-    <div id="activity-opts">
-      <div class="opt-pill-wide" onclick="selOne('activity-opts',this)" data-val="sedentary"><span style="font-size:26px;">🛋️</span><div><strong>Masa Başı</strong><small>Çok az hareket</small></div></div>
-      <div class="opt-pill-wide sel" onclick="selOne('activity-opts',this)" data-val="light"><span style="font-size:26px;">🚶</span><div><strong>Hafif Aktif</strong><small>Haftada 1-2 spor</small></div></div>
-      <div class="opt-pill-wide" onclick="selOne('activity-opts',this)" data-val="moderate"><span style="font-size:26px;">🏃</span><div><strong>Orta Aktif</strong><small>Haftada 3-4 spor</small></div></div>
-      <div class="opt-pill-wide" onclick="selOne('activity-opts',this)" data-val="active"><span style="font-size:26px;">💪</span><div><strong>Çok Aktif</strong><small>Her gün spor</small></div></div>
+  <div id="ob-s4" class="ob-step hidden" style="flex:1;overflow-y:auto;padding:20px 16px;">
+    <div style="margin-bottom:24px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:10px;">🚶</div>
+      <div style="font-size:24px;font-weight:800;margin-bottom:6px;">Günlük Hayatın</div>
+      <div style="font-size:13px;color:var(--text3);">Kalori hesabı için kullanılır</div>
+    </div>
+    <div id="activity-opts" style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="selOne('activity-opts',this)" data-val="sedentary">
+        <span style="font-size:28px;">🛋️</span>
+        <div><div style="font-size:15px;font-weight:700;">Masa Başı</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Çok az hareket, ofis işi</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" class="sel" onclick="selOne('activity-opts',this)" data-val="light">
+        <span style="font-size:28px;">🚶</span>
+        <div><div style="font-size:15px;font-weight:700;">Hafif Aktif</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Haftada 1-3 gün hafif aktivite</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="selOne('activity-opts',this)" data-val="moderate">
+        <span style="font-size:28px;">🏃</span>
+        <div><div style="font-size:15px;font-weight:700;">Orta Aktif</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Haftada 3-5 gün orta aktivite</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="selOne('activity-opts',this)" data-val="active">
+        <span style="font-size:28px;">💪</span>
+        <div><div style="font-size:15px;font-weight:700;">Çok Aktif</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Haftada 6-7 gün yoğun aktivite</div></div>
+      </div>
     </div>
   </div>
   <div id="ob-s4-footer" style="display:none;padding:12px 16px;border-top:1px solid var(--border);">
     <div style="display:flex;gap:10px;"><button class="btn btn-ghost btn-sm" onclick="obBack(4)" style="width:auto;">← Geri</button><button class="btn btn-primary" onclick="obNext(4)" style="flex:1;">Devam Et →</button></div>
   </div>
   <!-- Step 5 -->
-  <div id="ob-s5" class="ob-step hidden" style="flex:1;overflow-y:auto;padding:16px;">
-    <div style="text-align:center;margin-bottom:20px;"><div style="font-size:40px;margin-bottom:8px;">🥗</div><div style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:4px;">Beslenme Tercihlerin</div></div>
-    <div class="form-group"><label class="form-label">Beslenme Tipi</label>
-      <div class="option-grid" id="diet-opts" style="margin-top:6px;">
-        <div class="opt-pill sel" onclick="selOne('diet-opts',this)" data-val="normal">🍗 Normal</div>
-        <div class="opt-pill" onclick="selOne('diet-opts',this)" data-val="vegetarian">🥦 Vejetaryen</div>
-        <div class="opt-pill" onclick="selOne('diet-opts',this)" data-val="vegan">🌱 Vegan</div>
-        <div class="opt-pill" onclick="selOne('diet-opts',this)" data-val="pescatarian">🐟 Pesketaryen</div>
+  <div id="ob-s5" class="ob-step hidden" style="flex:1;overflow-y:auto;padding:20px 16px;">
+    <div style="margin-bottom:24px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:10px;">🥗</div>
+      <div style="font-size:24px;font-weight:800;margin-bottom:6px;">Beslenme Tercihin</div>
+      <div style="font-size:13px;color:var(--text3);">Birini seç</div>
+    </div>
+    <div id="diet-opts" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" class="sel" onclick="selOne('diet-opts',this)" data-val="normal">
+        <span style="font-size:28px;">🍗</span>
+        <div><div style="font-size:15px;font-weight:700;">Normal</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Her şeyi yerim</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="selOne('diet-opts',this)" data-val="vegetarian">
+        <span style="font-size:28px;">🥦</span>
+        <div><div style="font-size:15px;font-weight:700;">Vejetaryen</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Et yemiyorum</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="selOne('diet-opts',this)" data-val="vegan">
+        <span style="font-size:28px;">🌱</span>
+        <div><div style="font-size:15px;font-weight:700;">Vegan</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Hayvansal ürün yok</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="selOne('diet-opts',this)" data-val="low_carb">
+        <span style="font-size:28px;">🥩</span>
+        <div><div style="font-size:15px;font-weight:700;">Düşük Karb</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Keto / low-carb</div></div>
       </div>
     </div>
-    <div class="form-group"><label class="form-label">Günlük Öğün Sayısı</label>
-      <div class="option-grid" id="meals-opts" style="margin-top:6px;">
-        <div class="opt-pill" onclick="selOne('meals-opts',this)" data-val="2">2 öğün</div>
-        <div class="opt-pill sel" onclick="selOne('meals-opts',this)" data-val="3">3 öğün</div>
-        <div class="opt-pill" onclick="selOne('meals-opts',this)" data-val="5">4-5 küçük</div>
-        <div class="opt-pill" onclick="selOne('meals-opts',this)" data-val="0">Esnek</div>
+    <div style="margin-bottom:10px;">
+      <div style="font-size:14px;font-weight:600;color:var(--text2);margin-bottom:10px;">Alerjiler / İstemediğin yiyecekler</div>
+      <input class="form-input" id="ob-allergies" placeholder="Ör: fındık, süt, gluten..." oninput="obD.allergies=this.value" style="width:100%;">
+    </div>
+  </div>
+  <div id="ob-s5-footer" style="display:none;padding:12px 16px;border-top:1px solid var(--border);">
+    <div style="display:flex;gap:10px;"><button class="btn btn-ghost btn-sm" onclick="obBack(5)" style="width:auto;">← Geri</button><button class="btn btn-primary" onclick="obNext(5)" style="flex:1;">Devam Et →</button></div>
+  </div>
+  <!-- Step 6 -->
+  <div id="ob-s6" class="ob-step hidden" style="flex:1;overflow-y:auto;padding:20px 16px;">
+    <div style="margin-bottom:24px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:10px;">🏋️</div>
+      <div style="font-size:24px;font-weight:800;margin-bottom:6px;">Spor Tercihin</div>
+      <div style="font-size:13px;color:var(--text3);">Birden fazla seçebilirsin</div>
+    </div>
+    <div id="sport-opts" style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" class="sel" onclick="toggleOpt(this)" data-val="ev">
+        <span style="font-size:28px;">🏠</span>
+        <div><div style="font-size:15px;font-weight:700;">Evde Spor</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Ekipman gerektirmez, YouTube videoları</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="toggleOpt(this)" data-val="gym">
+        <span style="font-size:28px;">🏋️</span>
+        <div><div style="font-size:15px;font-weight:700;">Spor Salonu</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Ağırlık ve makine çalışması</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="toggleOpt(this)" data-val="outdoor">
+        <span style="font-size:28px;">🌳</span>
+        <div><div style="font-size:15px;font-weight:700;">Dış Mekan</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Koşu, bisiklet, yürüyüş</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="toggleOpt(this)" data-val="yoga">
+        <span style="font-size:28px;">🧘</span>
+        <div><div style="font-size:15px;font-weight:700;">Yoga / Pilates</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Esneklik ve meditasyon</div></div>
       </div>
     </div>
-    <div class="form-group"><label class="form-label">Alerjiler (yoksa boş bırak)</label><input class="form-input" id="ob-allergies" placeholder="ör: fındık, deniz ürünleri"/></div>
+  </div>
+  <div id="ob-s6-footer" style="display:none;padding:12px 16px;border-top:1px solid var(--border);">
+    <div style="display:flex;gap:10px;"><button class="btn btn-ghost btn-sm" onclick="obBack(6)" style="width:auto;">← Geri</button><button class="btn btn-primary" onclick="obNext(6)" style="flex:1;">Devam Et →</button></div>
+  </div>
+  TYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="FitFlow"/>
+<meta name="theme-color" content="#0a0612"/>
+<title>FitFlow</title>
+<link rel="manifest" href="manifest.json"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"/>
+<script>
+// Inline emergency fallback - if scripts fail, show auth
+window.addEventListener('error', function(e){
+  if(e.filename && (e.filename.includes('supabase') || e.filename.includes('chart'))){
+    document.getElementById('loader').style.display='none';
+    var a=document.getElementById('screen-auth');
+    if(a){a.classList.add('active');}
+    console.error('Script load failed:', e.filename);
+  }
+}, true);
+</script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js" 
+  onerror="document.getElementById('loader').style.display='none';document.getElementById('screen-auth').classList.add('active');"></script>
+<script src="/photos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:#08060f;}
+body{font-family:'Outfit',sans-serif;color:#fff;font-size:15px;}
+:root{
+  --accent:#7c3aed;--accent2:#a855f7;--accent3:#ec4899;
+  --bg1:#08060f;--bg2:#110d1e;--bg3:#1a1428;
+  --card:#1e1830;--card-accent:rgba(124,58,237,0.12);
+  --border:rgba(255,255,255,0.07);--border-accent:rgba(168,85,247,0.3);
+  --text:#fff;--text2:#a09cb8;--text3:#5e5877;
+  --green:#22c55e;--orange:#f97316;--pink:#ec4899;--blue:#38bdf8;
+  --grad:linear-gradient(135deg,#7c3aed,#a855f7);
+  --glow:0 0 60px rgba(124,58,237,0.25);
+}
+body.male{
+  --accent:#f97316;--accent2:#fb923c;--accent3:#fbbf24;
+  --bg1:#060a0f;--bg2:#0c1420;--bg3:#101e30;
+  --card:#141f32;--card-accent:rgba(249,115,22,0.12);
+  --border-accent:rgba(249,115,22,0.3);
+  --grad:linear-gradient(135deg,#f97316,#fb923c);
+  --glow:0 0 60px rgba(249,115,22,0.2);
+}
+
+#app{height:100vh;display:flex;flex-direction:column;max-width:430px;margin:0 auto;background:var(--bg1);position:relative;overflow:hidden;}
+#app::before{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(124,58,237,0.08) 0%,transparent 70%);pointer-events:none;z-index:0;}
+body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 0%,transparent 70%);}
+
+.screen{display:none;flex-direction:column;height:100%;overflow:hidden;}
+.screen.active{display:flex;}
+.page-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px 80px;}
+.page-content::-webkit-scrollbar{display:none;}
+
+/* TOPBAR */
+.topbar{background:rgba(8,6,15,0.85);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;z-index:10;}
+.topbar-title{font-size:18px;font-weight:800;}
+
+/* BOTTOM NAV */
+.bottomnav{background:rgba(8,6,15,0.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);display:flex;padding:6px 0 env(safe-area-inset-bottom,8px);flex-shrink:0;z-index:10;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;border:none;background:none;cursor:pointer;color:var(--text3);}
+.nav-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;}
+.nav-item span{font-size:10px;font-family:'Outfit',sans-serif;}
+.nav-item.active{color:var(--accent2);}
+.plus-btn-wrap{flex:1;display:flex;align-items:center;justify-content:center;}
+.plus-btn{width:52px;height:52px;border-radius:50%;background:var(--grad);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;margin-top:-20px;box-shadow:0 4px 24px rgba(124,58,237,0.5),0 0 0 1px rgba(168,85,247,0.2);}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:14px;margin-bottom:10px;transition:all .2s;}
+.card-accent{background:var(--card-accent);border:1px solid var(--border-accent);border-radius:20px;padding:14px;margin-bottom:10px;}
+
+/* BUTTONS */
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:13px;border-radius:14px;border:1.5px solid var(--border);background:transparent;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s;}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 20px rgba(124,58,237,0.45);}
+.btn-secondary{background:var(--card);color:var(--text2);border-color:var(--border);}
+.btn-sm{padding:8px 14px;font-size:12px;border-radius:10px;width:auto;}
+.btn-outline{border-color:var(--accent);color:var(--accent);background:transparent;}
+.btn-ghost{border-color:transparent;color:var(--text3);}
+.btn-danger{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);color:#fca5a5;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;}
+.badge-accent{background:rgba(168,85,247,0.15);color:var(--accent2);border:1px solid rgba(168,85,247,0.25);}
+.badge-amber{background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.2);}
+.badge-gray{background:rgba(255,255,255,0.08);color:var(--text2);}
+.badge-green{background:rgba(34,197,94,0.15);color:#22c55e;}
+
+/* FORM */
+.form-input{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:12px;color:#fff;padding:12px 14px;font-size:14px;font-family:'Outfit',sans-serif;outline:none;transition:border-color .15s;}
+.form-input:focus{border-color:var(--accent);}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:12px;color:var(--text3);font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.form-select{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:12px;color:#fff;padding:12px 14px;font-size:14px;font-family:'Outfit',sans-serif;outline:none;}
+
+/* SEARCH BAR */
+.search-bar{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px 16px;display:flex;gap:10px;align-items:center;margin-bottom:12px;}
+.search-input{flex:1;background:none;border:none;color:#fff;font-size:14px;font-family:'Outfit',sans-serif;outline:none;}
+.search-input::placeholder{color:var(--text3);}
+
+/* PROGRESS */
+.progress-track{width:100%;height:6px;background:rgba(255,255,255,0.07);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--grad);border-radius:99px;transition:width .5s ease;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);}
+.modal-overlay.show{display:flex;}
+.modal-sheet{background:var(--bg2);border-radius:28px 28px 0 0;padding:16px;max-height:92vh;overflow-y:auto;width:100%;}
+.modal-box{background:var(--bg2);border-radius:24px;padding:20px;margin:auto;width:90%;max-width:380px;}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:99px;margin:0 auto 16px;}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:14px;}
+.modal-close{background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;padding:0;line-height:1;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+
+/* SECTIONS */
+.sec-title{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.7px;text-transform:uppercase;margin:16px 0 8px;}
+
+/* WATER */
+.water-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:8px;}
+.water-drop{width:100%;aspect-ratio:1;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;background:var(--card);}
+.water-drop.filled{background:rgba(56,189,248,0.2);border-color:var(--blue);}
+
+/* STAT */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px;text-align:center;}
+.stat-val{font-size:22px;font-weight:800;color:var(--accent2);}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* FOOD ITEM */
+.food-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.food-img{width:44px;height:44px;border-radius:12px;object-fit:cover;background:var(--bg3);flex-shrink:0;}
+.food-info{flex:1;}
+.food-name{font-size:13px;font-weight:600;}
+.food-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.food-kcal{font-size:13px;font-weight:700;color:var(--accent2);}
+
+/* SWIPE */
+.swipe-container{position:relative;width:100%;height:100%;}
+.swipe-card-shadow{position:absolute;top:8px;left:6px;right:6px;bottom:-6px;border-radius:28px;background:var(--card);border:1px solid var(--border);}
+.swipe-card{position:absolute;top:0;left:0;right:0;bottom:6px;border-radius:28px;overflow:hidden;border:1.5px solid var(--border-accent);background:var(--card);cursor:grab;user-select:none;}
+.swipe-label{position:absolute;top:16px;padding:8px 18px;border-radius:12px;font-size:14px;font-weight:800;opacity:0;transition:opacity .15s;z-index:2;backdrop-filter:blur(8px);}
+.swipe-label-left{left:14px;background:rgba(239,68,68,0.9);color:#fff;box-shadow:0 4px 16px rgba(239,68,68,0.4);}
+.swipe-label-right{right:14px;background:rgba(34,197,94,0.9);color:#fff;box-shadow:0 4px 16px rgba(34,197,94,0.4);}
+.swipe-actions{display:flex;gap:20px;justify-content:center;align-items:center;}
+.swipe-btn{border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s;}
+.swipe-btn:active{transform:scale(0.88);}
+.swipe-btn-no{width:60px;height:60px;font-size:24px;background:rgba(239,68,68,0.1);color:#fca5a5;border:2px solid rgba(239,68,68,0.35);box-shadow:0 4px 16px rgba(239,68,68,0.15);}
+.swipe-btn-undo{width:48px;height:48px;font-size:20px;background:var(--card);color:var(--text2);border:1.5px solid var(--border);}
+.swipe-btn-yes{width:60px;height:60px;font-size:24px;background:rgba(34,197,94,0.1);color:#86efac;border:2px solid rgba(34,197,94,0.35);box-shadow:0 4px 16px rgba(34,197,94,0.15);}
+.sw-meal-btn{padding:7px 16px;border-radius:99px;border:1.5px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;transition:all .15s;}
+.sw-meal-btn.sel{background:var(--card-accent);border-color:var(--accent);color:var(--accent2);}
+
+/* ONBOARDING */
+.ob-step{display:none;flex:1;overflow-y:auto;padding:16px;}
+.ob-step.active{display:block;}
+.onboard-bar{height:4px;background:rgba(255,255,255,0.07);margin:0 16px;border-radius:99px;overflow:hidden;}
+.onboard-fill{height:100%;background:var(--grad);transition:width .5s ease;border-radius:99px;}
+.opt-pill{padding:10px 18px;border-radius:99px;border:1.5px solid var(--border);background:var(--card);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;margin:6px;display:inline-flex;align-items:center;gap:6px;transition:all .15s;}
+.opt-pill.sel{background:var(--card-accent);border-color:var(--accent2);color:var(--accent2);}
+.opt-pill-wide{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;border:1.5px solid var(--border);background:var(--card);cursor:pointer;margin-bottom:10px;transition:all .15s;}
+.opt-pill-wide.sel{border-color:var(--accent2);background:var(--card-accent);}
+.ob-input-row{display:flex;gap:10px;margin-bottom:12px;}
+
+/* EXERCISE */
+.ex-card{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .2s;}
+.ex-card:active{border-color:var(--accent);}
+.ex-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.ex-name{font-size:13px;font-weight:600;}
+.ex-info{font-size:11px;color:var(--text3);margin-top:2px;}
+.ex-done{background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.3);}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:14px 0;}
+
+/* CHAT */
+.chat-bubble{max-width:85%;padding:10px 14px;border-radius:18px;font-size:13px;line-height:1.5;margin-bottom:10px;}
+.chat-user{background:var(--grad);color:#fff;align-self:flex-end;border-radius:18px 18px 4px 18px;margin-left:auto;}
+.chat-ai{background:var(--card);color:var(--text);border-radius:18px 18px 18px 4px;border:1px solid var(--border);}
+
+/* MACRO BAR */
+.macro-bar-wrap{display:flex;gap:8px;margin:6px 0;}
+.macro-bar{flex:1;background:rgba(255,255,255,0.06);border-radius:8px;padding:8px;text-align:center;}
+.macro-bar .mb-val{font-size:14px;font-weight:700;}
+.macro-bar .mb-lbl{font-size:10px;color:var(--text3);margin-top:2px;}
+
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--bg1);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* AUTH */
+.auth-brand{font-size:36px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;}
+.auth-box{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:24px;width:90%;max-width:340px;}
+.input-group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+
+/* NOTIFICATIONS */
+#toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 20px;font-size:13px;font-weight:600;white-space:nowrap;z-index:9999;opacity:0;transition:opacity .3s;backdrop-filter:blur(12px);}
+#toast.show{opacity:1;}
+#toast.ok{border-color:rgba(34,197,94,0.5);color:#22c55e;}
+#toast.err{border-color:rgba(239,68,68,0.5);color:#fca5a5;}
+
+/* QUICK MODAL öğün butonları */
+.quick-meal-btn{padding:14px;border-radius:16px;background:var(--card);border:1.5px solid var(--border);cursor:pointer;text-align:center;font-size:22px;transition:all .15s;}
+.quick-meal-btn:hover,.quick-meal-btn:active{border-color:var(--accent2);background:var(--card-accent);}
+.quick-meal-label{font-size:11px;color:var(--text3);margin-top:4px;font-weight:600;}
+
+/* PAGING */
+.pag-btn{padding:6px 12px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--text2);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;}
+.pag-btn.active{background:var(--card-accent);border-color:var(--accent);color:var(--accent2);}
+
+/* CHALLENGES */
+.challenge-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:10px;overflow:hidden;position:relative;}
+.challenge-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad);}
+
+/* LEADERBOARD */
+.lb-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.lb-rank{width:28px;height:28px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.lb-me .lb-rank{background:var(--card-accent);border:1px solid var(--border-accent);color:var(--accent2);}
+
+/* RESPONSIVE */
+@media(max-width:400px){.mini-card .mc-val{font-size:14px;}.ring-kcal{font-size:28px;}}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div id="loader">
+  <div style="font-family:'Playfair Display',serif;font-size:40px;color:var(--accent);">🌿 FitFlow</div>
+  <div style="font-size:14px;color:var(--text3);margin-top:6px;" id="loader-text">Yükleniyor...</div>
+  <div class="spinner"></div>
+  <div id="loader-retry" style="display:none;margin-top:20px;text-align:center;">
+    <div style="font-size:13px;color:var(--text3);margin-bottom:10px;">Bağlantı kurulamadı</div>
+    <button onclick="location.reload()" style="background:var(--accent);color:#fff;border:none;padding:10px 24px;border-radius:10px;font-size:14px;cursor:pointer;font-family:'Outfit',sans-serif;">🔄 Yenile</button>
+  </div>
+</div>
+
+<!-- ======= MODALS ======= -->
+<div class="modal-overlay" id="food-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="food-modal-title">Yemek Ekle</div>
+    <div class="search-bar">
+      <span style="color:var(--text3);">🔍</span>
+      <input class="search-input" id="food-search" placeholder="Yemek ara..." autocomplete="off"/>
+    </div>
+    <div id="food-search-results" style="max-height:200px;overflow-y:auto;margin-bottom:10px;"></div>
+    <div class="divider"></div>
+    <div class="form-group">
+      <div class="form-label">Yoksa AI ile hesapla:</div>
+      <div style="display:flex;gap:8px;">
+        <input class="form-input" id="food-ai-text" placeholder="ör: 1 tabak pilav, 1 çay bardağı süt" style="flex:1;"/>
+        <button class="btn btn-secondary btn-sm" id="food-ai-btn" onclick="calcFoodAI()">✨</button>
+      </div>
+    </div>
+    <div id="food-ai-result" style="display:none;" class="card-accent">
+      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:4px;">✨ AI Tahmini</div>
+      <div id="food-ai-kcal" style="font-size:24px;font-weight:700;color:var(--accent);"></div>
+      <div id="food-ai-macros" style="font-size:12px;color:var(--text2);margin-top:2px;"></div>
+    </div>
+    <button class="btn btn-primary" id="food-save-btn" onclick="saveFoodEntry()" style="display:none;margin-top:10px;margin-bottom:8px;">✓ Listeye Ekle</button>
+    <button class="btn btn-ghost" onclick="closeModal('food-modal')">İptal</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="weight-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Kilo Gir ⚖️</div>
+    <div class="form-group"><label class="form-label">Bugünkü kilo (kg)</label><input class="form-input" id="weight-input" type="number" step="0.1" min="20" max="300" placeholder="ör: 70.5"/></div>
+    <div class="form-group"><label class="form-label">Not (isteğe bağlı)</label><input class="form-input" id="weight-note" placeholder="ör: Sabah aç karnına"/></div>
+    <button class="btn btn-primary" id="weight-save-btn" onclick="saveWeight()">Kaydet</button>
+    <button class="btn btn-ghost" onclick="closeModal('weight-modal')" style="margin-top:8px;">İptal</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ex-done-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✅ Egzersiz Tamamlandı!</div>
+    <div class="form-group"><label class="form-label">Kaç dakika sürdü?</label><input class="form-input" id="ex-duration-input" type="number" min="1" max="300" placeholder="ör: 30"/></div>
+    <button class="btn btn-green" id="ex-done-save-btn" onclick="saveExerciseDone()">Kaydet 🎉</button>
+    <button class="btn btn-ghost" onclick="closeModal('ex-done-modal')" style="margin-top:8px;">İptal</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="extra-ex-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Ekstra Spor Ekle 🏃</div>
+    <div class="form-group"><label class="form-label">Aktivite adı</label><input class="form-input" id="extra-ex-name" placeholder="ör: Bisiklet, Dans, Yüzme"/></div>
+    <div class="form-group"><label class="form-label">Süre (dakika)</label><input class="form-input" id="extra-ex-dur" type="number" min="1" max="600" placeholder="ör: 45"/></div>
+    <button class="btn btn-secondary" id="extra-ex-btn" onclick="saveExtraEx()">Ekle</button>
+    <button class="btn btn-ghost" onclick="closeModal('extra-ex-modal')" style="margin-top:8px;">İptal</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="quick-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:14px;">Hızlı Ekle</div>
+    <div class="quick-grid">
+      <div class="quick-item" onclick="closeAndOpen('quick-modal','food-modal','breakfast')"><div style="font-size:26px;margin-bottom:5px;">🍳</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Kahvaltı</div></div>
+      <div class="quick-item" onclick="closeAndOpen('quick-modal','food-modal','lunch')"><div style="font-size:26px;margin-bottom:5px;">🍽️</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Öğle</div></div>
+      <div class="quick-item" onclick="closeAndOpen('quick-modal','food-modal','dinner')"><div style="font-size:26px;margin-bottom:5px;">🌙</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Akşam</div></div>
+      <div class="quick-item" onclick="closeAndOpen('quick-modal','food-modal','snack')"><div style="font-size:26px;margin-bottom:5px;">🍎</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Ara Öğün</div></div>
+      <div class="quick-item" onclick="closeModal('quick-modal');openModal('extra-ex-modal')"><div style="font-size:26px;margin-bottom:5px;">🏃</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Egzersiz</div></div>
+      <div class="quick-item" onclick="closeModal('quick-modal');quickAddWater()"><div style="font-size:26px;margin-bottom:5px;">💧</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Su</div></div>
+      <div class="quick-item" onclick="closeModal('quick-modal');openModal('weight-modal')"><div style="font-size:26px;margin-bottom:5px;">⚖️</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Kilo</div></div>
+      <div class="quick-item" onclick="closeModal('quick-modal');goTo('chat')"><div style="font-size:26px;margin-bottom:5px;">✨</div><div style="font-size:12px;font-weight:500;color:var(--text2);">AI Sor</div></div>
+      <div class="quick-item" onclick="closeModal('quick-modal');openMealPhoto()"><div style="font-size:26px;margin-bottom:5px;">📷</div><div style="font-size:12px;font-weight:500;color:var(--text2);">Fotoğrafla</div></div>
+    </div>
+    <button class="btn btn-ghost" onclick="closeModal('quick-modal')">Kapat</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="mood-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Bugün nasıl hissediyorsun? 💭</div>
+    <div style="display:flex;justify-content:space-around;margin-bottom:16px;">
+      <div onclick="saveMood('great')" style="text-align:center;padding:12px;border-radius:12px;cursor:pointer;" class="mood-opt"><div style="font-size:34px;">😄</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">Harika</div></div>
+      <div onclick="saveMood('good')" style="text-align:center;padding:12px;border-radius:12px;cursor:pointer;" class="mood-opt"><div style="font-size:34px;">😊</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">İyi</div></div>
+      <div onclick="saveMood('ok')" style="text-align:center;padding:12px;border-radius:12px;cursor:pointer;" class="mood-opt"><div style="font-size:34px;">😐</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">Orta</div></div>
+      <div onclick="saveMood('bad')" style="text-align:center;padding:12px;border-radius:12px;cursor:pointer;" class="mood-opt"><div style="font-size:34px;">😔</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">Kötü</div></div>
+      <div onclick="saveMood('terrible')" style="text-align:center;padding:12px;border-radius:12px;cursor:pointer;" class="mood-opt"><div style="font-size:34px;">😞</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">Berbat</div></div>
+    </div>
+    <button class="btn btn-ghost" onclick="closeModal('mood-modal')">Kapat</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="coupon-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🎁 Kupon Kodu</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px;">Kupon kodu girerek ekstra AI mesaj hakkı kazan!</p>
+    <div class="form-group"><input class="form-input" id="coupon-input" placeholder="Kupon kodunu gir..." style="text-transform:uppercase;letter-spacing:2px;"/></div>
+    <button class="btn btn-primary" id="coupon-btn" onclick="applyCoupon()">Uygula</button>
+    <button class="btn btn-ghost" onclick="closeModal('coupon-modal')" style="margin-top:8px;">İptal</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="password-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔑 Şifre Değiştir</div>
+    <div class="form-group"><label class="form-label">Yeni Şifre</label><input class="form-input" id="new-password" type="password" placeholder="En az 6 karakter"/></div>
+    <div class="form-group"><label class="form-label">Şifreyi Onayla</label><input class="form-input" id="confirm-password" type="password" placeholder="Şifreyi tekrar gir"/></div>
+    <button class="btn btn-primary" id="password-btn" onclick="changePassword()">Güncelle</button>
+    <button class="btn btn-ghost" onclick="closeModal('password-modal')" style="margin-top:8px;">İptal</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="edit-profile-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📏 Profil Düzenle</div>
+    <div class="form-group"><label class="form-label">Ad</label><input class="form-input" id="edit-name" placeholder="Adın"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="form-group"><label class="form-label">Kilo (kg)</label>
+        <select class="form-input" id="edit-weight" style="height:46px;"></select></div>
+      <div class="form-group"><label class="form-label">Hedef Kilo (kg)</label>
+        <select class="form-input" id="edit-goal-weight" style="height:46px;"></select></div>
+      <div class="form-group"><label class="form-label">Boy (cm)</label>
+        <select class="form-input" id="edit-height" style="height:46px;"></select></div>
+      <div class="form-group"><label class="form-label">Yaş</label>
+        <select class="form-input" id="edit-age" style="height:46px;"></select></div>
+    </div>
+    <button class="btn btn-primary" id="edit-profile-btn" onclick="saveProfileEdit()">Kaydet</button>
+    <button class="btn btn-ghost" onclick="closeModal('edit-profile-modal')" style="margin-top:8px;">İptal</button>
+  </div>
+</div>
+
+<div id="app">
+<!-- ====== AUTH ====== -->
+<div class="screen active" id="screen-auth">
+  <div style="flex:1;overflow-y:auto;">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px 24px;text-align:center;">
+      <div style="font-size:60px;margin-bottom:12px;">🌿</div>
+      <div style="font-family:'Playfair Display',serif;font-size:36px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;">FitFlow</div>
+      <div style="font-size:14px;color:var(--text3);margin-bottom:32px;">Hedefine giden yolda yanındayız</div>
+    </div>
+    <div style="padding:0 16px 32px;">
+      <div id="auth-login">
+        <div class="form-group"><label class="form-label">E-posta</label><input class="form-input" id="login-email" type="email" placeholder="ornek@email.com" autocomplete="email"/></div>
+        <div class="form-group"><label class="form-label">Şifre</label><input class="form-input" id="login-password" type="password" placeholder="Şifren" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+        <button class="btn btn-primary" id="login-btn" onclick="doLogin()" style="margin-bottom:10px;">Giriş Yap</button>
+        <button class="btn btn-ghost" onclick="showAuthForm('register')">Hesabın yok mu? Kayıt ol →</button>
+      </div>
+      <div id="auth-register" style="display:none;">
+        <div class="form-group"><label class="form-label">Adın</label><input class="form-input" id="reg-name" placeholder="Adın" autocomplete="name"/></div>
+        <div class="form-group"><label class="form-label">E-posta</label><input class="form-input" id="reg-email" type="email" placeholder="ornek@email.com" autocomplete="email"/></div>
+        <div class="form-group"><label class="form-label">Şifre (en az 6 karakter)</label><input class="form-input" id="reg-password" type="password" placeholder="Şifren" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()"/></div>
+        <button class="btn btn-primary" id="register-btn" onclick="doRegister()" style="margin-bottom:10px;">Hesap Oluştur</button>
+        <button class="btn btn-ghost" onclick="showAuthForm('login')">← Giriş sayfasına dön</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== ONBOARDING ====== -->
+<div class="screen" id="screen-onboard">
+  <div style="padding:10px 0 0;">
+    <div class="onboard-bar"><div class="onboard-fill" id="ob-fill" style="width:16%;"></div></div>
+    <div class="ob-dots" id="ob-dots">
+      <div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div>
+      <div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div>
+    </div>
+  </div>
+  <!-- Step 1 -->
+  <div id="ob-s1" class="ob-step" style="flex:1;overflow-y:auto;padding:20px 16px;">
+    <div style="margin-bottom:20px;">
+      <div style="font-size:26px;font-weight:800;margin-bottom:6px;">Cinsiyetin nedir?</div>
+      <div style="font-size:13px;color:var(--text3);">Planını kişiselleştirmek için kullanacağız</div>
+    </div>
+    <!-- Erkek -->
+    <div onclick="selectGender('male',this)" id="g-male" style="border-radius:20px;overflow:hidden;border:2px solid var(--border);cursor:pointer;margin-bottom:12px;position:relative;transition:border-color .2s;">
+      <img src="/erkek.png" alt="Erkek" style="width:100%;height:200px;object-fit:cover;object-position:top center;display:block;" onerror="this.style.display='none'">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 50%);"></div>
+      <div style="position:absolute;bottom:14px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:20px;font-weight:800;">Erkek</div>
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);display:none;align-items:center;justify-content:center;font-size:13px;color:#fff;" class="ob-check-male">✓</div>
+      </div>
+    </div>
+    <!-- Kadın -->
+    <div onclick="selectGender('female',this)" id="g-female" style="border-radius:20px;overflow:hidden;border:2px solid var(--border);cursor:pointer;position:relative;transition:border-color .2s;margin-bottom:12px;">
+      <img src="/kadin.png" alt="Kadın" style="width:100%;height:200px;object-fit:cover;object-position:top center;display:block;" onerror="this.style.display='none'">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 50%);"></div>
+      <div style="position:absolute;bottom:14px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:20px;font-weight:800;">Kadın</div>
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--accent3);display:none;align-items:center;justify-content:center;font-size:13px;color:#fff;" class="ob-check-female">✓</div>
+      </div>
+    </div>
+    <div style="text-align:center;">
+      <button onclick="selectGender('other',null)" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;">Diğerleri / Söylememeyi tercih ederim ›</button>
+    </div>
+  </div>
+  <div id="ob-s1-footer" style="padding:12px 16px;border-top:1px solid var(--border);">
+    <button class="btn btn-primary" onclick="obNext(1)">Devam Et →</button>
+  </div>
+  <!-- Step 2 -->
+  <div id="ob-s2" class="ob-step hidden" style="flex:1;padding:24px 20px;display:flex;flex-direction:column;justify-content:center;">
+    <div style="margin-bottom:32px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:10px;">📏</div>
+      <div style="font-size:24px;font-weight:800;margin-bottom:6px;">Vücut Bilgilerin</div>
+      <div style="font-size:13px;color:var(--text3);">Program buna göre hesaplanır</div>
+    </div>
+    <!-- Boy -->
+    <div style="margin-bottom:28px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:600;color:var(--text2);">Boy (cm)</span>
+        <span style="font-size:24px;font-weight:800;color:var(--accent2);" id="ob-hd">170 cm</span>
+      </div>
+      <input type="range" id="ob-height" min="140" max="220" value="170"
+        style="width:100%;height:8px;border-radius:99px;accent-color:var(--accent2);cursor:pointer;"
+        oninput="obD.height_cm=parseInt(this.value);document.getElementById('ob-hd').textContent=this.value+' cm'">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px;"><span>140 cm</span><span>220 cm</span></div>
+    </div>
+    <!-- Kilo -->
+    <div style="margin-bottom:28px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:600;color:var(--text2);">Kilo (kg)</span>
+        <span style="font-size:24px;font-weight:800;color:var(--accent2);" id="ob-wd">70 kg</span>
+      </div>
+      <input type="range" id="ob-weight" min="40" max="200" value="70"
+        style="width:100%;height:8px;border-radius:99px;accent-color:var(--accent2);cursor:pointer;"
+        oninput="obD.current_weight=parseInt(this.value);document.getElementById('ob-wd').textContent=this.value+' kg'">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px;"><span>40 kg</span><span>200 kg</span></div>
+    </div>
+    <!-- Yaş -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:600;color:var(--text2);">Yaş</span>
+        <span style="font-size:24px;font-weight:800;color:var(--accent2);" id="ob-ad">25 yaş</span>
+      </div>
+      <input type="range" id="ob-age" min="13" max="80" value="25"
+        style="width:100%;height:8px;border-radius:99px;accent-color:var(--accent2);cursor:pointer;"
+        oninput="obD.age=parseInt(this.value);document.getElementById('ob-ad').textContent=this.value+' yaş'">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px;"><span>13</span><span>80</span></div>
+    </div>
+  </div>
+  <div id="ob-s2-footer" style="display:none;padding:12px 16px;border-top:1px solid var(--border);">
+    <div style="display:flex;gap:10px;"><button class="btn btn-ghost btn-sm" onclick="obBack(2)" style="width:auto;">← Geri</button><button class="btn btn-primary" onclick="obNext(2)" style="flex:1;">Devam Et →</button></div>
+  </div>
+  <!-- Step 3 -->
+  <div id="ob-s3" class="ob-step hidden" style="flex:1;overflow-y:auto;padding:20px 16px;">
+    <div style="margin-bottom:24px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:10px;">🎯</div>
+      <div style="font-size:24px;font-weight:800;margin-bottom:6px;">Hedefin Ne?</div>
+    </div>
+    <div id="goal-opts" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;transition:all .2s;" class="sel" onclick="selOne('goal-opts',this)" data-val="lose_weight">
+        <span style="font-size:28px;">🔥</span>
+        <div><div style="font-size:15px;font-weight:700;">Kilo Ver</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Sağlıklı tempoda yağ yak</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;transition:all .2s;" onclick="selOne('goal-opts',this)" data-val="gain_weight">
+        <span style="font-size:28px;">💪</span>
+        <div><div style="font-size:15px;font-weight:700;">Kilo Al</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Kas yap, güçlen</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;transition:all .2s;" onclick="selOne('goal-opts',this)" data-val="maintain">
+        <span style="font-size:28px;">⚖️</span>
+        <div><div style="font-size:15px;font-weight:700;">Formda Kal</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Kilonu koru</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;transition:all .2s;" onclick="selOne('goal-opts',this)" data-val="performance">
+        <span style="font-size:28px;">🏃</span>
+        <div><div style="font-size:15px;font-weight:700;">Performans Artır</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Atletik kapasite</div></div>
+      </div>
+    </div>
+    <!-- Hedef kilo -->
+    <div style="margin-bottom:24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:600;color:var(--text2);">Hedef Kilo</span>
+        <span style="font-size:22px;font-weight:800;color:#22c55e;" id="ob-gwd">65 kg</span>
+      </div>
+      <input type="range" id="ob-goal-weight" min="40" max="150" value="65"
+        style="width:100%;height:8px;border-radius:99px;accent-color:#22c55e;cursor:pointer;"
+        oninput="obD.goal_weight=parseInt(this.value);document.getElementById('ob-gwd').textContent=this.value+' kg'">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px;"><span>40 kg</span><span>150 kg</span></div>
+    </div>
+    <!-- Süre slider -->
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:600;color:var(--text2);">Süre</span>
+        <span style="font-size:22px;font-weight:800;color:var(--orange);" id="ob-weeks-d">12 hafta</span>
+      </div>
+      <input type="range" id="ob-goal-weeks" min="4" max="52" value="12"
+        style="width:100%;height:8px;border-radius:99px;accent-color:var(--orange);cursor:pointer;"
+        oninput="obD.goal_weeks=parseInt(this.value);document.getElementById('ob-weeks-d').textContent=this.value+' hafta'">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px;"><span>4 hafta</span><span>52 hafta</span></div>
+    </div>
+  </div>
+  <div id="ob-s3-footer" style="display:none;padding:12px 16px;border-top:1px solid var(--border);">
+    <div style="display:flex;gap:10px;"><button class="btn btn-ghost btn-sm" onclick="obBack(3)" style="width:auto;">← Geri</button><button class="btn btn-primary" onclick="obNext(3)" style="flex:1;">Devam Et →</button></div>
+  </div>
+  <!-- Step 4 -->
+  <div id="ob-s4" class="ob-step hidden" style="flex:1;overflow-y:auto;padding:20px 16px;">
+    <div style="margin-bottom:24px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:10px;">🚶</div>
+      <div style="font-size:24px;font-weight:800;margin-bottom:6px;">Günlük Hayatın</div>
+      <div style="font-size:13px;color:var(--text3);">Kalori hesabı için kullanılır</div>
+    </div>
+    <div id="activity-opts" style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="selOne('activity-opts',this)" data-val="sedentary">
+        <span style="font-size:28px;">🛋️</span>
+        <div><div style="font-size:15px;font-weight:700;">Masa Başı</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Çok az hareket, ofis işi</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" class="sel" onclick="selOne('activity-opts',this)" data-val="light">
+        <span style="font-size:28px;">🚶</span>
+        <div><div style="font-size:15px;font-weight:700;">Hafif Aktif</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Haftada 1-3 gün hafif aktivite</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="selOne('activity-opts',this)" data-val="moderate">
+        <span style="font-size:28px;">🏃</span>
+        <div><div style="font-size:15px;font-weight:700;">Orta Aktif</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Haftada 3-5 gün orta aktivite</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="selOne('activity-opts',this)" data-val="active">
+        <span style="font-size:28px;">💪</span>
+        <div><div style="font-size:15px;font-weight:700;">Çok Aktif</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Haftada 6-7 gün yoğun aktivite</div></div>
+      </div>
+    </div>
+  </div>
+  <div id="ob-s4-footer" style="display:none;padding:12px 16px;border-top:1px solid var(--border);">
+    <div style="display:flex;gap:10px;"><button class="btn btn-ghost btn-sm" onclick="obBack(4)" style="width:auto;">← Geri</button><button class="btn btn-primary" onclick="obNext(4)" style="flex:1;">Devam Et →</button></div>
+  </div>
+  <!-- Step 5 -->
+  <div id="ob-s5" class="ob-step hidden" style="flex:1;overflow-y:auto;padding:20px 16px;">
+    <div style="margin-bottom:24px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:10px;">🥗</div>
+      <div style="font-size:24px;font-weight:800;margin-bottom:6px;">Beslenme Tercihin</div>
+      <div style="font-size:13px;color:var(--text3);">Birini seç</div>
+    </div>
+    <div id="diet-opts" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" class="sel" onclick="selOne('diet-opts',this)" data-val="normal">
+        <span style="font-size:28px;">🍗</span>
+        <div><div style="font-size:15px;font-weight:700;">Normal</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Her şeyi yerim</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="selOne('diet-opts',this)" data-val="vegetarian">
+        <span style="font-size:28px;">🥦</span>
+        <div><div style="font-size:15px;font-weight:700;">Vejetaryen</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Et yemiyorum</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="selOne('diet-opts',this)" data-val="vegan">
+        <span style="font-size:28px;">🌱</span>
+        <div><div style="font-size:15px;font-weight:700;">Vegan</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Hayvansal ürün yok</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;border:2px solid var(--border);background:var(--card);cursor:pointer;" onclick="selOne('diet-opts',this)" data-val="low_carb">
+        <span style="font-size:28px;">🥩</span>
+        <div><div style="font-size:15px;font-weight:700;">Düşük Karb</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Keto / low-carb</div></div>
+      </div>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div style="font-size:14px;font-weight:600;color:var(--text2);margin-bottom:10px;">Alerjiler / İstemediğin yiyecekler</div>
+      <input class="form-input" id="ob-allergies" placeholder="Ör: fındık, süt, gluten..." oninput="obD.allergies=this.value" style="width:100%;">
+    </div>
   </div>
   <div id="ob-s5-footer" style="display:none;padding:12px 16px;border-top:1px solid var(--border);">
     <div style="display:flex;gap:10px;"><button class="btn btn-ghost btn-sm" onclick="obBack(5)" style="width:auto;">← Geri</button><button class="btn btn-primary" onclick="obNext(5)" style="flex:1;">Devam Et →</button></div>
@@ -567,23 +1307,44 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
 
 <!-- ====== FOOD ====== -->
 <div class="screen" id="screen-food">
-  <div class="topbar">
-    <span class="topbar-title">Yemek</span>
-    <button class="btn btn-secondary btn-sm" onclick="openSwipe('food')" style="width:auto;">🔀 Swipe Öneri</button>
-  </div>
-  <div class="page-content">
-    <div class="card-accent">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-        <div><div style="font-size:26px;font-weight:700;color:var(--accent);" id="f-eaten">0</div><div style="font-size:11px;color:var(--text3);">kcal yendi</div></div>
-        <div style="text-align:right;"><div style="font-size:26px;font-weight:700;" id="f-goal">1800</div><div style="font-size:11px;color:var(--text3);">kcal hedef</div></div>
+  <div style="flex-shrink:0;padding:16px 20px 0;background:rgba(8,6,15,0.9);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <span style="font-size:22px;font-weight:800;">Yemekler 🍽️</span>
+      <button class="btn btn-secondary btn-sm" onclick="openSwipe('food')" style="border-radius:99px;font-size:12px;">Ne Yesem?</button>
+    </div>
+    <!-- Kalori özet -->
+    <div style="background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;border:1px solid var(--border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div><div style="font-size:11px;color:var(--text3);">Bugün yenildi</div>
+          <div style="font-size:26px;font-weight:800;color:var(--accent2);line-height:1;" id="f-eaten">0</div>
+          <div style="font-size:11px;color:var(--text3);">/ <span id="f-goal">1800</span> kcal</div></div>
+        <div style="text-align:right;"><div style="font-size:11px;color:var(--text3);">Kalan</div>
+          <div style="font-size:22px;font-weight:800;color:var(--green);line-height:1;" id="f-left">0</div>
+          <div style="font-size:11px;color:var(--text3);">kcal</div></div>
       </div>
-      <div class="progress-track"><div class="progress-fill" id="f-prog" style="width:0%;"></div></div>
-      <div class="macro-bar-wrap" style="margin-top:8px;" id="f-macro-bar"></div>
+      <div class="progress-track" style="margin-bottom:10px;"><div class="progress-fill" id="f-prog" style="width:0%;"></div></div>
+      <div style="display:flex;justify-content:space-between;">
+        <div style="text-align:center;flex:1;"><div style="font-size:13px;font-weight:700;color:#60a5fa;" id="f-prot-val">0g</div><div style="font-size:10px;color:var(--text3);">Protein</div></div>
+        <div style="text-align:center;flex:1;border-left:1px solid var(--border);border-right:1px solid var(--border);"><div style="font-size:13px;font-weight:700;color:#34d399;" id="f-carb-val">0g</div><div style="font-size:10px;color:var(--text3);">Karb.</div></div>
+        <div style="text-align:center;flex:1;"><div style="font-size:13px;font-weight:700;color:#fb923c;" id="f-fat-val">0g</div><div style="font-size:10px;color:var(--text3);">Yağ</div></div>
+      </div>
+    </div>
+    <div class="macro-bar-wrap" id="f-macro-bar" style="display:none;"></div>
+  </div>
+  <div class="page-content" style="padding-top:12px;">
+    <!-- Günün Tarifi -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">⭐ Günün Tarifi</div>
+      <div onclick="showDailyRecipe()" style="border-radius:18px;overflow:hidden;position:relative;cursor:pointer;background:var(--card);border:1px solid var(--border);">
+        <div style="width:100%;height:120px;background:linear-gradient(135deg,var(--bg3),var(--card));display:flex;align-items:center;justify-content:center;font-size:56px;" id="daily-recipe-img">🥗</div>
+        <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.85),transparent);padding:14px;">
+          <div style="font-size:14px;font-weight:700;" id="daily-recipe-name">Bugünün Tarifi</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);" id="daily-recipe-info">Yükleniyor...</div>
+        </div>
+      </div>
     </div>
     <div id="f-meals"></div>
-    <div style="margin-top:8px;" id="weekly-plan-section">
-      <div id="weekly-plan-result" style="margin-top:0;"></div>
-    </div>
+    <div style="margin-top:8px;" id="weekly-plan-section"><div id="weekly-plan-result"></div></div>
   </div>
   <div class="bottomnav">
     <button class="nav-item" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Ana</span></button>
@@ -593,7 +1354,6 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
     <button class="nav-item" onclick="goTo('profile')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profil</span></button>
   </div>
 </div>
-
 <!-- ====== SWIPE ====== -->
 <div class="screen" id="screen-swipe">
   <div class="topbar">
@@ -2212,7 +2972,7 @@ function showSwCard(){
   const done=document.getElementById('sw-done');
   if(swIdx>=swQueue.length){con.style.display='none';done.style.display='block';document.getElementById('sw-count').textContent='Bitti!';return;}
   con.style.display='block';done.style.display='none';
-  document.getElementById('sw-count').textContent=(swQueue.length-swIdx)+' kaldı';
+  document.getElementById('sw-count').textContent=Math.min(MEAL_LIMIT||10,(swQueue.length-swIdx))+' hak';
   const item=swQueue[swIdx];
   const card=document.getElementById('sw-card');
   card.style.transform='';card.style.opacity='1';card.className='swipe-card';
