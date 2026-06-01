@@ -2594,61 +2594,23 @@ function checkFastResume(){
 
 // ── ONBOARDING KOÇ EKRANI & PROJEKSİYON ──────────────────────────────
 function showCoachScreen(){
-  // Mevcut step'leri gizle
-  for(let i=1;i<=6;i++){
-    const s=document.getElementById('ob-s'+i);
-    const f=document.getElementById('ob-s'+i+'-footer');
-    if(s)s.style.display='none';
-    if(f)f.style.display='none';
-  }
-  document.getElementById('ob-s1-footer').style.display='none';
-  
-  // Koç ekranı HTML ekle
-  let coach=document.getElementById('ob-coach');
+  document.querySelectorAll('.ob-page').forEach(function(el){el.style.display='none';});
+  var footer=document.getElementById('ob-footer');
+  if(footer)footer.style.display='none';
+  var coach=document.getElementById('ob-coach');
   if(!coach){
     coach=document.createElement('div');
     coach.id='ob-coach';
-    coach.style.cssText='flex:1;overflow-y:auto;padding:32px 20px;display:flex;flex-direction:column;align-items:center;text-align:center;';
-    coach.innerHTML=`
-      <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:20px;box-shadow:0 0 40px rgba(232,84,122,0.3);">🏋️</div>
-      <div style="font-size:22px;font-weight:800;margin-bottom:8px;">Koçun hazırlanıyor...</div>
-      <div style="font-size:13px;color:var(--text3);margin-bottom:32px;">Verilerini analiz ediyoruz</div>
-      <div style="width:100%;text-align:left;" id="coach-steps"></div>
-    `;
+    coach.style.cssText='flex:1;overflow-y:auto;padding:32px 20px;flex-direction:column;align-items:center;text-align:center;';
+    var emoji=document.createElement('div');emoji.style.fontSize='80px';emoji.style.marginBottom='16px';emoji.textContent='🎉';
+    var title=document.createElement('div');title.style.cssText='font-size:26px;font-weight:800;margin-bottom:8px;';title.textContent='Planın Hazır!';
+    var sub=document.createElement('div');sub.style.cssText='font-size:14px;color:var(--text3);margin-bottom:32px;';sub.textContent='Sana özel program oluşturuldu';
+    var btn=document.createElement('button');btn.className='btn btn-primary';btn.style.maxWidth='280px';btn.textContent='Başlayalım 🚀';
+    btn.onclick=function(){goTo('dashboard');loadDash();};
+    coach.appendChild(emoji);coach.appendChild(title);coach.appendChild(sub);coach.appendChild(btn);
     document.getElementById('screen-onboard').appendChild(coach);
   }
   coach.style.display='flex';
-  
-  const steps=[
-    {icon:'✓',text:'Veriler analiz edildi',sub:`${obD.height_cm||'-'} cm · ${obD.current_weight||'-'} kg`,delay:0,color:'#22c55e'},
-    {icon:'⚡',text:'Metabolizma hesaplandı',sub:`${obD.daily_calorie_goal||calcGoal(obD)} kcal/gün`,delay:800,color:'var(--accent)'},
-    {icon:'🎯',text:'Hedef belirlendi',sub:`${obD.goal_weight||'-'} kg hedef`,delay:1600,color:'#f97316'},
-    {icon:'✨',text:'Planın hazır!',sub:'Kişisel programın oluşturuldu',delay:2400,color:'var(--accent3)'},
-  ];
-  
-  const container=document.getElementById('coach-steps');
-  container.innerHTML='';
-  steps.forEach((s,i)=>{
-    const div=document.createElement('div');
-    div.style.cssText='display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);opacity:0;transition:opacity .4s;';
-    div.innerHTML=`
-      <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">${s.icon}</div>
-      <div style="flex:1;text-align:left;">
-        <div style="font-size:13px;font-weight:600;">${s.text}</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px;">${s.sub}</div>
-      </div>
-    `;
-    container.appendChild(div);
-    setTimeout(()=>{
-      div.style.opacity='1';
-      div.querySelector('div').style.background=`rgba(255,255,255,0.08)`;
-      div.querySelector('div').style.borderColor=s.color;
-      div.querySelector('div').style.color=s.color;
-    },s.delay);
-  });
-  
-  // 3.2 saniye sonra projeksiyon ekranına geç
-  setTimeout(()=>showProjectionScreen(),3400);
 }
 
 function showProjectionScreen(){
