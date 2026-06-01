@@ -444,16 +444,57 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
     <button class="btn btn-primary" onclick="obNext(1)">Devam Et →</button>
   </div>
   <!-- Step 2 -->
-  <div id="ob-s2" class="ob-step hidden" style="flex:1;overflow-y:auto;padding:16px;">
-    <div style="text-align:center;margin-bottom:20px;"><div style="font-size:40px;margin-bottom:8px;">📏</div><div style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:4px;">Vücut Bilgilerin</div><div style="font-size:13px;color:var(--text3);">Program buna göre hesaplanır</div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div class="form-group"><label class="form-label">Boy (cm)</label><input class="form-input" id="ob-height" type="number" min="100" max="250" placeholder="165"/></div>
-      <div class="form-group"><label class="form-label">Kilo (kg)</label><input class="form-input" id="ob-weight" type="number" min="30" max="300" step="0.1" placeholder="70"/></div>
-      <div class="form-group"><label class="form-label">Yaş</label><input class="form-input" id="ob-age" type="number" min="10" max="100" placeholder="25"/></div>
+  <div id="ob-s2" class="ob-step hidden" style="flex:1;display:flex;flex-direction:column;background:var(--bg1);">
+    <!-- Başlık -->
+    <div style="padding:20px 20px 12px;text-align:center;">
+      <div style="font-size:24px;font-weight:800;margin-bottom:4px;">Vücut Bilgilerin</div>
+      <div style="font-size:13px;color:var(--text3);">Program buna göre hesaplanır</div>
+    </div>
+
+    <!-- Picker alanı - kalan tüm alanı kaplar -->
+    <div style="flex:1;display:flex;position:relative;overflow:hidden;">
+      <!-- Seçim highlight - tam ortada sabit -->
+      <div style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:52px;background:rgba(124,58,237,0.12);border-top:2px solid var(--accent);border-bottom:2px solid var(--accent);pointer-events:none;z-index:10;"></div>
+
+      <!-- Boy -->
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;border-right:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;color:var(--accent2);letter-spacing:1px;padding:10px 0 6px;text-transform:uppercase;">BOY</div>
+        <div style="flex:1;width:100%;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;-webkit-scrollbar:none;" id="ob-height-list" onscroll="ob2scroll(this,'ob-h-lbl','ob-height',140,220,'cm')">
+          <div id="ob-height-list-inner"></div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent2);padding:8px 0;" id="ob-h-lbl">170 cm</div>
+      </div>
+
+      <!-- Kilo -->
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;border-right:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;color:var(--accent2);letter-spacing:1px;padding:10px 0 6px;text-transform:uppercase;">KİLO</div>
+        <div style="flex:1;width:100%;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;" id="ob-weight-list" onscroll="ob2scroll(this,'ob-w-lbl','ob-weight',40,200,'kg')">
+          <div id="ob-weight-list-inner"></div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent2);padding:8px 0;" id="ob-w-lbl">70 kg</div>
+      </div>
+
+      <!-- Yaş -->
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+        <div style="font-size:11px;font-weight:700;color:var(--accent2);letter-spacing:1px;padding:10px 0 6px;text-transform:uppercase;">YAŞ</div>
+        <div style="flex:1;width:100%;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;" id="ob-age-list" onscroll="ob2scroll(this,'ob-a-lbl','ob-age',13,80,'yaş')">
+          <div id="ob-age-list-inner"></div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent2);padding:8px 0;" id="ob-a-lbl">25 yaş</div>
+      </div>
+    </div>
+
+    <input type="hidden" id="ob-height" value="170">
+    <input type="hidden" id="ob-weight" value="70">
+    <input type="hidden" id="ob-age" value="25">
+  </div>
+  <div id="ob-s2-footer" style="display:none;padding:12px 16px;border-top:1px solid var(--border);">
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost btn-sm" onclick="obBack(2)" style="width:auto;">← Geri</button>
+      <button class="btn btn-primary" onclick="obNext(2)" style="flex:1;">Devam Et →</button>
     </div>
   </div>
-  <div id="ob-s2-footer" style="display:none;padding:12px 16px;border-top:1px solid var(--border);display:none;">
-    <div style="display:flex;gap:10px;"><button class="btn btn-ghost btn-sm" onclick="obBack(2)" style="width:auto;">← Geri</button><button class="btn btn-primary" onclick="obNext(2)" style="flex:1;">Devam Et →</button></div>
+  </div>
   </div>
   <!-- Step 3 -->
   <div id="ob-s3" class="ob-step hidden" style="flex:1;overflow-y:auto;padding:16px;">
@@ -1267,6 +1308,7 @@ function obGo(step){
 }
 
 function obNext(step){
+  if(step===1){setTimeout(initAllPickers,50);}
   if(step===1&&!obD.gender){err('Lütfen bir seçenek seç');return;}
   if(step===2){
     const h=+document.getElementById('ob-height').value;
@@ -3551,6 +3593,48 @@ async function reportMissingFood(name){
   }catch(e){}
   ok('"'+name+'" talebi iletildi! Ekibimiz ekleyecek 🙏');
 }
+
+// ── PICKER JS ───────────────────────────────────────────────────
+function ob2scroll(el, lblId, inputId, min, max, unit){
+  var itemH=44;
+  var idx=Math.round(el.scrollTop/itemH);
+  var val=min+idx;
+  if(val<min)val=min;if(val>max)val=max;
+  var lbl=document.getElementById(lblId);
+  if(lbl)lbl.textContent=val+' '+unit;
+  var inp=document.getElementById(inputId);
+  if(inp)inp.value=val;
+  // obD güncellemesi
+  if(inputId==='ob-height')obD.height_cm=val;
+  else if(inputId==='ob-weight')obD.current_weight=val;
+  else if(inputId==='ob-age')obD.age=val;
+}
+
+function initPicker(listId, min, max, defaultVal){
+  var el=document.getElementById(listId);
+  if(!el)return;
+  var itemH=52;
+  // Padding için spacer - scroll alanının yarısı kadar
+  var spacerH=0; // JS ile hesaplayacağız
+  var html='';
+  for(var i=min;i<=max;i++){
+    html+='<div style="height:'+itemH+'px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:22px;font-weight:600;color:var(--text2);transition:color .1s,font-size .1s;">'+i+'</div>';
+  }
+  el.innerHTML=html;
+  // Ortaya scroll edebilmek için padding
+  el.style.paddingTop='calc(50% - '+Math.round(itemH/2)+'px)';
+  el.style.paddingBottom='calc(50% - '+Math.round(itemH/2)+'px)';
+  // Default değere scroll
+  var offset=(defaultVal-min)*itemH;
+  setTimeout(function(){el.scrollTop=offset;},50);
+}
+
+function initAllPickers(){
+  initPicker('ob-height-list',140,220,170);
+  initPicker('ob-weight-list',40,200,70);
+  initPicker('ob-age-list',13,80,25);
+}
+// ────────────────────────────────────────────────────────────────
 </script>
 </body>
 </html>
