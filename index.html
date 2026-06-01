@@ -1379,7 +1379,7 @@ async function completeOnboarding(){
     applyTheme(UP.gender||'female');
     // Koç ekranını göster, sonra projeksiyon, sonra dashboard
     showCoachScreen();
-  }catch(e){err('Bağlantı hatası. Tekrar dene.');}
+  }catch(e){console.error('Onboard error:',e.message,e);err('Bağlantı hatası: '+e.message);}
   finally{setBtn('ob-next-btn',false,'Planımı Al 🚀');unlockBtn('ob-next-btn');}
 }
 
