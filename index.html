@@ -1301,16 +1301,12 @@ function obGo(step){
 }
 
 function obNext(step){
-  if(step===1){setTimeout(initAllPickers,50);}
   if(step===1&&!obD.gender){err('Lütfen bir seçenek seç');return;}
+  if(step===1){setTimeout(function(){initAllPickers();},150);}
   if(step===2){
-    const h=+document.getElementById('ob-height').value;
-    const w=+document.getElementById('ob-weight').value;
-    const a=+document.getElementById('ob-age').value;
-    if(!h||!w||!a){err('Lütfen tüm alanları doldur');return;}
-    if(h<100||h>250){err('Geçerli bir boy gir (100-250 cm)');return;}
-    if(w<30||w>300){err('Geçerli bir kilo gir (30-300 kg)');return;}
-    if(a<10||a>100){err('Geçerli bir yaş gir (10-100)');return;}
+    const h=obD.height_cm||(+document.getElementById('ob-height').value)||170;
+    const w=obD.current_weight||(+document.getElementById('ob-weight').value)||70;
+    const a=obD.age||(+document.getElementById('ob-age').value)||25;
     obD.height_cm=h;obD.current_weight=w;obD.age=a;
   }
   if(step===3){
