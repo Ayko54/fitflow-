@@ -392,6 +392,35 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
   </div>
 
 <!-- ====== ONBOARDING ====== -->
+
+
+<div class="screen active" id="screen-auth">
+  <div style="flex:1;overflow-y:auto;">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px 24px;text-align:center;">
+      <div style="font-size:60px;margin-bottom:12px;">🌿</div>
+      <div style="font-family:'Playfair Display',serif;font-size:36px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;">FitFlow</div>
+      <div style="font-size:14px;color:var(--text3);margin-bottom:32px;">Hedefine giden yolda yanındayız</div>
+    </div>
+    <div style="padding:0 16px 32px;">
+      <div id="auth-login">
+        <div class="form-group"><label class="form-label">E-posta</label><input class="form-input" id="login-email" type="email" placeholder="ornek@email.com" autocomplete="email"/></div>
+        <div class="form-group"><label class="form-label">Şifre</label><input class="form-input" id="login-password" type="password" placeholder="Şifren" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+        <button class="btn btn-primary" id="login-btn" onclick="doLogin()" style="margin-bottom:10px;">Giriş Yap</button>
+        <button class="btn btn-ghost" onclick="showAuthForm('register')">Hesabın yok mu? Kayıt ol →</button>
+      </div>
+      <div id="auth-register" style="display:none;">
+        <div class="form-group"><label class="form-label">Adın</label><input class="form-input" id="reg-name" placeholder="Adın" autocomplete="name"/></div>
+        <div class="form-group"><label class="form-label">E-posta</label><input class="form-input" id="reg-email" type="email" placeholder="ornek@email.com" autocomplete="email"/></div>
+        <div class="form-group"><label class="form-label">Şifre (en az 6 karakter)</label><input class="form-input" id="reg-password" type="password" placeholder="Şifren" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()"/></div>
+        <button class="btn btn-primary" id="register-btn" onclick="doRegister()" style="margin-bottom:10px;">Hesap Oluştur</button>
+        <button class="btn btn-ghost" onclick="showAuthForm('login')">← Giriş sayfasına dön</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== ONBOARDING ====== -->
+
 <div class="screen" id="screen-onboard">
   <div style="padding:10px 0 0;">
     <div class="onboard-bar"><div class="onboard-fill" id="ob-fill" style="width:16%;"></div></div>
