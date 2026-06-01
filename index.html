@@ -1183,10 +1183,21 @@ function calcGoal(p){
 function initials(name){return(name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();}
 
 function selOne(grpId,el){
-  document.querySelectorAll('#'+grpId+' .opt-pill, #'+grpId+' .opt-pill-wide').forEach(x=>x.classList.remove('sel'));
+  document.querySelectorAll('#'+grpId+' [data-val]').forEach(function(x){
+    x.classList.remove('sel');
+    x.style.borderColor='var(--border)';
+    x.style.background='var(--card)';
+  });
   el.classList.add('sel');
+  el.style.borderColor='var(--accent)';
+  el.style.background='var(--card-accent)';
 }
-function toggleOpt(el){el.classList.toggle('sel');}
+function toggleOpt(el){
+  el.classList.toggle('sel');
+  var isSel=el.classList.contains('sel');
+  el.style.borderColor=isSel?'var(--accent)':'var(--border)';
+  el.style.background=isSel?'var(--card-accent)':'var(--card)';
+}
 function getVal(id){const e=document.querySelector('#'+id+' .sel');return e?e.dataset.val:null;}
 function getVals(id){return [...document.querySelectorAll('#'+id+' .sel')].map(e=>e.dataset.val);}
 
@@ -1343,12 +1354,12 @@ function obGo(step){
 // obBack replaced
 
 async function completeOnboarding(){
-  if(!lockBtn('ob-finish-btn'))return;
-  obD.sport_preferences=getVals('sport-opts');
+  if(!lockBtn('ob-next-btn'))return;
+  obD.sport_preferences=getVals('sport-opts')||['ev'];
   obD.fitness_level=getVal('fitness-opts')||'beginner';
   obD.onboarding_completed=true;
   obD.daily_calorie_goal=calcGoal(obD);
-  setBtn('ob-finish-btn',true,'Hazırlanıyor...');
+  setBtn('ob-next-btn',true,'Hazırlanıyor...');
   try{
     const{error}=await sb.from('profiles').update(obD).eq('id',CU.id);
     if(error){err('Profil kaydedilemedi. Tekrar dene.');return;}
@@ -1359,7 +1370,7 @@ async function completeOnboarding(){
     // Koç ekranını göster, sonra projeksiyon, sonra dashboard
     showCoachScreen();
   }catch(e){err('Bağlantı hatası. Tekrar dene.');}
-  finally{setBtn('ob-finish-btn',false,'Programımı Oluştur ✨');unlockBtn('ob-finish-btn');}
+  finally{setBtn('ob-next-btn',false,'Programımı Oluştur ✨');unlockBtn('ob-finish-btn');}
 }
 
 // ============ DASHBOARD ============
