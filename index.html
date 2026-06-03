@@ -699,11 +699,6 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
     </div>
     <div id="f-meals"></div>
     <div style="margin-top:8px;" id="weekly-plan-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <span style="font-size:14px;font-weight:700;">📅 7 Günlük Plan</span>
-        <button onclick="generateWeeklyPlan(true)" style="background:none;border:none;color:var(--accent2);font-size:12px;cursor:pointer;font-family:inherit;">↻ Yenile</button>
-      </div>
-      <button onclick="generateShoppingList()" class="btn btn-secondary" style="width:100%;margin-bottom:10px;font-size:13px;">🛒 Alışveriş Listesi Oluştur</button>
       <div id="weekly-plan-result"></div>
     </div>
   </div>
@@ -1903,6 +1898,12 @@ function renderWeeklyPlanTabs(){
   const res=document.getElementById('weekly-plan-result');
   if(!res||!weeklyPlanDays.length)return;
   const dayNames=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+  // Başlık ve alışveriş butonu
+  var headerHtml='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+    +'<span style="font-size:14px;font-weight:700;">📅 7 Günlük Plan</span>'
+    +'<button onclick="generateWeeklyPlan(true)" style="background:none;border:none;color:var(--accent2);font-size:12px;cursor:pointer;font-family:inherit;">↻ Yenile</button>'
+    +'</div>'
+    +'<button onclick="generateShoppingList()" class="btn btn-secondary" style="width:100%;margin-bottom:10px;font-size:13px;">🛒 Alışveriş Listesi Oluştur</button>';
   // Gün tabları
   var tabsHtml='<div style="display:flex;gap:4px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:none;">';
   weeklyPlanDays.forEach(function(day,i){
