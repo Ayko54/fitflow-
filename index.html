@@ -1864,6 +1864,36 @@ async function prefetchWeeklyPlan(){
   }catch(e){}
 }
 
+
+async function generateWeeklyPlan(force){
+  var res=document.getElementById('weekly-plan-result');
+  if(!res)return;
+  var cacheKey='weeklyPlan_'+today();
+  if(!force){
+    var cached=sessionStorage.getItem(cacheKey);
+    if(cached){try{weeklyPlanDays=JSON.parse(cached);renderWeeklyPlanTabs();return;}catch(e){}}
+  }
+  res.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);">📅 Plan hazırlanıyor...</div>';
+  try{
+    var kcal=(UP&&UP.daily_calorie_goal)||1800;
+    var r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,
+        system:'Return ONLY a valid JSON array, no other text.',
+        messages:[{role:'user',content:buildPlanPrompt(kcal)}]})});
+    var d=await r.json();
+    var raw=(d.content&&d.content[0]&&d.content[0].text||'').replace(/```json|```/g,'').trim();
+    var arr=null;
+    try{arr=JSON.parse(raw);if(!Array.isArray(arr))arr=null;}catch(e){
+      var s=raw.indexOf('[');var e2=raw.lastIndexOf(']');
+      if(s>=0&&e2>s)try{arr=JSON.parse(raw.slice(s,e2+1));}catch(e3){}
+    }
+    if(!arr||!arr.length){res.innerHTML='<div style="color:var(--accent);padding:10px;">Format hatası. <button onclick="generateWeeklyPlan(true)" class="btn btn-secondary btn-sm" style="margin-top:8px;">Tekrar Dene</button></div>';return;}
+    weeklyPlanDays=arr.map(function(x){return{day:x.gun||x.day||'',breakfast:x.kahvalti||x.breakfast||'',lunch:x.ogle||x.lunch||'',dinner:x.aksam||x.dinner||'',snack:x.ara||x.snack||''};});
+    sessionStorage.setItem(cacheKey,JSON.stringify(weeklyPlanDays));
+    renderWeeklyPlanTabs();
+  }catch(e){res.innerHTML='<div style="color:var(--accent);padding:10px;">Hata: '+e.message+'</div>';}
+}
+
 function buildPlanPrompt(kcal){
   var mc=(UP&&UP.meal_count)||4;
   var days=['Pzt','Sal','Car','Per','Cum','Cmt','Paz'];
