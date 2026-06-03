@@ -121,7 +121,7 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
 .sec-title{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.7px;text-transform:uppercase;margin:16px 0 8px;}
 
 /* WATER */
-.water-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:8px;}
+.water-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:8px;overflow:hidden;}
 .water-drop{width:100%;aspect-ratio:1;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;background:var(--card);}
 .water-drop.filled{background:rgba(56,189,248,0.2);border-color:var(--blue);}
 
@@ -2075,17 +2075,18 @@ async function saveExtraEx(){
 }
 
 function renderWater(filled){
-  const goal=UP?.water_goal||8;
-  const mlPerGlass=250;
+  var goal=(UP&&UP.water_goal)||8;
+  var mlPerGlass=250;
   document.getElementById('water-label').textContent=filled+' / '+goal+' bardak ('+filled*mlPerGlass+'ml)';
-  let h='';
-  // Show goal + up to 3 extra drops
-  const showCount=Math.max(goal, filled+1, goal);
-  for(let i=0;i<showCount;i++){
-    const over=i>=goal;
-    h+=`<button class="water-drop ${i<filled?'filled':'empty'}" onclick="setWater(${i+1})" style="${over?'border-color:rgba(96,165,250,0.3);opacity:0.5;':''}" title="${(i+1)*mlPerGlass}ml">💧</button>`;
+  var h='';
+  // Sadece goal kadar göster - taşmasın
+  for(var i=0;i<goal;i++){
+    h+='<button class="water-drop '+(i<filled?'filled':'empty')+'" onclick="setWater('+(i+1)+')" title="'+((i+1)*mlPerGlass)+'ml">💧</button>';
   }
-  document.getElementById('water-drops').innerHTML=h+'<div style="font-size:11px;color:var(--text3);width:100%;margin-top:4px;">1 bardak = 250ml</div>';
+  document.getElementById('water-drops').innerHTML=h;
+  // "1 bardak = 250ml" yazısını gösterme
+  var info=document.getElementById('water-info');
+  if(info)info.style.display='none';
 }
 
 async function setWater(n){
