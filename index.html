@@ -698,7 +698,14 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
       </div>
     </div>
     <div id="f-meals"></div>
-    <div style="margin-top:8px;" id="weekly-plan-section"><div id="weekly-plan-result"></div></div>
+    <div style="margin-top:8px;" id="weekly-plan-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:14px;font-weight:700;">📅 7 Günlük Plan</span>
+        <button onclick="generateWeeklyPlan(true)" style="background:none;border:none;color:var(--accent2);font-size:12px;cursor:pointer;font-family:inherit;">↻ Yenile</button>
+      </div>
+      <button onclick="generateShoppingList()" class="btn btn-secondary" style="width:100%;margin-bottom:10px;font-size:13px;">🛒 Alışveriş Listesi Oluştur</button>
+      <div id="weekly-plan-result"></div>
+    </div>
   </div>
   <div class="bottomnav">
     <button class="nav-item" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Ana</span></button>
@@ -1559,6 +1566,14 @@ async function loadFood(){
   }
   document.getElementById('f-meals').innerHTML=html;
   initDailyRecipe();
+  // Haftalık plan varsa göster
+  var cacheKey='weeklyPlan_'+today();
+  var cached=sessionStorage.getItem(cacheKey);
+  if(cached&&document.getElementById('weekly-plan-result')&&!document.getElementById('weekly-plan-result').innerHTML){
+    try{weeklyPlanDays=JSON.parse(cached);renderWeeklyPlanTabs();}catch(e){}
+  }else if(!cached){
+    generateWeeklyPlan(false);
+  }
   const pct=Math.min(100,goal>0?Math.round(totKcal/goal*100):0);
   document.getElementById('f-eaten').textContent=totKcal;
   const fp=Math.min(100,Math.round(totKcal/goal*100));
