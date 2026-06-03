@@ -737,7 +737,11 @@ body.male #app::before{background:radial-gradient(ellipse,rgba(249,115,22,0.08) 
       <div class="swipe-card" id="sw-card">
         <div class="swipe-label swipe-label-left" id="sw-label-no">✗ İstemiyorum</div>
         <div class="swipe-label swipe-label-right" id="sw-label-yes">✓ Plana Ekle</div>
-        <img id="sw-img" src="" alt="" style="width:100%;height:330px;object-fit:cover;display:none;border-radius:0;" onerror="if(swType==='food'&&this._name){getFoodPhotoAsync(this._name,this);}else{this.style.display='none';}"/>
+        <div id="sw-img-placeholder" style="width:100%;height:330px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--bg3),var(--card));flex-direction:column;gap:8px;">
+          <div style="font-size:56px;">🍽️</div>
+          <div style="font-size:12px;color:var(--text3);">Resim yükleniyor...</div>
+        </div>
+        <img id="sw-img" src="" alt="" style="width:100%;height:330px;object-fit:cover;display:none;border-radius:0;" onerror="this.style.display='none';var ph=document.getElementById('sw-img-placeholder');if(ph){ph.style.display='flex';ph.innerHTML='<div style=\'font-size:56px;\'>🍽️</div><div style=\'font-size:12px;color:var(--text3);\'>Resim yakında</div>';}"/>
         <div style="padding:14px 16px;">
           <div style="font-size:18px;font-weight:700;margin-bottom:3px;" id="sw-name">-</div>
           <div style="font-size:12px;color:var(--text3);margin-bottom:10px;" id="sw-sub">-</div>
