@@ -1566,14 +1566,7 @@ async function loadFood(){
   }
   document.getElementById('f-meals').innerHTML=html;
   initDailyRecipe();
-  // Haftalık plan varsa göster
-  var cacheKey='weeklyPlan_'+today();
-  var cached=sessionStorage.getItem(cacheKey);
-  if(cached&&document.getElementById('weekly-plan-result')&&!document.getElementById('weekly-plan-result').innerHTML){
-    try{weeklyPlanDays=JSON.parse(cached);renderWeeklyPlanTabs();}catch(e){}
-  }else if(!cached){
-    generateWeeklyPlan(false);
-  }
+
   const pct=Math.min(100,goal>0?Math.round(totKcal/goal*100):0);
   document.getElementById('f-eaten').textContent=totKcal;
   const fp=Math.min(100,Math.round(totKcal/goal*100));
@@ -1898,13 +1891,13 @@ function buildPlanPrompt(kcal){
   var mc=(UP&&UP.meal_count)||4;
   var days=['Pzt','Sal','Car','Per','Cum','Cmt','Paz'];
   var mealKeys=[];
-  if(mc>=1)mealKeys.push('"kahvalti":"yemek~kcal"');
-  if(mc>=2)mealKeys.push('"ogle":"yemek~kcal"');
-  if(mc>=3)mealKeys.push('"aksam":"yemek~kcal"');
-  if(mc>=4)mealKeys.push('"ara":"atistirma~kcal"');
+  if(mc>=1)mealKeys.push('"kahvalti":"YemekAdi PoRsiyon ~KkalKcal"');
+  if(mc>=2)mealKeys.push('"ogle":"YemekAdi Porsiyon ~KkalKcal"');
+  if(mc>=3)mealKeys.push('"aksam":"YemekAdi Porsiyon ~KkalKcal"');
+  if(mc>=4)mealKeys.push('"ara":"Atistirma Porsiyon ~KkalKcal"');
   var tmpl='{"gun":"X",'+mealKeys.join(',')+'}';
   var arr='['+days.map(function(d){return tmpl.replace('X',d);}).join(', ')+']';
-  return 'Turkish '+kcal+' kcal/day meal plan. Include portions. ONLY JSON: '+arr+'. Different meals each day.';
+  return 'Gunluk '+kcal+' kcal Turkce yemek plani. Her ogun icin yemek adi, porsiyon miktari (1 kase, 150g, 2 dilim vb) ve kalori yaz. Ornek: "Mercimek corbasi 1 kase ~310kcal". SADECE JSON: '+arr;
 }
 function renderWeeklyPlanTabs(){
   const res=document.getElementById('weekly-plan-result');
@@ -3691,9 +3684,13 @@ function obNextStep(){
   if(_obStep===3){
     obD.goal_weight=parseInt(document.getElementById('ob-goal-weight').value)||65;
     obD.goal_weeks=parseInt(document.getElementById('ob-goal-weeks').value)||12;
-    obD.goal_type=getVal('goal-opts')||'lose_weight';
+    obD.goal_type=getVal('goal-opts');
+    if(!obD.goal_type){err('Lütfen bir hedef seç');return;}
   }
-  if(_obStep===4)obD.activity_level=getVal('activity-opts')||'light';
+  if(_obStep===4){
+    obD.activity_level=getVal('activity-opts');
+    if(!obD.activity_level){err('Lütfen aktivite seviyeni seç');return;}
+  }
   if(_obStep===5){
     obD.diet_type=getVal('diet-opts')||'normal';
     obD.allergies=document.getElementById('ob-allergies').value||null;
